@@ -87,6 +87,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .tier-gold{background:#fff8e0;color:var(--gold)}
 .tier-plat{background:#f0f8ff;color:#4488cc}
 .new-badge{font-size:9px;font-weight:700;background:#ff3b30;color:#fff;border-radius:4px;padding:1px 5px;text-transform:uppercase;letter-spacing:.4px}
+.ach-official {  font-size: 10px;  font-weight: 600;  color: var(--green);  background: color-mix(in srgb, var(--green) 15%, transparent);  border-radius: 4px;  padding: 1px 5px;  margin-left: 5px;  vertical-align: middle;  letter-spacing: 0.03em;}  
 
 /* Play history */
 .play-item{display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:1px solid var(--border);font-size:13px}
@@ -302,7 +303,7 @@ const GAME_DEFINITIONS = [
 
     achievements: [
       // ── Official scoring titles (any play, no win required) ──
-      { id: 'ca_65',   icon: '🥾', tier: 'bronze', pts: 5,  name: 'Naturalist',
+      { id: 'ca_65',   icon: '🥾', tier: 'bronze', pts: 5,  name: 'Naturalist', official: 'True',
         desc: 'Score 65+ points (official scoring tier)',
         check: { type: 'field_gte', field: 'score', value: 65 } },
       { id: 'ca_80',   icon: '🌿', tier: 'bronze', pts: 10, name: 'Experienced Naturalist',
@@ -1026,7 +1027,7 @@ function renderGameDetail(g) {
         ${a.icon}
       </div>
       <div class="ach-body">
-        <div class="ach-name">${a.name}${isNew?` <span class="new-badge">NEW</span>`:''}</div>
+        <div class="ach-name">${a.name}${a.official?' <span class="ach-official">✓ Official</span>':''}${isNew?` <span class="new-badge">NEW</span>`:''}</div>
         <div class="ach-desc">${a.desc}</div>
         ${progress?`<div class="ach-progress">${progress}</div>`:''}
       </div>
