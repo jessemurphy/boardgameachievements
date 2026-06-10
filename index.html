@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Achievement Tracker">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solo Achievement Tracker</title>
+<title>Solo Board Game Achievement Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -247,10 +250,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- Import Modal -->
-<div class="modal-overlay" id="importOverlay" onclick="handleImportOverlayClick(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
     <div class="modal-title" id="importTitle">Import from BGStats</div>
     <div style="font-size:13px;color:var(--text-2);line-height:1.5">
       In BGStats: tap a game → tap a play → Share → Export Play. Paste the JSON content below.
@@ -271,192 +270,6 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 // GAME & META DEFINITIONS
 // ═══════════════════════════════════════
 const GAME_DEFINITIONS = [
-
-  // ── Warp's Edge ──────────────────────────────────────────────
-  {
-    id:     'warps',
-    name:   "Warp's Edge",
-    icon:   '🚀',
-    genre:  'Bag-Building · Space Combat',
-    color:  '#e05c2a',
-    bgColor:'#fff4f0',
-    dimColor:'#f0a080',
-
-    logFields: [
-      { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'ship',       label: 'Starfighter',      type: 'select', options: ['Any / Unknown','Starfighter 1','Starfighter 2','Starfighter 3','Starfighter 4'] },
-      { id: 'mothership', label: 'Mothership',       type: 'select', options: ['Any / Unknown','Mothership 1','Mothership 2','Mothership 3','Mothership 4','Mothership 5'] },
-      { id: 'warpsUsed',  label: 'Warps Used',       type: 'number', min: 1, max: 6, default: 3 },
-      { id: 'noLoss',     label: 'No Shields Lost',  type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-    ],
-
-    achievements: [
-      { id: 'w_first_win',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Contact',       desc: 'Win your first game',
-        check: { type: 'min_wins', count: 1 } },
-      { id: 'w_5wins',        icon: '✨', tier: 'silver', pts: 25,  name: 'Ace Pilot',           desc: 'Win 5 games',
-        check: { type: 'min_wins', count: 5 } },
-      { id: 'w_all_ships',    icon: '🛸', tier: 'gold',   pts: 40,  name: 'Fleet Commander',     desc: 'Win with all 4 starfighters',
-        check: { type: 'win_all_values', field: 'ship', values: ['Starfighter 1','Starfighter 2','Starfighter 3','Starfighter 4'] } },
-      { id: 'w_all_mothers',  icon: '👾', tier: 'gold',   pts: 50,  name: 'Mothership Graveyard',desc: 'Defeat all 5 motherships',
-        check: { type: 'win_all_values', field: 'mothership', values: ['Mothership 1','Mothership 2','Mothership 3','Mothership 4','Mothership 5'] } },
-      { id: 'w_warp1',        icon: '⚡', tier: 'gold',   pts: 60,  name: 'First Warp, No Mercy',desc: 'Win using only 1 warp',
-        check: { type: 'win_field_lte', field: 'warpsUsed', value: 1 } },
-      { id: 'w_no_shield',    icon: '🛡️', tier: 'gold',   pts: 50,  name: 'Untouchable',         desc: 'Win without losing any shields',
-        check: { type: 'win_with_toggle', field: 'noLoss' } },
-      { id: 'w_10plays',      icon: '🎮', tier: 'silver', pts: 20,  name: 'Battle Hardened',     desc: 'Play 10 games total',
-        check: { type: 'min_plays', count: 10 } },
-      { id: 'w_plat',         icon: '💎', tier: 'plat',   pts: 100, name: "Taylor Minde, Legend", desc: "Unlock all other Warp's Edge achievements",
-        check: { type: 'all_achievements', ids: ['w_first_win','w_5wins','w_all_ships','w_all_mothers','w_warp1','w_no_shield','w_10plays'] } },
-    ]
-  },
-
-  // ── Under Falling Skies ──────────────────────────────────────
-  {
-    id:     'skies',
-    name:   'Under Falling Skies',
-    icon:   '🌆',
-    genre:  'Dice Placement · Sci-Fi Defense',
-    color:  '#2a7ae0',
-    bgColor:'#f0f5ff',
-    dimColor:'#80aef0',
-
-    logFields: [
-      { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'city',           label: 'City',               type: 'select', options: ['Any / Unknown','London','New York','Tokyo','Berlin','Sydney','Moscow','Rio de Janeiro','Cairo'] },
-      { id: 'hardSky',        label: 'Hard Sky Tiles',     type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-      { id: 'roundsLeft',     label: 'Rounds Remaining',   type: 'number', min: 0, max: 10, default: 0 },
-      { id: 'shipsDestroyed', label: 'Ships Destroyed',    type: 'number', min: 0, max: 30, default: 5 },
-    ],
-
-    achievements: [
-      { id: 's_first_win',  icon: '🌟', tier: 'bronze', pts: 10,  name: 'Earth Defender',      desc: 'Win your first city',
-        check: { type: 'min_wins', count: 1 } },
-      { id: 's_hard_win',   icon: '🌪️', tier: 'gold',   pts: 50,  name: 'Against All Odds',    desc: 'Win with hard sky tiles active',
-        check: { type: 'win_with_toggle', field: 'hardSky' } },
-      { id: 's_4cities',    icon: '🌍', tier: 'gold',   pts: 40,  name: 'Global Response',     desc: 'Win with 4 different cities',
-        check: { type: 'unique_win_values', field: 'city', count: 4 } },
-      { id: 's_efficiency', icon: '🎯', tier: 'gold',   pts: 60,  name: 'Efficient Defense',   desc: 'Win with 5+ rounds remaining',
-        check: { type: 'win_field_gte', field: 'roundsLeft', value: 5 } },
-      { id: 's_destroyer',  icon: '💥', tier: 'silver', pts: 40,  name: 'Total Annihilation',  desc: 'Destroy 20+ ships in a single game',
-        check: { type: 'field_gte', field: 'shipsDestroyed', value: 20 } },
-      { id: 's_5wins',      icon: '🏙️', tier: 'silver', pts: 25,  name: 'Last Line of Defense',desc: 'Win 5 cities',
-        check: { type: 'min_wins', count: 5 } },
-      { id: 's_10plays',    icon: '🎮', tier: 'silver', pts: 20,  name: 'War Veteran',         desc: 'Play 10 games total',
-        check: { type: 'min_plays', count: 10 } },
-      { id: 's_plat',       icon: '💎', tier: 'plat',   pts: 100, name: 'Savior of Earth',     desc: 'Unlock all other Under Falling Skies achievements',
-        check: { type: 'all_achievements', ids: ['s_first_win','s_hard_win','s_4cities','s_efficiency','s_destroyer','s_5wins','s_10plays'] } },
-    ]
-  },
-
-  // ── Turing Machine ───────────────────────────────────────────
-  {
-    id:     'turing',
-    name:   'Turing Machine',
-    icon:   '🖥️',
-    genre:  'Deduction · Logic Puzzle',
-    color:  '#7a2ae0',
-    bgColor:'#f6f0ff',
-    dimColor:'#b080f0',
-
-    logFields: [
-      { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'difficulty', label: 'Difficulty',          type: 'select', options: ['Easy','Normal','Hard','Extreme'] },
-      { id: 'rounds',     label: 'Rounds to Solve',     type: 'number', min: 1, max: 20, default: 4 },
-      { id: 'queries',    label: 'Total Queries Used',  type: 'number', min: 1, max: 30, default: 8 },
-      { id: 'noMistake',  label: 'No Wrong Guesses',    type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-    ],
-
-    achievements: [
-      { id: 't_first',     icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Decryption',   desc: 'Solve your first puzzle',
-        check: { type: 'min_wins', count: 1 } },
-      { id: 't_fast',      icon: '⚡', tier: 'gold',   pts: 60,  name: 'Speed Compiler',     desc: 'Solve a puzzle in 1 round',
-        check: { type: 'win_field_lte', field: 'rounds', value: 1 } },
-      { id: 't_efficient', icon: '🧠', tier: 'gold',   pts: 50,  name: 'Minimal Queries',    desc: 'Solve using 3 or fewer total queries',
-        check: { type: 'win_field_lte', field: 'queries', value: 3 } },
-      { id: 't_extreme',   icon: '🔬', tier: 'gold',   pts: 40,  name: 'Extreme Logician',   desc: 'Solve an Extreme difficulty puzzle',
-        check: { type: 'win_with_field', field: 'difficulty', value: 'Extreme' } },
-      { id: 't_perfect',   icon: '✅', tier: 'silver', pts: 30,  name: 'No False Positives', desc: 'Solve without any wrong guesses',
-        check: { type: 'win_with_toggle', field: 'noMistake' } },
-      { id: 't_10wins',    icon: '🏆', tier: 'silver', pts: 25,  name: 'Code Breaker',       desc: 'Solve 10 puzzles',
-        check: { type: 'min_wins', count: 10 } },
-      { id: 't_10plays',   icon: '🎮', tier: 'silver', pts: 20,  name: 'Dedicated Analyst',  desc: 'Play 10 games total',
-        check: { type: 'min_plays', count: 10 } },
-      { id: 't_plat',      icon: '💎', tier: 'plat',   pts: 100, name: 'The Turing Complete', desc: 'Unlock all other Turing Machine achievements',
-        check: { type: 'all_achievements', ids: ['t_first','t_fast','t_efficient','t_extreme','t_perfect','t_10wins','t_10plays'] } },
-    ]
-  },
-
-  // ── Circle the Wagons ────────────────────────────────────────
-  {
-    id:     'wagons',
-    name:   'Circle the Wagons',
-    icon:   '🪵',
-    genre:  'Card Drafting · Territory',
-    color:  '#2aae6b',
-    bgColor:'#f0fff8',
-    dimColor:'#80d4aa',
-
-    logFields: [
-      { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'score',      label: 'Final Score',         type: 'number', min: 0, max: 60, default: 20 },
-      { id: 'objective',  label: 'Objective Card',      type: 'select', options: ['Unknown','1','2','3','4','5','6','7','8','9','10'] },
-      { id: 'metObj',     label: 'Completed Objective', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-    ],
-
-    achievements: [
-      { id: 'wg_first',   icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Camp',        desc: 'Win your first game',
-        check: { type: 'min_wins', count: 1 } },
-      { id: 'wg_high',    icon: '🏅', tier: 'silver', pts: 30,  name: 'Master Settler',    desc: 'Score 40+ points in a single game',
-        check: { type: 'field_gte', field: 'score', value: 40 } },
-      { id: 'wg_perfect', icon: '🎯', tier: 'gold',   pts: 40,  name: 'Perfect Circle',    desc: 'Win while completing your objective',
-        check: { type: 'win_with_toggle', field: 'metObj' } },
-      { id: 'wg_5wins',   icon: '🪓', tier: 'silver', pts: 25,  name: 'Trail Boss',        desc: 'Win 5 games',
-        check: { type: 'min_wins', count: 5 } },
-      { id: 'wg_allobj',  icon: '📜', tier: 'gold',   pts: 50,  name: 'All Objectives',    desc: 'Win using 5 different objective cards',
-        check: { type: 'unique_win_values', field: 'objective', count: 5 } },
-      { id: 'wg_10plays', icon: '🎮', tier: 'silver', pts: 20,  name: 'Wagon Master',      desc: 'Play 10 games total',
-        check: { type: 'min_plays', count: 10 } },
-      { id: 'wg_plat',    icon: '💎', tier: 'plat',   pts: 100, name: 'Pioneer',           desc: 'Unlock all other Circle the Wagons achievements',
-        check: { type: 'all_achievements', ids: ['wg_first','wg_high','wg_perfect','wg_5wins','wg_allobj','wg_10plays'] } },
-    ]
-  },
-
-  // ── Palm Island ──────────────────────────────────────────────
-  {
-    id:     'palm',
-    name:   'Palm Island',
-    icon:   '🌴',
-    genre:  'Hand Management · Resource Building',
-    color:  '#e0a02a',
-    bgColor:'#fffbf0',
-    dimColor:'#f0cc80',
-
-    logFields: [
-      { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'score',    label: 'Final Score',           type: 'number', min: 0, max: 30, default: 8 },
-      { id: 'round2',   label: 'Played Round 2',        type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-      { id: 'noWaste',  label: 'Zero Resources Wasted', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-    ],
-
-    achievements: [
-      { id: 'p_first',     icon: '🌟', tier: 'bronze', pts: 10,  name: 'Castaway',              desc: 'Win your first game',
-        check: { type: 'min_wins', count: 1 } },
-      { id: 'p_high',      icon: '🏝️', tier: 'silver', pts: 30,  name: 'Island King',           desc: 'Score 20+ points',
-        check: { type: 'field_gte', field: 'score', value: 20 } },
-      { id: 'p_both',      icon: '🌊', tier: 'gold',   pts: 40,  name: 'Two-Round Champion',    desc: 'Win a two-round game',
-        check: { type: 'win_with_toggle', field: 'round2' } },
-      { id: 'p_efficient', icon: '♻️', tier: 'gold',   pts: 50,  name: 'Zero Waste',            desc: 'Win without wasting any resources',
-        check: { type: 'win_with_toggle', field: 'noWaste' } },
-      { id: 'p_5wins',     icon: '🐚', tier: 'silver', pts: 25,  name: 'Island Veteran',        desc: 'Win 5 games',
-        check: { type: 'min_wins', count: 5 } },
-      { id: 'p_10plays',   icon: '🎮', tier: 'silver', pts: 20,  name: 'Committed Islander',    desc: 'Play 10 games total',
-        check: { type: 'min_plays', count: 10 } },
-      { id: 'p_plat',      icon: '💎', tier: 'plat',   pts: 100, name: 'The Last Islander',     desc: 'Unlock all other Palm Island achievements',
-        check: { type: 'all_achievements', ids: ['p_first','p_high','p_both','p_efficient','p_5wins','p_10plays'] } },
-    ]
-  },
-
-
   // ── Cascadia ─────────────────────────────────────────────────
   {
     id:       'cascadia',
@@ -503,85 +316,109 @@ const GAME_DEFINITIONS = [
     ],
 
     achievements: [
-      // ── Score milestones ──
-      { id: 'ca_80',   icon: '🥾', tier: 'bronze', pts: 5,  name: 'Avid Hiker',          desc: 'Score 80+ points',
+      // ── Official scoring titles (any play, no win required) ──
+      { id: 'ca_65',   icon: '🥾', tier: 'bronze', pts: 5,  name: 'Naturalist',
+        desc: 'Score 65+ points (official scoring tier)',
+        check: { type: 'field_gte', field: 'score', value: 65 } },
+      { id: 'ca_80',   icon: '🌿', tier: 'bronze', pts: 10, name: 'Experienced Naturalist',
+        desc: 'Score 80+ points (official scoring tier)',
         check: { type: 'field_gte', field: 'score', value: 80 } },
-      { id: 'ca_85',   icon: '🦉', tier: 'bronze', pts: 5,  name: 'Wildlife Enthusiast', desc: 'Score 85+ points',
-        check: { type: 'field_gte', field: 'score', value: 85 } },
-      { id: 'ca_90',   icon: '🐦', tier: 'bronze', pts: 10, name: 'Amateur Bird Watcher', desc: 'Score 90+ points',
+      { id: 'ca_90',   icon: '🐦', tier: 'silver', pts: 15, name: 'Expert Naturalist',
+        desc: 'Score 90+ points (official scoring tier)',
         check: { type: 'field_gte', field: 'score', value: 90 } },
-      { id: 'ca_95',   icon: '🧗', tier: 'silver', pts: 15, name: 'Journeyman Climber',  desc: 'Score 95+ points',
-        check: { type: 'field_gte', field: 'score', value: 95 } },
-      { id: 'ca_100',  icon: '🌿', tier: 'silver', pts: 20, name: 'Skilled Naturalist',  desc: 'Score 100+ points',
+      { id: 'ca_100',  icon: '🌲', tier: 'silver', pts: 25, name: 'Master Naturalist',
+        desc: 'Score 100+ points (official scoring tier)',
         check: { type: 'field_gte', field: 'score', value: 100 } },
-      { id: 'ca_105',  icon: '🌱', tier: 'silver', pts: 25, name: 'Biodiversity Expert', desc: 'Score 105+ points',
-        check: { type: 'field_gte', field: 'score', value: 105 } },
-      { id: 'ca_110',  icon: '🌳', tier: 'gold',   pts: 35, name: 'True Conservationist',
-        desc: 'Score 110+ points',
+      { id: 'ca_110',  icon: '🌳', tier: 'gold',   pts: 40, name: 'Legendary Naturalist',
+        desc: 'Score 110+ points (official scoring tier)',
         check: { type: 'field_gte', field: 'score', value: 110 } },
 
       // ── Nature Tokens ──
-      { id: 'ca_no_tokens',  icon: '🍂', tier: 'silver', pts: 15, name: 'Natural Spender',  desc: 'End game with no Nature Tokens remaining',
-        check: { type: 'field_eq', field: 'natureTokens', value: 0 } },
-      { id: 'ca_5_tokens',   icon: '🌰', tier: 'silver', pts: 15, name: 'Cone Collector',   desc: 'End game with 5+ Nature Tokens',
-        check: { type: 'field_gte', field: 'natureTokens', value: 5 } },
-      { id: 'ca_10_tokens',  icon: '🌲', tier: 'gold',   pts: 30, name: 'Forester',         desc: 'End game with 10+ Nature Tokens',
-        check: { type: 'field_gte', field: 'natureTokens', value: 10 } },
+      { id: 'ca_no_tokens',  icon: '🍂', tier: 'silver', pts: 15, name: 'Natural Spender',
+        desc: 'Win a game with no Nature Tokens remaining',
+        check: { type: 'win_field_eq', field: 'natureTokens', value: 0 } },
+      { id: 'ca_5_tokens',   icon: '🌰', tier: 'silver', pts: 15, name: 'Cone Collector',
+        desc: 'Win a game with 5+ Nature Tokens remaining',
+        check: { type: 'win_field_gte', field: 'natureTokens', value: 5 } },
+      { id: 'ca_10_tokens',  icon: '🌲', tier: 'gold',   pts: 30, name: 'Forester',
+        desc: 'Win a game with 10+ Nature Tokens remaining',
+        check: { type: 'win_field_gte', field: 'natureTokens', value: 10 } },
 
-      // ── Wildlife absence (place none of a type) ──
-      { id: 'ca_no_bears',   icon: '🐻', tier: 'silver', pts: 20, name: 'Unbearable',  desc: 'End the game with no Bears placed',
+      // ── Wildlife absence (win without placing a type) ──
+      { id: 'ca_no_bears',   icon: '🐻', tier: 'silver', pts: 20, name: 'Unbearable',
+        desc: 'Win without placing any Bears',
         check: { type: 'win_toggle_false', field: 'hadBears' } },
-      { id: 'ca_no_elk',     icon: '🦌', tier: 'silver', pts: 20, name: 'Unherd Of',   desc: 'End the game with no Elk placed',
+      { id: 'ca_no_elk',     icon: '🦌', tier: 'silver', pts: 20, name: 'Unherd Of',
+        desc: 'Win without placing any Elk',
         check: { type: 'win_toggle_false', field: 'hadElk' } },
-      { id: 'ca_no_salmon',  icon: '🐟', tier: 'silver', pts: 20, name: 'Fishy',       desc: 'End the game with no Salmon placed',
+      { id: 'ca_no_salmon',  icon: '🐟', tier: 'silver', pts: 20, name: 'Gone Fishing',
+        desc: 'Win without placing any Salmon',
         check: { type: 'win_toggle_false', field: 'hadSalmon' } },
-      { id: 'ca_no_hawks',   icon: '🦅', tier: 'silver', pts: 20, name: 'Fowl Play',   desc: 'End the game with no Hawks placed',
+      { id: 'ca_no_hawks',   icon: '🦅', tier: 'silver', pts: 20, name: 'Fowl Play',
+        desc: 'Win without placing any Hawks',
         check: { type: 'win_toggle_false', field: 'hadHawks' } },
-      { id: 'ca_no_foxes',   icon: '🦊', tier: 'silver', pts: 20, name: 'Outfoxed',    desc: 'End the game with no Foxes placed',
+      { id: 'ca_no_foxes',   icon: '🦊', tier: 'silver', pts: 20, name: 'Outfoxed',
+        desc: 'Win without placing any Foxes',
         check: { type: 'win_toggle_false', field: 'hadFoxes' } },
 
       // ── Wildlife count & score ──
-      { id: 'ca_species',    icon: '🔬', tier: 'gold',   pts: 40, name: 'Species Specialist', desc: 'Have 11+ of a single Wildlife type in one game',
+      { id: 'ca_species',    icon: '🔬', tier: 'gold',   pts: 40, name: 'Species Specialist',
+        desc: 'Place 11+ tokens of a single Wildlife type in one game',
         check: { type: 'any_field_max_gte', fields: ['maxWildlifeCount'], value: 11 } },
-      { id: 'ca_wildlife10', icon: '🌏', tier: 'gold',   pts: 40, name: 'Thriving Ecosystem',  desc: 'Score 10+ points for each of the 5 Wildlife types',
+      { id: 'ca_wildlife10', icon: '🌏', tier: 'gold',   pts: 40, name: 'Thriving Ecosystem',
+        desc: 'Score 10+ points for each of the 5 Wildlife types in one game',
         check: { type: 'all_fields_gte', fields: ['scoreBears','scoreElk','scoreSalmon','scoreHawks','scoreFoxes'], value: 10 } },
-      { id: 'ca_wildlife20', icon: '🤝', tier: 'silver', pts: 25, name: 'Codependent',         desc: 'Score 20+ points for two or more Wildlife types',
+      { id: 'ca_wildlife20', icon: '🤝', tier: 'silver', pts: 25, name: 'Balanced Ecosystem',
+        desc: 'Score 20+ points for two or more Wildlife types in one game',
         check: { type: 'n_fields_gte', fields: ['scoreBears','scoreElk','scoreSalmon','scoreHawks','scoreFoxes'], value: 20, count: 2 } },
-      { id: 'ca_wildlife30', icon: '👑', tier: 'gold',   pts: 35, name: 'Dominant Species',    desc: 'Score 30+ points for a single Wildlife type',
+      { id: 'ca_wildlife30', icon: '👑', tier: 'gold',   pts: 35, name: 'Dominant Species',
+        desc: 'Score 30+ points for a single Wildlife type in one game',
         check: { type: 'any_field_max_gte', fields: ['scoreBears','scoreElk','scoreSalmon','scoreHawks','scoreFoxes'], value: 30 } },
 
       // ── Habitat ──
-      { id: 'ca_majorities', icon: '🗺️', tier: 'bronze', pts: 10, name: 'Grand Vistas',     desc: 'Win majority for 3+ Habitats in one game',
-        check: { type: 'field_gte', field: 'habitatMajorities', value: 3 } },
-      { id: 'ca_balanced',   icon: '⚖️', tier: 'silver', pts: 25, name: 'Balanced Scenery', desc: 'Score 5+ points for each Habitat in one game',
-        check: { type: 'field_eq', field: 'habitatsOver5', value: 5 } },
-      { id: 'ca_hab12',      icon: '🏔️', tier: 'silver', pts: 20, name: 'Scenic Overlook',  desc: 'Score 12+ points for a single Habitat',
+      { id: 'ca_majorities', icon: '🗺️', tier: 'bronze', pts: 10, name: 'Grand Vistas',
+        desc: 'Win majority for 3+ Habitats in one game',
+        check: { type: 'win_field_gte', field: 'habitatMajorities', value: 3 } },
+      { id: 'ca_balanced',   icon: '⚖️', tier: 'silver', pts: 25, name: 'Balanced Scenery',
+        desc: 'Win with 5+ points in every Habitat',
+        check: { type: 'win_field_eq', field: 'habitatsOver5', value: 5 } },
+      { id: 'ca_hab12',      icon: '🏔️', tier: 'silver', pts: 20, name: 'Scenic Overlook',
+        desc: 'Score 12+ points for a single Habitat in one game',
         check: { type: 'field_gte', field: 'bestHabitatScore', value: 12 } },
-      { id: 'ca_hab15',      icon: '🌄', tier: 'gold',   pts: 30, name: 'Natural Wonder',   desc: 'Score 15+ points for a single Habitat',
+      { id: 'ca_hab15',      icon: '🌄', tier: 'gold',   pts: 30, name: 'Natural Wonder',
+        desc: 'Score 15+ points for a single Habitat in one game',
         check: { type: 'field_gte', field: 'bestHabitatScore', value: 15 } },
 
-      // ── Constraint achievements ──
-      { id: 'ca_keystone',   icon: '🪨', tier: 'gold',   pts: 35, name: 'Shaky Foundation',  desc: 'Win with no completed Keystone Habitats',
+      // ── Constraint wins ──
+      { id: 'ca_keystone',   icon: '🪨', tier: 'gold',   pts: 35, name: 'Shaky Foundation',
+        desc: 'Win without completing any Keystone Habitats',
         check: { type: 'win_field_eq', field: 'keystonesCompleted', value: 0 } },
-      { id: 'ca_diversity',  icon: '🧬', tier: 'gold',   pts: 35, name: 'Diversity Collapse', desc: 'Win using only 3 Wildlife types',
+      { id: 'ca_diversity',  icon: '🧬', tier: 'gold',   pts: 35, name: 'Focused Collection',
+        desc: 'Win using only 3 Wildlife types',
         check: { type: 'win_field_lte', field: 'wildlifeTypes', value: 3 } },
-      { id: 'ca_microbiomes',icon: '🔭', tier: 'gold',   pts: 35, name: 'Microbiomes',        desc: 'Win without winning the largest Habitat bonus for any type',
+      { id: 'ca_microbiomes',icon: '🔭', tier: 'gold',   pts: 35, name: 'Off the Beaten Path',
+        desc: 'Win without claiming any Habitat majority bonuses',
         check: { type: 'win_field_eq', field: 'habitatMajorities', value: 0 } },
 
       // ── Multi-play ──
-      { id: 'ca_5wins',      icon: '📸', tier: 'silver', pts: 20, name: 'Photo Competition',  desc: 'Win 5 games',
+      { id: 'ca_5wins',      icon: '📸', tier: 'silver', pts: 20, name: 'Photo Competition',
+        desc: 'Win 5 games',
         check: { type: 'min_wins', count: 5 } },
+      { id: 'ca_10wins',     icon: '🏆', tier: 'gold',   pts: 35, name: 'Conservation Champion',
+        desc: 'Win 10 games',
+        check: { type: 'min_wins', count: 10 } },
 
       // ── Platinum ──
-      { id: 'ca_plat',       icon: '💎', tier: 'plat',   pts: 100, name: 'Cascadia Complete',
+      { id: 'ca_plat',       icon: '💎', tier: 'plat',   pts: 100, name: 'Legendary Naturalist — Complete',
         desc: 'Unlock all other Cascadia achievements',
         check: { type: 'all_achievements', ids: [
-          'ca_80','ca_85','ca_90','ca_95','ca_100','ca_105','ca_110',
+          'ca_65','ca_80','ca_90','ca_100','ca_110',
           'ca_no_tokens','ca_5_tokens','ca_10_tokens',
           'ca_no_bears','ca_no_elk','ca_no_salmon','ca_no_hawks','ca_no_foxes',
           'ca_species','ca_wildlife10','ca_wildlife20','ca_wildlife30',
           'ca_majorities','ca_balanced','ca_hab12','ca_hab15',
-          'ca_keystone','ca_diversity','ca_microbiomes','ca_5wins'
+          'ca_keystone','ca_diversity','ca_microbiomes',
+          'ca_5wins','ca_10wins'
         ]} },
     ]
   },
@@ -631,26 +468,40 @@ const GAME_DEFINITIONS = [
       { id: 'si_score20',   icon: '⚔️',  tier: 'bronze', pts: 10, name: 'Spirits Rise',
         desc: 'Score 20+ points in a victory',
         check: { type: 'win_field_gte', field: 'score', value: 20 } },
-      { id: 'si_score30',   icon: '🔥', tier: 'silver', pts: 20, name: 'Defenders of the Land',
-        desc: 'Score 30+ points in a victory',
-        check: { type: 'win_field_gte', field: 'score', value: 30 } },
-      { id: 'si_score40',   icon: '💀', tier: 'gold',   pts: 35, name: 'Dread Tide',
-        desc: 'Score 40+ points in a victory',
-        check: { type: 'win_field_gte', field: 'score', value: 40 } },
-      { id: 'si_score50',   icon: '🌊', tier: 'gold',   pts: 50, name: 'Overwhelming Power',
+      { id: 'si_score35',   icon: '🔥', tier: 'silver', pts: 20, name: 'Defenders of the Land',
+        desc: 'Score 35+ points in a victory',
+        check: { type: 'win_field_gte', field: 'score', value: 35 } },
+      { id: 'si_score50',   icon: '💀', tier: 'silver', pts: 30, name: 'Dread Tide',
         desc: 'Score 50+ points in a victory',
         check: { type: 'win_field_gte', field: 'score', value: 50 } },
+      { id: 'si_score65',   icon: '🌊', tier: 'gold',   pts: 45, name: 'Overwhelming Power',
+        desc: 'Score 65+ points in a victory',
+        check: { type: 'win_field_gte', field: 'score', value: 65 } },
+      { id: 'si_score80',   icon: '✨', tier: 'gold',   pts: 60, name: 'Terror of the Deep',
+        desc: 'Score 80+ points in a victory',
+        check: { type: 'win_field_gte', field: 'score', value: 80 } },
 
       // ── Adversary victories ──
       { id: 'si_any_adv',   icon: '🏴', tier: 'silver', pts: 20, name: 'First Invader Routed',
         desc: 'Win against any adversary (level 1+)',
         check: { type: 'win_field_gte', field: 'level', value: 1 } },
-      { id: 'si_adv3',      icon: '⚔️',  tier: 'silver', pts: 25, name: 'Hardened Veterans',
+      { id: 'si_adv3',      icon: '⚔️',  tier: 'silver', pts: 25, name: 'Hardened Resistance',
         desc: 'Win against any adversary at level 3+',
         check: { type: 'win_field_gte', field: 'level', value: 3 } },
       { id: 'si_adv6',      icon: '👑', tier: 'gold',   pts: 50, name: 'Maximum Resistance',
         desc: 'Win against any adversary at level 6',
         check: { type: 'win_field_gte', field: 'level', value: 6 } },
+
+      // ── Difficulty milestones ──
+      { id: 'si_diff5',     icon: '🌋', tier: 'silver', pts: 25, name: 'Rising Challenge',
+        desc: 'Win a game at difficulty 5+',
+        check: { type: 'win_field_gte', field: 'difficulty', value: 5 } },
+      { id: 'si_diff8',     icon: '🌑', tier: 'gold',   pts: 40, name: 'Against All Odds',
+        desc: 'Win a game at difficulty 8+',
+        check: { type: 'win_field_gte', field: 'difficulty', value: 8 } },
+      { id: 'si_diff10',    icon: '💀', tier: 'gold',   pts: 60, name: 'Island Incarnate',
+        desc: 'Win a game at difficulty 10+',
+        check: { type: 'win_field_gte', field: 'difficulty', value: 10 } },
 
       // ── Beat every adversary ──
       { id: 'si_all_adv',   icon: '🌍', tier: 'gold',   pts: 60, name: 'No Mercy for Colonists',
@@ -787,275 +638,17 @@ const GAME_DEFINITIONS = [
       { id: 'si_plat',      icon: '💎', tier: 'plat', pts: 100, name: 'The Island Endures',
         desc: 'Unlock all other Spirit Island achievements',
         check: { type: 'all_achievements', ids: [
-          'si_first','si_score20','si_score30','si_score40','si_score50',
-          'si_any_adv','si_adv3','si_adv6','si_all_adv',
+          'si_first',
+          'si_score20','si_score35','si_score50','si_score65','si_score80',
+          'si_any_adv','si_adv3','si_adv6',
+          'si_diff5','si_diff8','si_diff10',
+          'si_all_adv',
           'si_base8','si_bc','si_je','si_horizons','si_ni','si_all_spirits',
           'si_no_blight','si_dahan10','si_invaders8',
           'si_10plays','si_25wins',
         ]}},
     ]
   },
-
-
-  // ── Slay the Spire: The Board Game ───────────────────────────
-  {
-    id:       'sts',
-    name:     'Slay the Spire: TBG',
-    icon:     '⚔️',
-    genre:    'Deckbuilding · Roguelike',
-    color:    '#c0392b',
-    bgColor:  '#fff5f5',
-    dimColor: '#e8a0a0',
-
-    logFields: [
-      { id: 'win',        label: 'Win?',           type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'character',  label: 'Character',      type: 'select', options: ['Ironclad','Silent','Defect','Watcher'] },
-      { id: 'character2', label: 'Character 2',    type: 'select', options: ['None','Ironclad','Silent','Defect','Watcher'] },
-      { id: 'character3', label: 'Character 3',    type: 'select', options: ['None','Ironclad','Silent','Defect','Watcher'] },
-      { id: 'character4', label: 'Character 4',    type: 'select', options: ['None','Ironclad','Silent','Defect','Watcher'] },
-      { id: 'actsCleared', label: 'Acts Cleared',  type: 'select', options: ['Act 1','Act 2','Act 3','Act 4'] },
-      { id: 'ascension',  label: 'Ascension Level',type: 'number', min: 0, max: 13, default: 0 },
-      { id: 'playerCount',label: 'Player Count',   type: 'number', min: 1, max: 4, default: 1 },
-      { id: 'deckSize',   label: 'Final Deck Size', type: 'number', min: 1, max: 30, default: 10 },
-      { id: 'relicCount', label: 'Relics Held',     type: 'number', min: 0, max: 20, default: 3 },
-      { id: 'hpFull',     label: 'All Players at Full HP (boss kill)', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'noRares',    label: 'No Uncommons or Rares in deck', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'noRelics',   label: 'No Relics or Boss Relics',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'dailyClimb', label: 'Daily Climb run',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'bossT1',     label: 'Defeated Boss on Turn 1',       type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'hitStrength',label: 'Hit Strength Limit (8)',        type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'hitPoison',  label: 'Hit Poison Limit (30)',         type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'hitBlock',   label: 'Hit Block Limit (20)',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'play7shivs', label: 'Played 7 Shivs in One Turn',   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'have7powers',label: '7 Powers in Play at Once',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'killedTransient', label: 'Killed The Transient in Time', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'infiniteCombo',   label: 'Created Infinite Combo',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-    ],
-
-    achievements: [
-      // ── Character wins (official) ──
-      { id: 'sts_ruby',      icon: '❤️',  tier: 'bronze', pts: 15, name: 'Ruby',
-        desc: 'Beat Act III with the Ironclad',
-        check: { type: 'win_multifield_value_and_field_eq', fields: ['character','character2','character3','character4'], value: 'Ironclad', condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_emerald',   icon: '💚', tier: 'bronze', pts: 15, name: 'Emerald',
-        desc: 'Beat Act III with the Silent',
-        check: { type: 'win_multifield_value_and_field_eq', fields: ['character','character2','character3','character4'], value: 'Silent', condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_sapphire',  icon: '💙', tier: 'bronze', pts: 15, name: 'Sapphire',
-        desc: 'Beat Act III with the Defect',
-        check: { type: 'win_multifield_value_and_field_eq', fields: ['character','character2','character3','character4'], value: 'Defect', condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_amethyst',  icon: '💜', tier: 'bronze', pts: 15, name: 'Amethyst',
-        desc: 'Beat Act III with the Watcher',
-        check: { type: 'win_multifield_value_and_field_eq', fields: ['character','character2','character3','character4'], value: 'Watcher', condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_all_chars', icon: '✨', tier: 'gold',   pts: 40, name: 'Full Roster',
-        desc: 'Beat Act III with all 4 characters',
-        check: { type: 'all_achievements', ids: ['sts_ruby','sts_emerald','sts_sapphire','sts_amethyst'] } },
-
-      // ── Ascension milestones ──
-      { id: 'sts_asc1',      icon: '🔥', tier: 'bronze', pts: 10, name: 'Ascension Unlocked',
-        desc: 'Unlock Ascension mode (beat Act II boss solo / Act III with 2+ players)',
-        check: { type: 'field_gte', field: 'ascension', value: 1 } },
-      { id: 'sts_asc5',      icon: '🔥', tier: 'silver', pts: 20, name: 'Ascending',
-        desc: 'Reach Ascension 5',
-        check: { type: 'field_gte', field: 'ascension', value: 5 } },
-      { id: 'sts_asc10',     icon: '🔥', tier: 'gold',   pts: 35, name: 'High Climber',
-        desc: 'Complete Ascension Level 10',
-        check: { type: 'win_field_gte', field: 'ascension', value: 10 } },
-      { id: 'sts_asc13',     icon: '🔥', tier: 'gold',   pts: 60, name: 'Double Act 3 Boss',
-        desc: 'Complete Ascension Level 13',
-        check: { type: 'win_field_gte', field: 'ascension', value: 13 } },
-
-      // ── Official achievements (from rulebook) ──
-      { id: 'sts_jaxxed',    icon: '💪', tier: 'silver', pts: 20, name: 'Jaxxed',
-        desc: 'Hit the Strength limit (8)',
-        check: { type: 'win_with_toggle', field: 'hitStrength' } },
-      { id: 'sts_catalyst',  icon: '☠️',  tier: 'silver', pts: 20, name: 'Catalyst',
-        desc: 'Hit the Poison limit (30)',
-        check: { type: 'win_with_toggle', field: 'hitPoison' } },
-      { id: 'sts_ninja',     icon: '🗡️', tier: 'silver', pts: 25, name: 'Ninja',
-        desc: 'Play 7 Shivs in one turn',
-        check: { type: 'win_with_toggle', field: 'play7shivs' } },
-      { id: 'sts_powerful',  icon: '⚡', tier: 'silver', pts: 20, name: 'Powerful',
-        desc: 'Have 7 Powers in play at once',
-        check: { type: 'win_with_toggle', field: 'have7powers' } },
-      { id: 'sts_barricaded',icon: '🛡️', tier: 'silver', pts: 20, name: 'Barricaded',
-        desc: 'Hit the Block limit (20)',
-        check: { type: 'win_with_toggle', field: 'hitBlock' } },
-      { id: 'sts_nothing',   icon: '⚡', tier: 'gold',   pts: 40, name: 'You Are Nothing',
-        desc: 'Defeat a Boss on turn 1',
-        check: { type: 'win_with_toggle', field: 'bossT1' } },
-      { id: 'sts_perfect',   icon: '❤️',  tier: 'gold',   pts: 35, name: 'Perfect',
-        desc: 'Beat a Boss with all players at full HP',
-        check: { type: 'win_with_toggle', field: 'hpFull' } },
-      { id: 'sts_minimalist',icon: '🃏', tier: 'gold',   pts: 50, name: 'Minimalist',
-        desc: 'Beat Act III with a 5 card deck or smaller',
-        check: { type: 'win_field_lte_and_field_eq', field: 'deckSize', value: 5, condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_transient', icon: '👻', tier: 'gold',   pts: 40, name: 'The Transient',
-        desc: 'Kill The Transient before it kills itself',
-        check: { type: 'win_with_toggle', field: 'killedTransient' } },
-      { id: 'sts_common',    icon: '📦', tier: 'gold',   pts: 40, name: 'Common Sense',
-        desc: 'Beat Act III with no uncommons or rares',
-        check: { type: 'win_with_toggle_and_field_eq', field: 'noRares', condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_collector', icon: '🎒', tier: 'gold',   pts: 35, name: 'Collector',
-        desc: 'Beat Act III with 12+ relics and Boss relics per player',
-        check: { type: 'win_field_gte_and_field_eq', field: 'relicCount', value: 12, condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_lucky',     icon: '🎲', tier: 'silver', pts: 20, name: 'My Lucky Day',
-        desc: 'Beat Act III with a Daily Climb',
-        check: { type: 'win_with_toggle_and_field_eq', field: 'dailyClimb', condField: 'actsCleared', condValue: 'Act 3' } },
-      { id: 'sts_infinity',  icon: '♾️', tier: 'gold',   pts: 50, name: 'Infinity',
-        desc: 'Create an infinite card combo',
-        check: { type: 'win_with_toggle', field: 'infiniteCombo' } },
-      { id: 'sts_norelics',  icon: '🚫', tier: 'gold',   pts: 45, name: 'Who Needs Relics?',
-        desc: 'Beat Act III with no relics or Boss relics',
-        check: { type: 'win_with_toggle_and_field_eq', field: 'noRelics', condField: 'actsCleared', condValue: 'Act 3' } },
-
-      // ── Play milestones ──
-      { id: 'sts_10plays',   icon: '🎮', tier: 'silver', pts: 20, name: 'Veteran Climber',
-        desc: 'Play 10 runs total',
-        check: { type: 'min_plays', count: 10 } },
-      { id: 'sts_10wins',    icon: '🏆', tier: 'gold',   pts: 35, name: 'Spire Slayer',
-        desc: 'Win 10 runs',
-        check: { type: 'min_wins', count: 10 } },
-
-      // ── Platinum ──
-      { id: 'sts_plat',      icon: '💎', tier: 'plat',   pts: 100, name: 'Spire Conquered',
-        desc: 'Unlock all other Slay the Spire achievements',
-        check: { type: 'all_achievements', ids: [
-          'sts_ruby','sts_emerald','sts_sapphire','sts_amethyst','sts_all_chars',
-          'sts_asc1','sts_asc5','sts_asc10','sts_asc13',
-          'sts_jaxxed','sts_catalyst','sts_ninja','sts_powerful','sts_barricaded',
-          'sts_nothing','sts_perfect','sts_minimalist','sts_transient',
-          'sts_common','sts_collector','sts_lucky','sts_infinity','sts_norelics',
-          'sts_10plays','sts_10wins',
-        ]}},
-    ]
-  },
-
-
-  // ── Dorfromantik ─────────────────────────────────────────────
-  {
-    id:       'dorfromantik',
-    name:     'Dorfromantik',
-    icon:     '🏡',
-    genre:    'Tile Laying · Campaign',
-    color:    '#5b8a3c',
-    bgColor:  '#f2f9ee',
-    dimColor: '#9dc87a',
-
-    logFields: [
-      { id: 'win',     label: 'Win?',         type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'score',   label: 'Score',         type: 'number', min: 0, max: 500, default: 150 },
-      // Campaign Sheet achievement cards — tap when flipped in-game
-      { id: 'cs_castle',         label: 'Flipped: Castle',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_clouds',         label: 'Flipped: Clouds',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_farm',           label: 'Flipped: Farm',            type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_forest_tunnel',  label: 'Flipped: Forest Tunnel',   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_grain_tunnel',   label: 'Flipped: Grain Tunnel',    type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_shepherdess',    label: 'Flipped: Shepherdess',     type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_signalman',      label: 'Flipped: Signalman',       type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_village_tunnel', label: 'Flipped: Village Tunnel',  type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'cs_flag_meadow',    label: 'Flipped: Flag Meadow',     type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      // Box achievements — tick when earned from box contents
-      { id: 'ba_balloon',       label: 'Earned: Balloon Launch Site',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_construction',  label: 'Earned: Construction Site',        type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_farm',          label: 'Earned: Farm (Box)',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_forest_cabin',  label: 'Earned: Forest Cabin',             type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_golden_heart',  label: 'Earned: Golden Heart',             type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_harbor',        label: 'Earned: Harbor',                   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_harvest',       label: 'Earned: Harvest Festival',         type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_hearts_desire', label: "Earned: Heart's Desire",           type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_locomotive',    label: 'Earned: Locomotive',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_road',          label: 'Earned: On The Road To Success',   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_red_hearts',    label: 'Earned: Red Hearts',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_ship',          label: 'Earned: Ship',                     type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_train',         label: 'Earned: Train Station',            type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'ba_wildflower',    label: 'Earned: Wildflower',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-    ],
-
-    achievements: [
-      // Score milestones
-      { id: 'dorf_200',  icon: '🌿', tier: 'bronze', pts: 10, name: 'Village Life',
-        desc: 'Score 200+ points',
-        check: { type: 'field_gte', field: 'score', value: 200 } },
-      { id: 'dorf_300',  icon: '🏘️', tier: 'silver', pts: 20, name: 'Thriving Town',
-        desc: 'Score 300+ points',
-        check: { type: 'field_gte', field: 'score', value: 300 } },
-      { id: 'dorf_400',  icon: '🏰', tier: 'gold',   pts: 35, name: 'Grand Duchy',
-        desc: 'Score 400+ points',
-        check: { type: 'field_gte', field: 'score', value: 400 } },
-
-      // Campaign Sheet achievements — any play where it was flipped
-      { id: 'dorf_cs_castle',         icon: '🏰', tier: 'silver', pts: 15, name: 'Castle',
-        desc: 'Flip the Castle achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_castle' } },
-      { id: 'dorf_cs_clouds',         icon: '☁️',  tier: 'gold',   pts: 30, name: 'Clouds',
-        desc: 'Flip the Clouds achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_clouds' } },
-      { id: 'dorf_cs_farm',           icon: '🌾', tier: 'silver', pts: 15, name: 'Farm',
-        desc: 'Flip the Farm achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_farm' } },
-      { id: 'dorf_cs_forest_tunnel',  icon: '🌲', tier: 'silver', pts: 15, name: 'Forest Tunnel',
-        desc: 'Flip the Forest Tunnel achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_forest_tunnel' } },
-      { id: 'dorf_cs_grain_tunnel',   icon: '🌾', tier: 'silver', pts: 15, name: 'Grain Tunnel',
-        desc: 'Flip the Grain Tunnel achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_grain_tunnel' } },
-      { id: 'dorf_cs_shepherdess',    icon: '🐑', tier: 'silver', pts: 15, name: 'Shepherdess',
-        desc: 'Flip the Shepherdess achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_shepherdess' } },
-      { id: 'dorf_cs_signalman',      icon: '🚂', tier: 'silver', pts: 15, name: 'Signalman',
-        desc: 'Flip the Signalman achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_signalman' } },
-      { id: 'dorf_cs_village_tunnel', icon: '🏡', tier: 'silver', pts: 15, name: 'Village Tunnel',
-        desc: 'Flip the Village Tunnel achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_village_tunnel' } },
-      { id: 'dorf_cs_flag_meadow',    icon: '🚩', tier: 'silver', pts: 15, name: 'Flag Meadow',
-        desc: 'Flip the Flag Meadow achievement card',
-        check: { type: 'win_with_toggle', field: 'cs_flag_meadow' } },
-      { id: 'dorf_all_cs',            icon: '✨', tier: 'gold',   pts: 40, name: 'Campaign Complete',
-        desc: 'Flip all 9 Campaign Sheet achievement cards',
-        check: { type: 'all_achievements', ids: [
-          'dorf_cs_castle','dorf_cs_clouds','dorf_cs_farm','dorf_cs_forest_tunnel',
-          'dorf_cs_grain_tunnel','dorf_cs_shepherdess','dorf_cs_signalman',
-          'dorf_cs_village_tunnel','dorf_cs_flag_meadow'
-        ]}},
-
-      // Box achievements — earned across any play
-      { id: 'dorf_ba_5',  icon: '📦', tier: 'silver', pts: 20, name: 'Box Hunter',
-        desc: 'Earn 5 box achievements',
-        check: { type: 'any_toggle_count_gte', fields: [
-          'ba_balloon','ba_construction','ba_farm','ba_forest_cabin','ba_golden_heart',
-          'ba_harbor','ba_harvest','ba_hearts_desire','ba_locomotive','ba_road',
-          'ba_red_hearts','ba_ship','ba_train','ba_wildflower'
-        ], count: 5 } },
-      { id: 'dorf_ba_all', icon: '🎁', tier: 'gold',   pts: 50, name: 'Everything Unlocked',
-        desc: 'Earn all 14 box achievements',
-        check: { type: 'any_toggle_count_gte', fields: [
-          'ba_balloon','ba_construction','ba_farm','ba_forest_cabin','ba_golden_heart',
-          'ba_harbor','ba_harvest','ba_hearts_desire','ba_locomotive','ba_road',
-          'ba_red_hearts','ba_ship','ba_train','ba_wildflower'
-        ], count: 14 } },
-
-      // Play count
-      { id: 'dorf_10plays', icon: '🎮', tier: 'silver', pts: 20, name: 'Regular Villager',
-        desc: 'Play 10 games',
-        check: { type: 'min_plays', count: 10 } },
-
-      // Platinum
-      { id: 'dorf_plat', icon: '💎', tier: 'plat', pts: 100, name: 'Dorfromantik Master',
-        desc: 'Unlock all other Dorfromantik achievements',
-        check: { type: 'all_achievements', ids: [
-          'dorf_200','dorf_300','dorf_400',
-          'dorf_cs_castle','dorf_cs_clouds','dorf_cs_farm','dorf_cs_forest_tunnel',
-          'dorf_cs_grain_tunnel','dorf_cs_shepherdess','dorf_cs_signalman',
-          'dorf_cs_village_tunnel','dorf_cs_flag_meadow','dorf_all_cs',
-          'dorf_ba_5','dorf_ba_all','dorf_10plays',
-        ]}},
-    ],
-  }
-
-  // ── ADD YOUR NEXT GAME HERE ───────────────────────────────────
-  // Copy a block above, change the id/name/fields/achievements.
-  // The app will automatically add a tab and page for it.
 
 ];
 
@@ -1305,12 +898,12 @@ let appState = {}, unlocked = {}, newlyUnlocked = new Set();
 
 function loadState() {
   try {
-    const s = localStorage.getItem('solo_tracker_v7');
+    const s = localStorage.getItem('solo_tracker_pub_v1');
     if (s) { const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; }
   } catch(e){}
 }
 function saveState() {
-  localStorage.setItem('solo_tracker_v7', JSON.stringify({state:appState,unlocked}));
+  localStorage.setItem('solo_tracker_pub_v1', JSON.stringify({state:appState,unlocked}));
 }
 
 function calcTotalPts() {
@@ -1495,7 +1088,6 @@ function renderGameDetail(g) {
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn-log" style="background:${g.color};flex:1" onclick="openModal('${g.id}')">+ Log Play</button>
-      <button class="btn-log" style="background:var(--text-3);width:48px;flex:none;font-size:18px" onclick="openImport('${g.id}')" title="Import from BGStats">⬇</button>
     </div>
     <div class="card">
       <div class="card-header">
@@ -1723,7 +1315,7 @@ function resetAll(){
     btn.style.background='#fff0ee';
     setTimeout(()=>{resetPending=false;btn.textContent='Reset All Data';btn.style.background='';},3000);
   } else {
-    localStorage.removeItem('solo_tracker_v7');
+    localStorage.removeItem('solo_tracker_pub_v1');
     location.reload();
   }
 }
@@ -1731,245 +1323,6 @@ function resetAll(){
 // ═══════════════════════════════════════
 // BGSPLAY IMPORT
 // ═══════════════════════════════════════
-let importGameId = null;
-let importParsedPlays = [];
-
-// Spirit name normalization (BGStats uses Title Case)
-const SPIRIT_NORMALIZE = {
-  'vital strength of the earth':              'Vital Strength of the Earth',
-  "lightning's swift strike":                 "Lightning's Swift Strike",
-  "ocean's hungry grasp":                     "Ocean's Hungry Grasp",
-  'river surges in sunlight':                 'River Surges in Sunlight',
-  'shadows flicker like flame':               'Shadows Flicker Like Flame',
-  "stone's unyielding defiance":              "Stone's Unyielding Defiance",
-  "stone's unyielding defiance (aspect)":     "Stone's Unyielding Defiance (Aspect)",
-  'a spread of rampant green':                'A Spread of Rampant Green',
-  'bringer of dreams and nightmares':         'Bringer of Dreams and Nightmares',
-  'keeper of the forbidden wilds':            'Keeper of the Forbidden Wilds',
-  'sharp fangs behind the leaves':            'Sharp Fangs Behind the Leaves',
-  'devouring teeth lurk underfoot':           'Devouring Teeth Lurk Underfoot',
-  'eyes watch from the trees':                'Eyes Watch from the Trees',
-  'fathomless mud of the swamp':              'Fathomless Mud of the Swamp',
-  'fractured days split the sky':             'Fractured Days Split the Sky',
-  'grinning trickster stirs up trouble':      'Grinning Trickster Stirs Up Trouble',
-  'lure of the deep wilderness':              'Lure of the Deep Wilderness',
-  'many minds move as one':                   'Many Minds Move as One',
-  'shifting memory of ages':                  'Shifting Memory of Ages',
-  'shroud of silent mist':                    'Shroud of Silent Mist',
-  'starlight seeks its form':                 'Starlight Seeks Its Form',
-  'thunderspeaker':                           'Thunderspeaker',
-  'volcano looming high':                     'Volcano Looming High',
-  'dances up earthquakes':                    'Dances Up Earthquakes',
-  'finder of paths unseen':                   'Finder of Paths Unseen',
-  'hearth-vigil':                             'Hearth-Vigil',
-  'relentless gaze of the sun':               'Relentless Gaze of the Sun',
-  'wandering voice keens desolation':         'Wandering Voice Keens Desolation',
-  'breath of darkness down your spine':       'Breath of Darkness Down Your Spine',
-  'ember-eyed behemoth':                      'Ember-Eyed Behemoth',
-  'foreboding dreams of the first people':    'Foreboding Dreams of the First People',
-  "rot and renewal's grasping tide":          "Rot and Renewal's Grasping Tide",
-  'vengeance as a burning plague':            'Vengeance as a Burning Plague',
-  'wounded waters bleeding':                  'Wounded Waters Bleeding',
-};
-
-const ADVERSARY_NORMALIZE = {
-  'the kingdom of france': 'France',
-  'france': 'France',
-  'england': 'England',
-  'brandenburg-prussia': 'Brandenburg-Prussia',
-  'the kingdom of brandenburgprussia': 'Brandenburg-Prussia',
-  'sweden': 'Sweden',
-  'the kingdom of sweden': 'Sweden',
-  'the habsburg miners': 'Habsburg Miners',
-  'habsburg miners': 'Habsburg Miners',
-  'russia': 'Russia',
-  'the russian tsardom': 'Russia',
-  'scotland': 'Scotland',
-  'the kingdom of scotland': 'Scotland',
-  'austria-habsburg': 'Austria-Habsburg',
-  'the habsburg monarchy': 'Austria-Habsburg',
-};
-
-function normalizeSpirit(s) {
-  if (!s) return 'None';
-  return SPIRIT_NORMALIZE[s.toLowerCase()] || s;
-}
-
-function normalizeAdversary(s) {
-  if (!s) return 'None';
-  return ADVERSARY_NORMALIZE[s.toLowerCase()] || s;
-}
-
-function parseBgsplay(jsonText, gameId) {
-  let data;
-  try { data = JSON.parse(jsonText); } catch(e) {
-    return { error: 'Invalid JSON — make sure you pasted the full file content.' };
-  }
-  if (!data.plays || !Array.isArray(data.plays)) {
-    return { error: 'No plays found in this file.' };
-  }
-
-  const players = data.players || [];
-  const games   = data.games || [];
-  const meId    = data.userInfo?.meRefId;
-  const mePlayer = players.find(p => p.id === meId) || players[0];
-  const meUuid  = mePlayer?.uuid;
-
-  const parsed = [];
-
-  for (const play of data.plays) {
-    const playDate = (play.playDate||'').slice(0,10);
-    const ts = new Date(playDate + 'T12:00:00').getTime();
-
-    // Find my player score
-    const myScore = play.playerScores?.find(ps =>
-      ps.playerRefId === mePlayer?.id || ps.playerRefId === meId
-    ) || play.playerScores?.[0];
-
-    if (!myScore) continue;
-
-    const win   = !!myScore.winner;
-    const score = parseFloat(myScore.score) || 0;
-    const role  = myScore.role || '';
-
-    // Parse scoresheet for detailed fields
-    let ssData = {};
-    try {
-      const ss = JSON.parse(play.scoresheet || '{}');
-      for (const group of ss.groups || []) {
-        for (const row of group.rows || []) {
-          const val = row.scores?.[meUuid];
-          if (val !== undefined && val !== '') {
-            ssData[row.templateId] = val;
-          }
-        }
-      }
-    } catch(e) {}
-
-    // Parse board field: "Level 0／The Kingdom Of France"
-    const board = play.board || '';
-    const boardParts = board.split('\uff0f').map(s => s.trim()); // ／ fullwidth slash
-    let level = 0, adversary = 'None';
-    if (boardParts.length >= 2) {
-      const lvlMatch = boardParts[0].match(/Level\s*(\d+)/i);
-      if (lvlMatch) level = parseInt(lvlMatch[1]);
-      adversary = normalizeAdversary(boardParts[1]);
-    }
-
-    // Expansions used
-    const expIds = (play.expansionPlays||[]).map(e => e.gameRefId);
-    const expNames = expIds.map(id => games.find(g=>g.id===id)?.name||'').filter(Boolean);
-
-    // Build play object based on game
-    let playObj = { date: playDate, ts, win, score };
-
-    if (gameId === 'spiritisland') {
-      // Multi-spirit: role might be "Spirit1 / Spirit2"
-      const roles = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
-      playObj.spirit1 = normalizeSpirit(roles[0] || '');
-      playObj.spirit2 = normalizeSpirit(roles[1] || '') || 'None';
-      playObj.adversary = adversary;
-      playObj.level = level;
-      playObj.score = score;
-      playObj.difficulty = parseInt(ssData.defeatdifficulty || ssData.victorydifficulty || 0) || 0;
-      playObj.invaders = parseInt(ssData.victoryinvadercards || ssData.defeatinvadercards || 0) || 0;
-      playObj.dahan = parseInt(ssData.livingdahan || 0) || 0;
-      playObj.blight = parseInt(ssData.blight || 0) || 0;
-      playObj.noBlight = playObj.blight === 0;
-    } else if (gameId === 'warps') {
-      playObj.warpsUsed = parseInt(ssData.warps || 3);
-      playObj.ship = role || 'Any / Unknown';
-      playObj.mothership = board || 'Any / Unknown';
-      playObj.noLoss = false;
-    } else if (gameId === 'cascadia') {
-      playObj.score = score;
-      playObj.natureTokens = parseInt(ssData.naturetokens || 0) || 0;
-    } else {
-      // Generic: just date, win, score
-      playObj.score = score;
-    }
-
-    parsed.push(playObj);
-  }
-
-  return { plays: parsed, playerName: mePlayer?.name || 'Unknown' };
-}
-
-function openImport(gid) {
-  importGameId = gid;
-  importParsedPlays = [];
-  const g = GAME_DEFINITIONS.find(x=>x.id===gid);
-  document.getElementById('importTitle').textContent = `Import from BGStats — ${g.name}`;
-  document.getElementById('importJson').value = '';
-  document.getElementById('importPreview').innerHTML = '';
-  document.getElementById('importSubmit').style.display = '';
-  document.getElementById('importConfirm').style.display = 'none';
-  document.getElementById('importOverlay').classList.add('open');
-}
-
-function closeImport() {
-  document.getElementById('importOverlay').classList.remove('open');
-}
-
-function handleImportOverlayClick(e) {
-  if (e.target === document.getElementById('importOverlay')) closeImport();
-}
-
-function previewImport() {
-  const json = document.getElementById('importJson').value.trim();
-  if (!json) { document.getElementById('importPreview').textContent = 'Paste the .bgsplay JSON first.'; return; }
-
-  const result = parseBgsplay(json, importGameId);
-  const preview = document.getElementById('importPreview');
-
-  if (result.error) {
-    preview.innerHTML = `<div style="color:var(--red)">${result.error}</div>`;
-    return;
-  }
-
-  importParsedPlays = result.plays;
-  const wins = result.plays.filter(p=>p.win).length;
-
-  // Check for duplicates
-  const existing = appState[importGameId]?.plays || [];
-  const dupes = result.plays.filter(p =>
-    existing.some(e => e.date === p.date && e.score === p.score)
-  ).length;
-
-  preview.innerHTML = `
-    <div style="background:#f0faf4;border:1px solid #b0dfc0;border-radius:8px;padding:12px">
-      <div style="font-weight:600;margin-bottom:6px">Found ${result.plays.length} plays for ${result.playerName}</div>
-      <div style="font-size:12px;color:var(--text-2);line-height:1.8">
-        ✓ Wins: ${wins} &nbsp;✗ Losses: ${result.plays.length - wins}<br>
-        ${dupes > 0 ? `⚠ ${dupes} possible duplicate${dupes>1?'s':''} (same date & score — will still import)` : ''}
-      </div>
-      <div style="font-size:11px;color:var(--text-3);margin-top:6px">
-        ${result.plays.slice(0,3).map(p=>`${p.date} · ${p.win?'Win':'Loss'} · ${p.score}pts`).join('<br>')}
-        ${result.plays.length > 3 ? `<br>…and ${result.plays.length-3} more` : ''}
-      </div>
-    </div>`;
-
-  document.getElementById('importSubmit').style.display = 'none';
-  document.getElementById('importConfirm').style.display = '';
-}
-
-function confirmImport() {
-  if (!importParsedPlays.length) return;
-  if (!appState[importGameId]) appState[importGameId] = { plays: [] };
-  // Sort by date ascending before adding
-  const sorted = [...importParsedPlays].sort((a,b) => a.ts - b.ts);
-  appState[importGameId].plays.push(...sorted);
-  // Re-sort all plays by date
-  appState[importGameId].plays.sort((a,b) => a.ts - b.ts);
-  const newUnlocks = checkAll();
-  saveState();
-  const g = GAME_DEFINITIONS.find(x=>x.id===importGameId);
-  if (currentGameId === importGameId) renderGameDetail(g);
-  renderAll();
-  closeImport();
-  showToast(`Imported ${importParsedPlays.length} play${importParsedPlays.length!==1?'s':''}`);
-  if (newUnlocks.length > 0) setTimeout(() => showUnlockBanner(newUnlocks[0]), 400);
-}
 
 // ═══════════════════════════════════════
 // INIT
