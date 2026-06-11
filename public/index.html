@@ -148,6 +148,49 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .empty-state{padding:40px 20px;text-align:center;color:var(--text-3);font-size:14px;line-height:1.6}
 .empty-icon{font-size:36px;margin-bottom:10px}
 
+/* Official badge */
+.official-badge{font-size:9px;font-weight:700;background:#e8f4ec;color:#3a8a4a;border:1px solid #b0d4b8;border-radius:4px;padding:1px 5px;text-transform:uppercase;letter-spacing:.4px;margin-left:4px;vertical-align:middle}
+
+/* Near-miss indicator */
+.near-miss .ach-desc{color:var(--blue)}
+.near-miss .ach-icon-wrap{border-color:var(--blue)!important;opacity:.6!important;filter:none!important}
+.near-miss-label{font-size:10px;font-weight:700;color:var(--blue);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+
+/* Score titles */
+.score-title-banner{background:linear-gradient(135deg,#fff8e0,#fff);border:1px solid #f0d870;border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.07);margin-bottom:0}
+.score-title-icon{font-size:28px}
+.score-title-text{flex:1}
+.score-title-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3)}
+.score-title-name{font-size:20px;font-weight:700;color:var(--text);margin-top:2px}
+.score-title-next{font-size:12px;color:var(--text-3);margin-top:2px}
+.score-title-table{padding:8px 0}
+.score-title-row{display:flex;align-items:center;justify-content:space-between;padding:6px 16px;font-size:13px;border-bottom:1px solid var(--border)}
+.score-title-row:last-child{border-bottom:none}
+.score-title-row.current{background:#fff8e0;font-weight:600}
+.score-title-pts{color:var(--text-3);font-family:'DM Mono',monospace;font-size:12px}
+
+/* Personal bests */
+.pb-table{padding:4px 0}
+.pb-row{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;font-size:13px;border-bottom:1px solid var(--border)}
+.pb-row:last-child{border-bottom:none}
+.pb-label{color:var(--text-2)}
+.pb-val{font-family:'DM Mono',monospace;font-weight:600;color:var(--text)}
+
+/* Sort/filter bar */
+.list-controls{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.sort-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:none;color:var(--text-3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap}
+.sort-chip.active{background:var(--text);border-color:var(--text);color:#fff}
+.filter-input{flex:1;padding:7px 12px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none}
+.filter-input:focus{border-color:var(--blue)}
+
+/* Import indicator */
+.import-indicator{font-size:11px;color:var(--text-3);padding:6px 16px;border-top:1px solid var(--border)}
+.import-indicator.stale{color:#e08030}
+
+/* Notes field */
+.notes-field{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;resize:none;min-height:60px;line-height:1.5}
+.notes-field:focus{border-color:var(--blue)}
+
 /* Dorfromantik campaign */
 
 
@@ -206,10 +249,18 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="content">
     <div class="card" id="settingsGameList"></div>
     <div class="card">
+      <div class="card-header"><span class="card-title">BGStats Import</span></div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:13px;color:var(--text-2);line-height:1.5">Import your full BGStats play history in one shot. In BGStats: Settings → Backup → Export.</div>
+        <button class="btn-log" style="background:var(--blue)" onclick="openImport(null)">⬇ Import Full BGStats History</button>
+        <div id="lastImportIndicator" class="import-indicator"></div>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-header"><span class="card-title">Data</span></div>
       <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
         <div style="font-size:13px;color:var(--text-2);line-height:1.5">Play history and achievements are stored locally in this browser.</div>
-        <div style="font-size:12px;color:var(--text-3)">Version 0.32</div>
+        <div style="font-size:12px;color:var(--text-3)">Version 0.51</div>
         <button class="btn-danger" onclick="resetAll()">Reset All Data</button>
       </div>
     </div>
@@ -407,7 +458,6 @@ const GAME_DEFINITIONS = [
         ]} },
     ]
   },
-
 
   // ── Spirit Island ─────────────────────────────────────────────
   {
@@ -635,62 +685,160 @@ const GAME_DEFINITIONS = [
     ]
   },
 
+  // ── Ganz Schön Clever ─────────────────────────────────────────
+  {
+    id: 'clever', name: 'Ganz Schön Clever', icon: '🎲', genre: 'Dice Game · Roll & Write',
+    color: '#d44020', bgColor: '#fff5f2', dimColor: '#e89070',
+    scoreTitles: [
+      { min: 0,   title: 'Try Harder!' },
+      { min: 140, title: 'Not Bad…' },
+      { min: 160, title: 'Pretty Good' },
+      { min: 180, title: 'Great Result!' },
+      { min: 200, title: "Hat's Off To You" },
+      { min: 230, title: 'Impressive!' },
+      { min: 260, title: 'What a Genius!' },
+      { min: 280, title: "You're So Clever!" },
+    ],
+    official: true,
+    logFields: [
+      { id: 'win',    label: 'Win?',        type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
+      { id: 'score',  label: 'Score',       type: 'number', min: 0, max: 350, default: 150 },
+      { id: 'mode',   label: 'Mode',        type: 'select', options: ['Solo','2 Player','3-4 Player'] },
+    ],
+    achievements: [
+      { id: 'cl_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Roll',
+        desc: 'Play your first game',
+        check: { type: 'min_plays', count: 1 } },
+      { id: 'cl_150',     icon: '🎯', tier: 'bronze', pts: 10, name: 'Above Average',
+        desc: 'Score 150+ points',
+        check: { type: 'field_gte', field: 'score', value: 150 } },
+      { id: 'cl_175',     icon: '🏅', tier: 'silver', pts: 20, name: 'Sharp Mind',
+        desc: 'Score 175+ points',
+        check: { type: 'field_gte', field: 'score', value: 175 } },
+      { id: 'cl_200',     icon: '✨', tier: 'silver', pts: 25, name: 'Quite Clever',
+        desc: 'Score 200+ points',
+        check: { type: 'field_gte', field: 'score', value: 200 } },
+      { id: 'cl_225',     icon: '🧠', tier: 'gold',   pts: 35, name: 'Very Clever',
+        desc: 'Score 225+ points',
+        check: { type: 'field_gte', field: 'score', value: 225 } },
+      { id: 'cl_250',     icon: '👑', tier: 'gold',   pts: 50, name: 'Extraordinarily Clever',
+        desc: 'Score 250+ points',
+        check: { type: 'field_gte', field: 'score', value: 250 } },
+      { id: 'cl_5wins',   icon: '🏆', tier: 'silver', pts: 20,  name: 'Regular',
+        desc: 'Win 5 solo games',
+        check: { type: 'min_wins', count: 5 } },
+      { id: 'cl_300',     icon: '🧮', tier: 'gold',   pts: 60,  name: 'Extraordinary',
+        desc: 'Score 300+ points',
+        check: { type: 'field_gte', field: 'score', value: 300 } },
+      { id: 'cl_streak3', icon: '🔥', tier: 'silver', pts: 25,  name: 'Dice Streak',
+        desc: 'Win 3 games in a row',
+        check: { type: 'win_streak_game', count: 3 } },
+      { id: 'cl_10plays', icon: '🎮', tier: 'silver', pts: 20, name: 'Dice Master',
+        desc: 'Play 10 games',
+        check: { type: 'min_plays', count: 10 } },
+      { id: 'cl_plat',    icon: '💎', tier: 'plat',   pts: 100, name: 'Ganz Schön Clever',
+        desc: 'Unlock all other achievements',
+        check: { type: 'all_achievements', ids: ['cl_first','cl_150','cl_175','cl_200','cl_225','cl_250','cl_10plays','cl_5wins','cl_300','cl_streak3'] } },
+    ]
+  },
+
 ];
 
 const META_DEFINITIONS = [
-  // ── Active achievements (fixed targets, stay achievable at any library size) ──
-  { id: 'm_first_win',   icon: '🌟', tier: 'bronze', pts: 10,  category: 'active',
-    name: 'First Blood',       desc: 'Win your first game of any kind',
+  // ── Active achievements ────────────────────────────────────
+  { id: 'm_first_win',    icon: '🌟', tier: 'bronze', pts: 10,  category: 'active',
+    name: 'First Blood',        desc: 'Win your first game of any kind',
     check: { type: 'total_wins_gte', count: 1 } },
-  { id: 'm_5diff',       icon: '🎲', tier: 'silver', pts: 30,  category: 'active',
-    name: 'Variety Pack',      desc: 'Play 5 different games',
+  { id: 'm_5diff',        icon: '🎲', tier: 'silver', pts: 30,  category: 'active',
+    name: 'Variety Pack',       desc: 'Play 5 different games',
     check: { type: 'games_played_gte', count: 5 } },
-  { id: 'm_streak3',     icon: '🔥', tier: 'silver', pts: 25,  category: 'active',
-    name: 'Hot Streak',        desc: 'Win 3 games in a row across any games',
+  { id: 'm_10diff',       icon: '📚', tier: 'gold',   pts: 40,  category: 'active',
+    name: 'Eclectic Gamer',     desc: 'Play 10 different games',
+    check: { type: 'games_played_gte', count: 10 } },
+  { id: 'm_streak3',      icon: '🔥', tier: 'silver', pts: 25,  category: 'active',
+    name: 'Hot Streak',         desc: 'Win 3 games in a row across any games',
     check: { type: 'win_streak', count: 3 } },
-  { id: 'm_streak5',     icon: '🔥', tier: 'gold',   pts: 50,  category: 'active',
-    name: 'On Fire',           desc: 'Win 5 games in a row across any games',
+  { id: 'm_streak5',      icon: '🔥', tier: 'gold',   pts: 50,  category: 'active',
+    name: 'On Fire',            desc: 'Win 5 games in a row across any games',
     check: { type: 'win_streak', count: 5 } },
-  { id: 'm_week',        icon: '🌈', tier: 'silver', pts: 35,  category: 'active',
-    name: 'Game Week',         desc: 'Play 5 different games within the same 7 days',
+  { id: 'm_streak10',     icon: '🌋', tier: 'gold',   pts: 80,  category: 'active',
+    name: 'Unstoppable',        desc: 'Win 10 games in a row across any games',
+    check: { type: 'win_streak', count: 10 } },
+  { id: 'm_week',         icon: '🌈', tier: 'silver', pts: 35,  category: 'active',
+    name: 'Game Week',          desc: 'Play 5 different games within the same 7 days',
     check: { type: 'n_different_games_in_week', count: 5 } },
-  { id: 'm_scifi',       icon: '🛸', tier: 'gold',   pts: 40,  category: 'active',
-    name: 'Sci-Fi Weekend',    desc: "Win Warp's Edge and Under Falling Skies on the same day",
+  { id: 'm_scifi',        icon: '🛸', tier: 'gold',   pts: 40,  category: 'active',
+    name: 'Sci-Fi Weekend',     desc: "Win Warp's Edge and Under Falling Skies on the same day",
     check: { type: 'cross_same_day', games: ['warps','skies'] } },
-  { id: 'm_100pts',      icon: '💯', tier: 'silver', pts: 25,  category: 'active',
-    name: 'Century Club',      desc: 'Earn 100 total achievement points',
+  { id: 'm_deduction',    icon: '🔍', tier: 'gold',   pts: 40,  category: 'active',
+    name: 'Master Deductionist', desc: 'Win Turing Machine and Search for Planet X on the same day',
+    check: { type: 'cross_same_day', games: ['turing','planetx'] } },
+  { id: 'm_island_day',   icon: '🏝️', tier: 'gold',   pts: 40,  category: 'active',
+    name: 'Island Day',         desc: 'Win Spirit Island and Friday on the same day',
+    check: { type: 'cross_same_day', games: ['spiritisland','friday'] } },
+  { id: 'm_solo_sunday',  icon: '☀️',  tier: 'gold',   pts: 50,  category: 'active',
+    name: 'Solo Sunday',        desc: 'Win 5 different games in a single day',
+    check: { type: 'n_different_games_won_same_day', count: 5 } },
+  { id: 'm_100pts',       icon: '💯', tier: 'silver', pts: 25,  category: 'active',
+    name: 'Century Club',       desc: 'Earn 100 total achievement points',
     check: { type: 'total_pts_gte', count: 100 } },
-  { id: 'm_500pts',      icon: '⭐', tier: 'gold',   pts: 50,  category: 'active',
-    name: 'Elite Collector',   desc: 'Earn 500 total achievement points',
+  { id: 'm_500pts',       icon: '⭐', tier: 'gold',   pts: 50,  category: 'active',
+    name: 'Elite Collector',    desc: 'Earn 500 total achievement points',
     check: { type: 'total_pts_gte', count: 500 } },
-  { id: 'm_1000pts',     icon: '🏅', tier: 'gold',   pts: 75,  category: 'active',
-    name: 'Grand Master',      desc: 'Earn 1000 total achievement points',
+  { id: 'm_1000pts',      icon: '🏅', tier: 'gold',   pts: 75,  category: 'active',
+    name: 'Grand Master',       desc: 'Earn 1000 total achievement points',
     check: { type: 'total_pts_gte', count: 1000 } },
-  { id: 'm_25plays',     icon: '📅', tier: 'silver', pts: 20,  category: 'active',
-    name: 'Dedicated',         desc: 'Log 25 total plays',
+  { id: 'm_1500pts',      icon: '👑', tier: 'gold',   pts: 100, category: 'active',
+    name: 'Legend',             desc: 'Earn 1500 total achievement points',
+    check: { type: 'total_pts_gte', count: 1500 } },
+  { id: 'm_25plays',      icon: '📅', tier: 'silver', pts: 20,  category: 'active',
+    name: 'Dedicated',          desc: 'Log 25 total plays',
     check: { type: 'total_plays_gte', count: 25 } },
-  { id: 'm_100plays',    icon: '📅', tier: 'gold',   pts: 40,  category: 'active',
-    name: 'Veteran',           desc: 'Log 100 total plays',
+  { id: 'm_100plays',     icon: '📅', tier: 'gold',   pts: 40,  category: 'active',
+    name: 'Veteran',            desc: 'Log 100 total plays',
     check: { type: 'total_plays_gte', count: 100 } },
+  { id: 'm_solo_all',     icon: '🧘', tier: 'gold',   pts: 50,  category: 'active',
+    name: 'Committed Solo Player', desc: 'Earn platinum in 3 different games',
+    check: { type: 'plat_count_gte', count: 3 } },
+  { id: 'm_dungeon_adv',  icon: '⚔️',  tier: 'gold',   pts: 45,  category: 'active',
+    name: 'Dungeon Adventurer',  desc: 'Win Spirit Island, One Deck Dungeon, and Frosthaven',
+    check: { type: 'all_games_won_subset', games: ['spiritisland','onedeck','frosthaven'] } },
+  { id: 'm_puzzle_master',icon: '🧩', tier: 'gold',   pts: 45,  category: 'active',
+    name: 'Puzzle Master',      desc: 'Win Turing Machine, Search for Planet X, and Cascadia',
+    check: { type: 'all_games_won_subset', games: ['turing','planetx','cascadia'] } },
+  { id: 'm_tiny_games',   icon: '🃏', tier: 'silver', pts: 30,  category: 'active',
+    name: 'Micro Gamer',        desc: 'Win Sprawlopolis, Orchard, and Palm Island',
+    check: { type: 'all_games_won_subset', games: ['sprawlopolis','orchard','palm'] } },
 
-  // ── Completionist achievements (library-wide prestige, scale with collection) ──
-  { id: 'mc_all_played', icon: '📚', tier: 'silver', pts: 50,  category: 'completionist',
-    name: 'Full Library',      desc: 'Log at least one play of every game in your library',
+  // ── Completionist achievements ─────────────────────────────
+  { id: 'mc_all_played',  icon: '📚', tier: 'silver', pts: 50,  category: 'completionist',
+    name: 'Full Library',       desc: 'Log at least one play of every game in your library',
     check: { type: 'all_games_played' } },
-  { id: 'mc_all_won',    icon: '🏆', tier: 'gold',   pts: 100, category: 'completionist',
-    name: 'Undefeated',        desc: 'Win at least once in every game in your library',
+  { id: 'mc_all_won',     icon: '🏆', tier: 'gold',   pts: 100, category: 'completionist',
+    name: 'Undefeated',         desc: 'Win at least once in every game in your library',
     check: { type: 'all_games_won' } },
-  { id: 'mc_all_plat',   icon: '💠', tier: 'plat',   pts: 200, category: 'completionist',
-    name: 'Platinum Master',   desc: 'Earn the platinum trophy in every game',
-    check: { type: 'all_plat_achievements' } },
-  { id: 'mc_10plat',     icon: '💎', tier: 'gold',   pts: 100, category: 'completionist',
-    name: 'Platinum Collector',desc: 'Earn platinum trophies in 5 games',
+  { id: 'mc_5plat',       icon: '💎', tier: 'gold',   pts: 100, category: 'completionist',
+    name: 'Platinum Collector', desc: 'Earn platinum in 5 games',
     check: { type: 'plat_count_gte', count: 5 } },
+  { id: 'mc_10plat',      icon: '💠', tier: 'gold',   pts: 150, category: 'completionist',
+    name: 'Platinum Hoarder',   desc: 'Earn platinum in 10 games',
+    check: { type: 'plat_count_gte', count: 10 } },
+  { id: 'mc_all_plat',    icon: '🌟', tier: 'plat',   pts: 200, category: 'completionist',
+    name: 'Platinum Master',    desc: 'Earn the platinum trophy in every game',
+    check: { type: 'all_plat_achievements' } },
+
+  // ── Seasonal achievements ──────────────────────────────────
+  { id: 'ms_month_all',   icon: '📆', tier: 'gold',   pts: 60,  category: 'seasonal',
+    name: 'Monthly Completionist', desc: 'Play every tracked game at least once in a calendar month',
+    check: { type: 'all_games_in_month' } },
+  { id: 'ms_week5',       icon: '🌈', tier: 'gold',   pts: 50,  category: 'seasonal',
+    name: 'Game Week',          desc: 'Play 5 different games in 7 days',
+    check: { type: 'n_different_games_in_week', count: 5 } },
+  { id: 'ms_3_wins_day',  icon: '☀️',  tier: 'gold',   pts: 45,  category: 'seasonal',
+    name: 'Big Day',            desc: 'Win 3 different games in a single day',
+    check: { type: 'n_different_games_won_same_day', count: 3 } },
 ];
-
-</script>
-
-<script>
+</script><script>
 // ═══════════════════════════════════════
 // CONDITION ENGINE
 // ═══════════════════════════════════════
@@ -791,6 +939,22 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       const now=Date.now(), week=7*24*60*60*1000;
       return GAME_DEFINITIONS.filter(g=>g.id!=='dorfromantik').every(g=>(allState[g.id]?.plays||[]).some(p=>now-p.ts<week));
     }
+
+    // n_different_games_won_same_day: won N+ different games on the same calendar date
+    case 'n_different_games_won_same_day': {
+      const dateGames = {};
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).filter(p=>p.win).forEach(p => {
+          if (!dateGames[p.date]) dateGames[p.date] = new Set();
+          dateGames[p.date].add(g.id);
+        });
+      });
+      return Object.values(dateGames).some(s => s.size >= check.count);
+    }
+
+    // all_games_won_subset: won at least once in each listed game
+    case 'all_games_won_subset':
+      return check.games.every(gid => (allState[gid]?.plays||[]).some(p=>p.win));
     case 'all_plat_achievements': {
       const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
       return platIds.every(id=>unlockedMap[id]);
@@ -811,6 +975,53 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       return everTrue.size >= check.count;
     }
 
+    // win_field_beats_by: won a game where field - compareField >= margin
+    case 'win_field_beats_by':
+      return wins.some(p =>
+        (Number(p[check.field]) - Number(p[check.compareField])) >= check.margin
+      );
+
+    // win_two_fields: won a game where field1===value1 AND field2===value2
+    case 'win_two_fields':
+      return wins.some(p =>
+        String(p[check.field1]) === String(check.value1) &&
+        String(p[check.field2]) === String(check.value2)
+      );
+
+    // win_two_fields_gte: won a game where field1>=value1 AND field2>=value2
+    case 'win_two_fields_gte':
+      return wins.some(p =>
+        Number(p[check.field1]) >= check.value1 &&
+        Number(p[check.field2]) >= check.value2
+      );
+
+    // all_games_in_month: all games played at least once in any calendar month
+    case 'all_games_in_month': {
+      const byMonth = {};
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).forEach(p => {
+          const month = p.date?.slice(0,7);
+          if (!month) return;
+          if (!byMonth[month]) byMonth[month] = new Set();
+          byMonth[month].add(g.id);
+        });
+      });
+      const total = GAME_DEFINITIONS.length;
+      return Object.values(byMonth).some(s => s.size >= total);
+    }
+
+    // win_streak_game: last N plays of THIS game are all wins
+    case 'win_streak_game': {
+      const last = plays.slice(-check.count);
+      return last.length >= check.count && last.every(p => p.win);
+    }
+
+    // count_wins_with_field_values: won N+ games where field is one of values
+    case 'count_wins_with_field_values': {
+      const matching = wins.filter(p => check.values.includes(String(p[check.field])));
+      return matching.length >= check.count;
+    }
+
     default:
       console.warn('Unknown condition type:', check.type);
       return false;
@@ -821,6 +1032,108 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
 // PROGRESS HINTS
 // Returns a human-readable progress string for locked achievements
 // ═══════════════════════════════════════
+function getProgressPct(check, gameState, allState) {
+  const plays = gameState?.plays || [];
+  const wins  = plays.filter(p => p.win);
+  switch(check.type) {
+    case 'min_plays':    return Math.min(1, plays.length / check.count);
+    case 'min_wins':     return Math.min(1, wins.length / check.count);
+    case 'win_all_values': {
+      const have = check.values.filter(v=>wins.some(p=>p[check.field]===v)).length;
+      return have / check.values.length;
+    }
+    case 'win_all_values_multifield': {
+      const have = check.values.filter(v=>wins.some(p=>check.fields.some(f=>p[f]===v))).length;
+      return have / check.values.length;
+    }
+    case 'unique_win_values': {
+      const vals = new Set(wins.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='None'));
+      return Math.min(1, vals.size / check.count);
+    }
+    case 'field_gte': {
+      const best = plays.reduce((m,p)=>Math.max(m,Number(p[check.field])||0),0);
+      return Math.min(1, best / check.value);
+    }
+    case 'win_field_gte': {
+      const best = wins.reduce((m,p)=>Math.max(m,Number(p[check.field])||0),0);
+      return Math.min(1, best / check.value);
+    }
+    case 'all_achievements': {
+      const have = check.ids.filter(id=>unlocked[id]).length;
+      return have / check.ids.length;
+    }
+    default: return 0;
+  }
+}
+
+function getCurrentScoreTitle(g) {
+  if (!g.scoreTitles) return null;
+  const plays = appState[g.id]?.plays || [];
+  if (!plays.length) return null;
+  const bestScore = Math.max(...plays.map(p => Number(p.score)||0));
+  let current = g.scoreTitles[0];
+  for (const t of g.scoreTitles) {
+    if (bestScore >= t.min) current = t;
+  }
+  const nextIdx = g.scoreTitles.indexOf(current) + 1;
+  const next = g.scoreTitles[nextIdx] || null;
+  return { title: current.title, bestScore, next };
+}
+
+function getPersonalBests(g) {
+  if (!g.personalBestField) return null;
+  const plays = appState[g.id]?.plays || [];
+  const wins  = plays.filter(p => p.win);
+  const field = g.personalBestField;
+  const byValue = {};
+  wins.forEach(p => {
+    const key = p[field];
+    if (!key || key === 'Unknown' || key === 'None') return;
+    const s = Number(p.score) || 0;
+    if (!byValue[key] || s > byValue[key]) byValue[key] = s;
+  });
+  return byValue;
+}
+
+function renderScoreTitles(g) {
+  const info = getCurrentScoreTitle(g);
+  if (!info) return '';
+  const tierHtml = g.scoreTitles.map(t => {
+    const isCurrent = t.title === info.title;
+    return `<div class="score-title-row ${isCurrent?'current':''}">
+      <span>${t.title}</span>
+      <span class="score-title-pts">${t.min}+ pts</span>
+    </div>`;
+  }).reverse().join('');
+  return `<div class="score-title-banner">
+    <div class="score-title-icon">🏅</div>
+    <div class="score-title-text">
+      <div class="score-title-label">Current Title</div>
+      <div class="score-title-name">${info.title}</div>
+      ${info.next ? `<div class="score-title-next">Next: ${info.next.title} at ${info.next.min} pts</div>` : '<div class="score-title-next">Maximum title reached!</div>'}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Score Rankings</span></div>
+    <div class="score-title-table">${tierHtml}</div>
+  </div>`;
+}
+
+function renderPersonalBests(g) {
+  const bests = getPersonalBests(g);
+  if (!bests || !Object.keys(bests).length) return '';
+  const field = g.personalBestField;
+  const label = g.logFields?.find(f=>f.id===field)?.label || field;
+  const rows = Object.entries(bests)
+    .sort((a,b) => b[1]-a[1])
+    .map(([k,v]) => `<div class="pb-row"><span class="pb-label">${k}</span><span class="pb-val">${v} pts</span></div>`)
+    .join('');
+  return `<div class="card">
+    <div class="card-header"><span class="card-title">Best Score by ${label}</span></div>
+    <div class="pb-table">${rows}</div>
+  </div>`;
+}
+
 function getProgress(check, gameState, allState) {
   const plays = gameState?.plays || [];
   const wins  = plays.filter(p => p.win);
@@ -872,6 +1185,15 @@ function getProgress(check, gameState, allState) {
       plays.forEach(p => check.fields.forEach(f => { if(p[f]===true) everTrue.add(f); }));
       return `${everTrue.size} / ${check.count}`;
     }
+    case 'win_field_beats_by': {
+      const best = wins.reduce((m,p) => Math.max(m, Number(p[check.field])-Number(p[check.compareField])), 0);
+      return `Best margin: ${best} / ${check.margin}`;
+    }
+    case 'win_two_fields': return null;
+    case 'win_two_fields_gte': {
+      const best1 = plays.reduce((m,p)=>Math.max(m,Number(p[check.field1])||0),0);
+      return `Best ${check.field1}: ${best1} / ${check.value1}`;
+    }
     default: return null;
   }
 }
@@ -879,16 +1201,16 @@ function getProgress(check, gameState, allState) {
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let appState = {}, unlocked = {}, newlyUnlocked = new Set();
+let appState = {}, unlocked = {}, newlyUnlocked = new Set(), unlockedDates = {}, sortMode = 'alpha', gameFilter = '';
 
 function loadState() {
   try {
-    const s = localStorage.getItem('solo_tracker_pub_v1');
-    if (s) { const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; }
+    const s = localStorage.getItem('solo_tracker_pub_v2');
+    if (s) { const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{}; }
   } catch(e){}
 }
 function saveState() {
-  localStorage.setItem('solo_tracker_pub_v1', JSON.stringify({state:appState,unlocked}));
+  localStorage.setItem('solo_tracker_pub_v2', JSON.stringify({state:appState,unlocked,unlockedDates}));
 }
 
 function calcTotalPts() {
@@ -912,7 +1234,7 @@ function checkAll() {
     const gs=appState[g.id]||{plays:[]};
     g.achievements.forEach(a=>{
       if(!unlocked[a.id] && evalCondition(a.check,gs,appState,unlocked,calcTotalPts)){
-        unlocked[a.id]=true; newlyUnlocked.add(a.id); newUnlocks.push({...a,source:g.name});
+        unlocked[a.id]=true; newlyUnlocked.add(a.id); unlockedDates[a.id]=new Date().toISOString().split('T')[0]; newUnlocks.push({...a,source:g.name});
       }
     });
   });
@@ -961,9 +1283,55 @@ function renderAll() {
   else if (currentNav==='settings') renderSettings();
 }
 
+function getSortedFilteredGames() {
+  let games = [...GAME_DEFINITIONS];
+  if (gameFilter) games = games.filter(g => g.name.toLowerCase().includes(gameFilter.toLowerCase()));
+  switch(sortMode) {
+    case 'recent': {
+      games.sort((a,b) => {
+        const ta = Math.max(...(appState[a.id]?.plays||[{ts:0}]).map(p=>p.ts));
+        const tb = Math.max(...(appState[b.id]?.plays||[{ts:0}]).map(p=>p.ts));
+        return tb - ta;
+      }); break;
+    }
+    case 'pts': {
+      games.sort((a,b) => calcGamePts(b.id).earned - calcGamePts(a.id).earned); break;
+    }
+    case 'winrate': {
+      games.sort((a,b) => {
+        const pa = appState[a.id]?.plays||[], pb = appState[b.id]?.plays||[];
+        const wa = pa.length ? pa.filter(p=>p.win).length/pa.length : 0;
+        const wb = pb.length ? pb.filter(p=>p.win).length/pb.length : 0;
+        return wb - wa;
+      }); break;
+    }
+    default: games.sort((a,b)=>a.name.localeCompare(b.name));
+  }
+  return games;
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  renderHome();
+}
+
+function setFilter(val) {
+  gameFilter = val;
+  renderHome();
+}
+
 function renderHome() {
-  const sorted = [...GAME_DEFINITIONS].sort((a,b)=>a.name.localeCompare(b.name));
-  document.getElementById('homeGameList').innerHTML = sorted.map(g => {
+  const sorted = getSortedFilteredGames();
+
+  // Sort/filter controls
+  const controlsHtml = `<div class="list-controls">
+    <input class="filter-input" type="text" placeholder="Search games…" value="${gameFilter}" oninput="setFilter(this.value)">
+    <button class="sort-chip ${sortMode==='alpha'?'active':''}" onclick="setSort('alpha')">A–Z</button>
+    <button class="sort-chip ${sortMode==='recent'?'active':''}" onclick="setSort('recent')">Recent</button>
+    <button class="sort-chip ${sortMode==='pts'?'active':''}" onclick="setSort('pts')">Points</button>
+  </div>`;
+
+  document.getElementById('homeGameList').innerHTML = controlsHtml + sorted.map(g => {
     const plays = appState[g.id]?.plays||[];
     const wins  = plays.filter(p=>p.win).length;
     const {earned,total} = calcGamePts(g.id);
@@ -1017,18 +1385,24 @@ function renderGameDetail(g) {
   const streak = calcStreak(g.id);
   const lastPlayed = plays.length ? new Date(Math.max(...plays.map(p=>p.ts))).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
 
+  const gs4ach = appState[g.id]||{plays:[]};
   const achHtml = (g.achievements||[]).map(a=>{
     const u=!!unlocked[a.id];
     const isNew = newlyUnlocked.has(a.id);
-    const progress = !u ? getProgress(a.check, appState[g.id]||{plays:[]}, appState) : null;
-    return `<div class="ach-item ${u?'unlocked':'locked'}${isNew?' new-unlock':''}">
+    const progress = !u ? getProgress(a.check, gs4ach, appState) : null;
+    const progressPct = progress ? getProgressPct(a.check, gs4ach, appState) : 0;
+    const isNearMiss = !u && progressPct >= 0.8 && progressPct < 1;
+    const unlockDate = u && unlockedDates[a.id] ? unlockedDates[a.id] : null;
+    return `<div class="ach-item ${u?'unlocked':'locked'}${isNew?' new-unlock':''}${isNearMiss?' near-miss':''}">
       <div class="ach-icon-wrap" style="${u?`background:${g.bgColor};border-color:${g.dimColor};`:''}">
         ${a.icon}
       </div>
       <div class="ach-body">
-        <div class="ach-name">${a.name}${isNew?` <span class="new-badge">NEW</span>`:''}</div>
+        <div class="ach-name">${a.name}${isNew?` <span class="new-badge">NEW</span>`:''}${a.official||g.official?` <span class="official-badge">Official</span>`:''}</div>
         <div class="ach-desc">${a.desc}</div>
-        ${progress?`<div class="ach-progress">${progress}</div>`:''}
+        ${progress?`<div class="ach-progress">${isNearMiss?'🔥 ':''} ${progress}</div>`:''}
+        ${isNearMiss?`<div class="near-miss-label">Almost there!</div>`:''}
+        ${unlockDate?`<div style="font-size:10px;color:var(--text-3);margin-top:2px">Unlocked ${unlockDate}</div>`:''}
       </div>
       <div class="ach-right">
         <div class="ach-pts">${a.pts} pts</div>
@@ -1039,19 +1413,21 @@ function renderGameDetail(g) {
 
   const histHtml = plays.length===0
     ? '<div class="empty-state"><div class="empty-icon">📋</div>No plays logged yet.</div>'
-    : [...plays].map((p,i)=>({p,i})).reverse().slice(0,15).map(({p,i})=>{
+    : [...plays].reverse().slice(0,15).map((p,ri)=>{
+        const realIdx = plays.length - 1 - ri;
         const d=new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
         const s=buildSummary(g,p);
-        const realIdx = plays.length - 1 - [...plays].reverse().slice(0,15).indexOf(p); // original index
-        return `<div class="play-item">
+        const noteStr = p.notes ? `<div style="font-size:11px;color:var(--text-3);padding:2px 0 4px 0;grid-column:1/-1">${p.notes}</div>` : '';
+        return `<div class="play-item" style="${p.notes?'flex-wrap:wrap':''}">
           <div class="play-dot" style="background:${p.win?'var(--green)':'var(--red)'}"></div>
           <span class="play-date">${d}</span>
           <span class="play-detail">${s||'—'}</span>
           <div class="play-actions">
             <span class="play-badge" style="color:${p.win?'var(--green)':'var(--red)'}">${p.win?'WIN':'LOSS'}</span>
-            <button class="play-action-btn" onclick="editPlay('${g.id}',${plays.indexOf(p)})" title="Edit">✎</button>
-            <button class="play-action-btn" onclick="deletePlayAt('${g.id}',${plays.indexOf(p)})" title="Delete">✕</button>
+            <button class="play-action-btn" onclick="editPlay('${g.id}',${realIdx})" title="Edit">✎</button>
+            <button class="play-action-btn" onclick="deletePlayAt('${g.id}',${realIdx})" title="Delete">✕</button>
           </div>
+          ${noteStr}
         </div>`;
       }).join('');
 
@@ -1074,9 +1450,11 @@ function renderGameDetail(g) {
     <div style="display:flex;gap:8px">
       <button class="btn-log" style="background:${g.color};flex:1" onclick="openModal('${g.id}')">+ Log Play</button>
     </div>
+    ${renderScoreTitles(g)}
+    ${renderPersonalBests(g)}
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Achievements</span>
+        <span class="card-title">Achievements${g.official ? ' <span class=\"official-badge\">Official</span>' : ''}</span>
         <span style="font-size:12px;color:var(--text-3)">${earned} / ${total} pts</span>
       </div>
       ${achHtml}
@@ -1099,18 +1477,24 @@ function renderMeta() {
   const active = META_DEFINITIONS.filter(a=>a.category==='active');
   const comp   = META_DEFINITIONS.filter(a=>a.category==='completionist');
 
+  const seasonal = META_DEFINITIONS.filter(a=>a.category==='seasonal');
+
   function achRow(a) {
     const u=!!unlocked[a.id];
     const isNew=newlyUnlocked.has(a.id);
     const progress = !u ? getProgress(a.check,null,appState) : null;
-    return `<div class="ach-item ${u?'unlocked':'locked'}${isNew?' new-unlock':''}">
+    const progressPct = !u ? getProgressPct(a.check,null,appState) : 0;
+    const isNearMiss = !u && progressPct >= 0.8;
+    const unlockDate = u && unlockedDates[a.id] ? unlockedDates[a.id] : null;
+    return `<div class="ach-item ${u?'unlocked':'locked'}${isNew?' new-unlock':''}${isNearMiss?' near-miss':''}">
       <div class="ach-icon-wrap" style="${u?'background:#fff8e0;border-color:#f0d870;':''}">
         ${a.icon}
       </div>
       <div class="ach-body">
         <div class="ach-name">${a.name}${isNew?` <span class="new-badge">NEW</span>`:''}</div>
         <div class="ach-desc">${a.desc}</div>
-        ${progress?`<div class="ach-progress">${progress}</div>`:''}
+        ${progress?`<div class="ach-progress">${isNearMiss?'🔥 ':''}${progress}</div>`:''}
+        ${unlockDate?`<div style="font-size:10px;color:var(--text-3);margin-top:2px">Unlocked ${unlockDate}</div>`:''}
       </div>
       <div class="ach-right">
         <div class="ach-pts">${a.pts} pts</div>
@@ -1126,6 +1510,11 @@ function renderMeta() {
       ${active.map(achRow).join('')}
     </div>
     <div class="card">
+      <div class="meta-category-header">Seasonal Achievements</div>
+      <div class="meta-category-desc">Time-based challenges — play patterns across days, weeks, and months.</div>
+      ${seasonal.map(achRow).join('')}
+    </div>
+    <div class="card">
       <div class="meta-category-header">Completionist Achievements</div>
       <div class="meta-category-desc">Library-wide prestige goals — scale with your collection.</div>
       ${comp.map(achRow).join('')}
@@ -1134,6 +1523,18 @@ function renderMeta() {
 
 function renderSettings() {
   const sorted = [...GAME_DEFINITIONS].sort((a,b)=>a.name.localeCompare(b.name));
+  const lastImport = appState._lastImport;
+  const importEl = document.getElementById('lastImportIndicator');
+  if (importEl) {
+    if (!lastImport) {
+      importEl.textContent = 'Never imported';
+      importEl.className = 'import-indicator stale';
+    } else {
+      const days = Math.floor((Date.now() - new Date(lastImport).getTime()) / 86400000);
+      importEl.textContent = `Last imported: ${lastImport}${days > 7 ? ' — consider re-importing' : ''}`;
+      importEl.className = `import-indicator${days > 7 ? ' stale' : ''}`;
+    }
+  }
   document.getElementById('settingsGameList').innerHTML = `
     <div class="card-header"><span class="card-title">Games (${GAME_DEFINITIONS.length})</span><span style="font-size:11px;color:var(--text-3)">A–Z</span></div>
     ${sorted.map(g=>`
@@ -1211,7 +1612,12 @@ function openModal(gid, playIdx=-1) {
     }
   });
 
-  document.getElementById('modalFields').innerHTML = dateHtml + html;
+  const existingNotes = existingPlay?.notes || '';
+  const notesHtml = `<div class="modal-field">
+    <label class="modal-label">Notes (optional)</label>
+    <textarea class="notes-field" id="modal_notes" rows="2" placeholder="Anything to remember…">${existingNotes}</textarea>
+  </div>`;
+  document.getElementById('modalFields').innerHTML = dateHtml + html + notesHtml;
   document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -1300,10 +1706,380 @@ function resetAll(){
     btn.style.background='#fff0ee';
     setTimeout(()=>{resetPending=false;btn.textContent='Reset All Data';btn.style.background='';},3000);
   } else {
-    localStorage.removeItem('solo_tracker_pub_v1');
+    localStorage.removeItem('solo_tracker_pub_v2');
     location.reload();
   }
 }
+
+// ═══════════════════════════════════════
+// BGSTATS IMPORT
+// Supports both .bgsplay (single play) and BGStatsExport.json (full backup)
+// ═══════════════════════════════════════
+
+// BGG ID -> tracker game ID mapping
+const BGG_TO_TRACKER = {
+  162886: 'spiritisland',   // Spirit Island
+  356123: 'turing',         // Turing Machine
+  306735: 'skies',          // Under Falling Skies
+  295947: 'cascadia',       // Cascadia
+  338960: 'sts',            // Slay the Spire: The Board Game
+  370591: 'dorfromantik',   // Dorfromantik: The Board Game
+  239464: 'palm',           // Palm Island
+  296237: 'warps',          // Warp's Edge
+  43570:  'friday',         // Friday
+  279537: 'planetx',        // The Search for Planet X
+  304783: 'hadrians',       // Hadrian's Wall
+  244522: 'clever',         // Ganz Schön Clever
+  179275: 'onedeck',        // One Deck Dungeon
+  251658: 'sprawlopolis',   // Sprawlopolis
+  245487: 'orchard',        // Orchard
+  295770: 'frosthaven',     // Frosthaven
+  258779: 'planetunknown',  // Planet Unknown
+  263918: 'cartographers',  // Cartographers
+  315767: 'cartographers',  // Cartographers Heroes
+  245654: 'railroad',        // Railroad Ink: Deep Blue
+  245655: 'railroad',        // Railroad Ink: Lush Green
+};
+
+// Spirit name normalization (BGStats uses Title Case)
+const SPIRIT_NORMALIZE = {
+  'vital strength of the earth':              'Vital Strength of the Earth',
+  "lightning's swift strike":                 "Lightning's Swift Strike",
+  "ocean's hungry grasp":                     "Ocean's Hungry Grasp",
+  'river surges in sunlight':                 'River Surges in Sunlight',
+  'shadows flicker like flame':               'Shadows Flicker Like Flame',
+  "stone's unyielding defiance":              "Stone's Unyielding Defiance",
+  "stone's unyielding defiance (aspect)":     "Stone's Unyielding Defiance (Aspect)",
+  'a spread of rampant green':                'A Spread of Rampant Green',
+  'bringer of dreams and nightmares':         'Bringer of Dreams and Nightmares',
+  'keeper of the forbidden wilds':            'Keeper of the Forbidden Wilds',
+  'sharp fangs behind the leaves':            'Sharp Fangs Behind the Leaves',
+  'devouring teeth lurk underfoot':           'Devouring Teeth Lurk Underfoot',
+  'eyes watch from the trees':                'Eyes Watch from the Trees',
+  'fathomless mud of the swamp':              'Fathomless Mud of the Swamp',
+  'fractured days split the sky':             'Fractured Days Split the Sky',
+  'grinning trickster stirs up trouble':      'Grinning Trickster Stirs Up Trouble',
+  'lure of the deep wilderness':              'Lure of the Deep Wilderness',
+  'many minds move as one':                   'Many Minds Move as One',
+  'shifting memory of ages':                  'Shifting Memory of Ages',
+  'shroud of silent mist':                    'Shroud of Silent Mist',
+  'starlight seeks its form':                 'Starlight Seeks Its Form',
+  'thunderspeaker':                           'Thunderspeaker',
+  'volcano looming high':                     'Volcano Looming High',
+  'dances up earthquakes':                    'Dances Up Earthquakes',
+  'finder of paths unseen':                   'Finder of Paths Unseen',
+  'hearth-vigil':                             'Hearth-Vigil',
+  'relentless gaze of the sun':               'Relentless Gaze of the Sun',
+  'wandering voice keens desolation':         'Wandering Voice Keens Desolation',
+  'breath of darkness down your spine':       'Breath of Darkness Down Your Spine',
+  'ember-eyed behemoth':                      'Ember-Eyed Behemoth',
+  'foreboding dreams of the first people':    'Foreboding Dreams of the First People',
+  "rot and renewal's grasping tide":          "Rot and Renewal's Grasping Tide",
+  'vengeance as a burning plague':            'Vengeance as a Burning Plague',
+  'wounded waters bleeding':                  'Wounded Waters Bleeding',
+};
+
+const ADVERSARY_NORMALIZE = {
+  'the kingdom of france':             'France',
+  'france':                            'France',
+  'england':                           'England',
+  'the kingdom of england':            'England',
+  'brandenburg-prussia':               'Brandenburg-Prussia',
+  'the kingdom of brandenburg-prussia':'Brandenburg-Prussia',
+  'sweden':                            'Sweden',
+  'the kingdom of sweden':             'Sweden',
+  'the habsburg miners':               'Habsburg Miners',
+  'habsburg miners':                   'Habsburg Miners',
+  'russia':                            'Russia',
+  'the russian tsardom':               'Russia',
+  'scotland':                          'Scotland',
+  'the kingdom of scotland':           'Scotland',
+  'austria-habsburg':                  'Austria-Habsburg',
+  'the habsburg monarchy':             'Austria-Habsburg',
+};
+
+function normalizeSpirit(s) {
+  if (!s) return 'None';
+  return SPIRIT_NORMALIZE[s.toLowerCase()] || s;
+}
+function normalizeAdversary(s) {
+  if (!s || s === 'Spirit Progression' || s === 'No Blight Card' || s === 'Blight Card') return 'None';
+  return ADVERSARY_NORMALIZE[s.toLowerCase()] || s;
+}
+
+// Parse the ／-separated board field, returning {level, adversary, scenario, extra:[]}
+function parseBoard(board) {
+  const parts = (board||'').split('\uff0f').map(s => s.trim()).filter(Boolean);
+  let level = 0, adversary = 'None', actsCleared = null, ascension = 0;
+  const extras = [];
+
+  for (const part of parts) {
+    const lvlMatch = part.match(/^Level\s*(\d+)$/i);
+    const actMatch = part.match(/^Act\s*(I{1,3}|IV|\d)/i);
+    const ascMatch = part.match(/^Ascension\s*(\d+)$/i);
+    if (lvlMatch) { level = parseInt(lvlMatch[1]); continue; }
+    if (actMatch) {
+      const actNum = {'i':1,'ii':2,'iii':3,'iv':4,'1':1,'2':2,'3':3,'4':4};
+      actsCleared = actNum[actMatch[1].toLowerCase()] || 1;
+      // boss name may follow colon
+      continue;
+    }
+    if (ascMatch) { ascension = parseInt(ascMatch[1]); continue; }
+    const norm = normalizeAdversary(part);
+    if (norm !== 'None') { adversary = norm; continue; }
+    extras.push(part);
+  }
+  return { level, adversary, actsCleared, ascension, extras };
+}
+
+// Parse a single BGStats play object into our format
+function parseSinglePlay(play, gameId, playerUuid, games) {
+  const ps = play.playerScores?.[0] || {};
+  const win   = !!ps.winner;
+  const score = parseFloat(ps.score) || 0;
+  const role  = (ps.role || '').trim();
+  const playDate = (play.playDate || '').slice(0, 10);
+  const ts = new Date(playDate + 'T12:00:00').getTime();
+  if (!playDate) return null;
+
+  // Parse scoresheet
+  let ssData = {};
+  try {
+    const ss = JSON.parse(play.scoresheet || '{}');
+    for (const group of ss.groups || []) {
+      for (const row of group.rows || []) {
+        const val = row.scores?.[playerUuid];
+        if (val !== undefined && val !== '') ssData[row.templateId] = val;
+      }
+    }
+  } catch(e) {}
+
+  const board = parseBoard(play.board);
+  const base = { date: playDate, ts, win, score };
+
+  switch (gameId) {
+    case 'spiritisland': {
+      const roles = role.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
+      const s1 = normalizeSpirit(roles[0]);
+      const s2 = normalizeSpirit(roles[1]) || 'None';
+      const dahan   = parseInt(ssData.livingdahan || 0) || 0;
+      const blight  = parseInt(ssData.blight || 0) || 0;
+      const invaders = parseInt(ssData.victoryinvadercards || ssData.defeatinvadercards || 0) || 0;
+      const diff    = parseInt(ssData.defeatdifficulty || ssData.victorydifficulty || 0) || 0;
+      return { ...base, spirit1: s1, spirit2: s2,
+        adversary: board.adversary, level: board.level,
+        difficulty: diff, invaders, dahan, blight, noBlight: blight === 0 };
+    }
+    case 'turing': {
+      // board field has difficulty: 'Easy', 'Medium', 'Hard', or puzzle number
+      const rawBoard = (play.board || '').trim();
+      const diffMap = { 'easy':'Easy', 'medium':'Normal', 'hard':'Hard', 'extreme':'Extreme' };
+      const diff = diffMap[rawBoard.toLowerCase()] || (rawBoard.match(/^\d+$/) ? 'Normal' : 'Normal');
+      return { ...base, difficulty: diff, rounds: 0, queries: 0, noMistake: false };
+    }
+    case 'skies': {
+      const city = normalizeCity(role);
+      return { ...base, city, hardSky: false, roundsLeft: 0, shipsDestroyed: 0 };
+    }
+    case 'cascadia': {
+      return { ...base, natureTokens: 0, maxWildlifeCount: 0, wildlifeTypes: 5,
+        scoreBears:0, scoreElk:0, scoreSalmon:0, scoreHawks:0, scoreFoxes:0,
+        bestHabitatScore:0, habitatsOver5:0, habitatMajorities:0, keystonesCompleted:0,
+        hadBears:true, hadElk:true, hadSalmon:true, hadHawks:true, hadFoxes:true };
+    }
+    case 'sts': {
+      const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
+      const actStr = board.actsCleared;
+      const actsMap = {1:'Act 1', 2:'Act 2', 3:'Act 3', 4:'Act 4'};
+      return { ...base,
+        character:  chars[0] || 'Ironclad',
+        character2: chars[1] || 'None',
+        character3: chars[2] || 'None',
+        character4: chars[3] || 'None',
+        actsCleared: actsMap[actStr] || (win ? 'Act 3' : 'Act 2'),
+        ascension: board.ascension,
+        playerCount: 1,
+        deckSize: 10, relicCount: 0, hpFull: false, noRares: false,
+        noRelics: false, dailyClimb: false, bossT1: false,
+        hitStrength: false, hitPoison: false, hitBlock: false,
+        play7shivs: false, have7powers: false, killedTransient: false, infiniteCombo: false,
+      };
+    }
+    case 'dorfromantik': {
+      return { ...base,
+        cs_castle:false, cs_clouds:false, cs_farm:false, cs_forest_tunnel:false,
+        cs_grain_tunnel:false, cs_shepherdess:false, cs_signalman:false,
+        cs_village_tunnel:false, cs_flag_meadow:false,
+        ba_balloon:false, ba_construction:false, ba_farm:false, ba_forest_cabin:false,
+        ba_golden_heart:false, ba_harbor:false, ba_harvest:false, ba_hearts_desire:false,
+        ba_locomotive:false, ba_road:false, ba_red_hearts:false, ba_ship:false,
+        ba_train:false, ba_wildflower:false,
+      };
+    }
+    case 'warps': {
+      return { ...base, ship: role || 'Any / Unknown',
+        mothership: board.extras[0] || 'Any / Unknown',
+        warpsUsed: 3, noLoss: false };
+    }
+    case 'palm': {
+      return { ...base, round2: false, noWaste: false };
+    }
+    case 'friday': {
+      // board = 'Level 1'/'Level 2'/'Level 3'
+      const lvlMap = {'level 1':'Level 1','level 2':'Level 2','level 3':'Level 3','level 4':'Level 4'};
+      const diff = lvlMap[(play.board||'').toLowerCase()] || 'Level 1';
+      // score string may be '36+50+30-5-24' - evaluate it
+      let parsedScore = 0;
+      try { parsedScore = eval((ps.score||'0').replace(/--/g,'+')) || 0; } catch(e) {}
+      return { ...base, difficulty: diff, score: parsedScore, lifeLeft: 0 };
+    }
+    case 'planetx': {
+      const modeMap = {'standard':'Standard','expert':'Expert'};
+      const mode = modeMap[(play.board||'').toLowerCase()] || 'Standard';
+      // role = 'Beginner - 8 Clues', '4 Clues', 'Genius - 0 Clues'
+      const role = (ps.role||'').toLowerCase();
+      let clues = '4 Clues';
+      if (role.includes('8') || role.includes('beginner')) clues = '8 Clues (Beginner)';
+      else if (role.includes('0') || role.includes('genius')) clues = '0 Clues (Genius)';
+      // comments often has 'Bot X points'
+      const botMatch = (play.comments||'').match(/bot\s+(\d+)/i);
+      const botScore = botMatch ? parseInt(botMatch[1]) : 0;
+      return { ...base, mode, clues, score: parseFloat(ps.score)||0, botScore };
+    }
+    case 'hadrians': {
+      const boardParts = (play.board||'').split('／').map(s=>s.trim());
+      const diffMap = {'easy':'Easy','medium':'Medium','hard':'Hard'};
+      let diff = 'Easy', fort = 'Any';
+      for (const part of boardParts) {
+        if (diffMap[part.toLowerCase()]) diff = diffMap[part.toLowerCase()];
+        else if (part.toLowerCase().startsWith('fort')) fort = part;
+        else if (part.toLowerCase().startsWith('solo challenge')) fort = part;
+      }
+      return { ...base, difficulty: diff, fort, score: parseFloat(ps.score)||0 };
+    }
+    case 'clever': {
+      return { ...base, score: parseFloat(ps.score)||0, mode: 'Solo' };
+    }
+    case 'onedeck': {
+      const boardParts = (play.board||'').split('／').map(s=>s.trim());
+      const dungeons = ["Dragon's Cave","Hydra's Reef","Yeti's Peak","Dragonshard Mines"];
+      const difficulties = ['Novice','Standard','Veteran','Heroic'];
+      // BGStats stores Dragon not Dragon's Cave
+      const dungeonMap = {
+        'dragon':"Dragon's Cave", "dragon's cave":"Dragon's Cave",
+        "hydra's reef":"Hydra's Reef", 'hydra':"Hydra's Reef",
+        "yeti's peak":"Yeti's Peak", 'yeti':"Yeti's Peak",
+        'dragonshard mines':'Dragonshard Mines',
+      };
+      let dungeon = "Dragon's Cave", difficulty = 'Novice';
+      for (const part of boardParts) {
+        const dl = dungeonMap[part.toLowerCase()];
+        if (dl) dungeon = dl;
+        if (difficulties.map(d=>d.toLowerCase()).includes(part.toLowerCase()))
+          difficulty = difficulties.find(d=>d.toLowerCase()===part.toLowerCase());
+      }
+      const roles = (ps.role||'').split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
+      return { ...base, character: roles[0]||'Archer', character2: roles[1]||'None',
+        dungeon, difficulty };
+    }
+    case 'sprawlopolis': {
+      // board = '01 The Outskirts／02 Bloom Boom／03 Go Green'
+      // extract target score by summing card numbers
+      const boardParts = (play.board||'').split('／').map(s=>s.trim());
+      const targetScore = boardParts.reduce((sum,p) => {
+        const m = p.match(/^(\d+)/);
+        return sum + (m ? parseInt(m[1]) : 0);
+      }, 0);
+      // score string may be complex like '2+3+3+4-14+3+14+14'
+      let parsedScore = 0;
+      try { parsedScore = eval((ps.score||'0').replace(/--/g,'+')) || 0; } catch(e) {}
+      return { ...base, score: parsedScore, targetScore: targetScore || 9 };
+    }
+    case 'orchard': {
+      return { ...base, score: parseFloat(ps.score)||0, perfect: false };
+    }
+    case 'frosthaven': {
+      // board = 'Difficulty 1／3 - Algox Offensive' or '1／Difficulty 1'
+      const boardParts = (play.board||'').split('／').map(s=>s.trim());
+      let difficulty = 1, scenario = 1;
+      for (const part of boardParts) {
+        const diffM = part.match(/difficulty\s*(\d+)/i);
+        if (diffM) { difficulty = parseInt(diffM[1]); continue; }
+        const scenM = part.match(/^(\d+)/);
+        if (scenM) scenario = parseInt(scenM[1]);
+      }
+      // role = 'Drifter／Deathwalker'
+      const chars = (ps.role||'').split('／').map(s=>s.trim()).filter(Boolean);
+      return { ...base, character1: chars[0]||'Drifter', character2: chars[1]||'None',
+        scenario, difficulty };
+    }
+    case 'planetunknown': {
+      return { ...base, targetScore: 60, asymmetric: false, metObj: false, noMeteorites: false,
+        planet: 'Unknown', corporation: 'Unknown' };
+    }
+    case 'cartographers': {
+      return { ...base, season: 'All Seasons', coins: 0, monsters: 0, allEdicts: false };
+    }
+    case 'railroad': {
+      return { ...base, exits: 0, longest: 0, centre: 0, errors: 0, edition: 'Deep Blue' };
+    }
+    default:
+      return base;
+  }
+}
+
+function normalizeCity(role) {
+  const cities = ['London','New York','Tokyo','Berlin','Sydney','Moscow','Rio de Janeiro','Cairo'];
+  const r = (role||'').toLowerCase();
+  return cities.find(c => c.toLowerCase() === r) || role || 'Any / Unknown';
+}
+
+// Parse full BGStatsExport.json
+function parseFullExport(jsonText) {
+  let data;
+  try { data = JSON.parse(jsonText); }
+  catch(e) { return { error: 'Invalid JSON — make sure you pasted the full file.' }; }
+
+  // Detect format
+  const isSinglePlay = Array.isArray(data.plays) && data.games && !data.challenges;
+  const isFullExport = Array.isArray(data.plays) && Array.isArray(data.challenges);
+
+  if (!data.plays) return { error: 'No plays found in this file.' };
+
+  const meId     = data.userInfo?.meRefId;
+  const players  = data.players || [];
+  const mePlayer = players.find(p => p.id === meId) || players[0];
+  const meUuid   = mePlayer?.uuid;
+
+  const gamesById  = {};
+  (data.games||[]).forEach(g => gamesById[g.id] = g);
+
+  // Build results per tracker game
+  const results = {};
+
+  for (const play of data.plays) {
+    if (play.ignored) continue;
+    const bgGame = gamesById[play.gameRefId];
+    if (!bgGame) continue;
+    const trackerId = BGG_TO_TRACKER[bgGame.bggId];
+    if (!trackerId) continue;
+
+    const parsed = parseSinglePlay(play, trackerId, meUuid, gamesById);
+    if (!parsed) continue;
+    if (!results[trackerId]) results[trackerId] = [];
+    results[trackerId].push(parsed);
+  }
+
+  // Sort each game's plays by date
+  for (const gid of Object.keys(results)) {
+    results[gid].sort((a,b) => a.ts - b.ts);
+  }
+
+  const totalPlays = Object.values(results).reduce((s,a) => s+a.length, 0);
+  return { results, playerName: mePlayer?.name || 'Unknown', totalPlays };
+}
+
+// ── Import UI state ──
 
 // ═══════════════════════════════════════
 // INIT
