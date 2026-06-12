@@ -402,7 +402,8 @@ function removeField(id, e) {
 }
 function updateField(id, key, value) {
   const f = fields.find(f => f._id === id); if (f) f[key] = value;
-  if (key === 'id' || key === 'type') { renderFields(); updatePersonalBestOptions(); }
+  if (key === 'type') { renderFields(); updatePersonalBestOptions(); }
+  else if (key === 'id') { updatePersonalBestOptions(); renderAchievements(); }
   generate();
 }
 function renderFields() {
