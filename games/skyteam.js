@@ -14,6 +14,10 @@ window.GAME_DEFINITIONS.push(
     { id: 'coffeeCups', label: 'Landed with three cups of coffee?', type: 'toggle' },
   ],
   achievements: [
+    { id: 'sky_caffeinated', icon: '☕', tier: 'bronze', pts: 10,
+      name: 'Fully Caffeinated',
+      desc: 'Land at an airport with three cups of coffee',
+      check: { type: 'win_with_toggle', field: 'coffeeCups' } },
     { id: 'sky_base_green', icon: '🏆', tier: 'bronze', pts: 10,
       name: 'Student Pilot',
       desc: 'Land at all the base green airports',
@@ -50,10 +54,7 @@ window.GAME_DEFINITIONS.push(
       name: 'Legend of the Skies',
       desc: 'Land at Every Airport',
       check: { type: 'win_all_values', field: 'scenario', values: ['YUL (Green)', 'LHR (Green)', 'HND (Green)', 'OSL (Green)', 'ATL (Green)', 'PRG (Green)', 'CTP (Green ✈)', 'SYD (Green ✈)', 'PEK (Green ✈)', 'LHR (Yellow)', 'TGU (Yellow)', 'GIG (Yellow)', 'KEF (Yellow)', 'PRG (Yellow)', 'KUL (Yellow)', 'ATL (Yellow)', 'KBP (Yellow ✈)', 'TER (Yellow ✈)', 'SXM (Yellow ✈)', 'DUS (Yellow ✈)', 'MAD (Yellow ✈)', 'WAW (Yellow ✈)', 'PBH (Red)', 'HND (Red)', 'GIG (Red)', 'OSL (Red)', 'TGU (Red)', 'SXM (Red ✈)', 'SYD (Red ✈)', 'WAW (Red ✈)', 'DUS (Red ✈)', 'NZIR (Red ✈)', 'PEK (Red ✈)', 'KEF (Black)', 'KUL (Black)', 'PBH (Black)', 'CPT (Black ✈)', 'MAD (Black ✈)', 'TER (Black ✈)', 'KBP (Black ✈)', 'NZIR (Black ✈)'] } },
-    { id: 'sky_caffeinated', icon: '☕', tier: 'bronze', pts: 10,
-      name: 'Fully Caffeinated',
-      desc: 'Land at an airport with three cups of coffee',
-      check: { type: 'win_with_toggle', field: 'coffeeCups' } },
+
   ]
 }
 );
