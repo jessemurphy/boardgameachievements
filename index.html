@@ -244,6 +244,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <script src="games/cartographers.js"></script>
 <script src="games/railroad.js"></script>
 <script src="games/meta.js"></script>
+<script src="games/skyteam.js"></script>
 </head>
 <body>
 <div class="topbar" id="topbar">
@@ -1476,6 +1477,9 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     }
     case 'dragonsdown': {
       return { ...base, avidReader: false };
+    }
+    case 'skyteam': {
+      return { ...base };
     }
     case 'sts': {
       const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
