@@ -1055,7 +1055,8 @@ function renderGameDetail(g) {
     } else if (g.id === 'sts') {
       if (p.character) parts.push(p.character);
       if (p.ascension) parts.push('A' + p.ascension);
-      if (p.score) parts.push(p.score + ' pts');
+      if (p.actsCleared) parts.push(p.actsCleared);
+      if (p.boss && p.boss !== 'None') parts.push(p.boss);
     } else if (g.id === 'warps') {
       if (p.ship && p.ship !== 'Any / Unknown') parts.push(p.ship);
       if (p.warpsUsed !== undefined) parts.push(p.warpsUsed + ' warps');
@@ -1555,7 +1556,9 @@ function parseBoard(board) {
     if (actMatch) {
       const actNum = {'i':1,'ii':2,'iii':3,'iv':4,'1':1,'2':2,'3':3,'4':4};
       actsCleared = actNum[actMatch[1].toLowerCase()] || 1;
-      // boss name may follow colon
+      // boss name follows colon: "Act II: The Collector"
+      const colonIdx = part.indexOf(':');
+      if (colonIdx >= 0) extras.push(part.slice(colonIdx + 1).trim());
       continue;
     }
     if (ascMatch) { ascension = parseInt(ascMatch[1]); continue; }
@@ -1643,13 +1646,16 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
       const actStr = board.actsCleared;
       const actsMap = {1:'Act 1', 2:'Act 2', 3:'Act 3', 4:'Act 4'};
+      const actsCleared = actsMap[actStr] || (win ? 'Act 3' : 'Act 1');
+      // Boss name captured by parseBoard in extras
+      const boss = board.extras?.[0] || 'None';
       return { ...base,
         character:  chars[0] || 'Ironclad',
         character2: chars[1] || 'None',
         character3: chars[2] || 'None',
         character4: chars[3] || 'None',
-        actsCleared: actsMap[actStr] || (win ? 'Act 3' : 'Act 2'),
-        ascension: board.ascension,
+        actsCleared, ascension: board.ascension,
+        boss,
         playerCount: 1,
         deckSize: 10, relicCount: 0, hpFull: false, noRares: false,
         noRelics: false, dailyClimb: false, bossT1: false,
