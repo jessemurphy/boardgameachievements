@@ -1065,6 +1065,8 @@ function renderGameDetail(g) {
     } else if (g.id === 'planetx') {
       if (p.score) parts.push(p.score + ' pts');
       if (p.botScore) parts.push('Bot: ' + p.botScore);
+      if (p.clues) parts.push(p.clues);
+      if (p.foundPlanetX === false) parts.push('No Planet X');
     } else if (g.id === 'frosthaven') {
       if (p.scenario) parts.push(p.scenario);
       if (p.score) parts.push(p.score + ' pts');
@@ -1568,16 +1570,13 @@ function parseBoard(board) {
 function parseSinglePlay(play, gameId, playerUuid, games) {
   // Always identify as player id:1 (account owner)
   const myScore = play.playerScores?.find(ps => {
-    // Match by UUID in metaData scoreUuid field
+    // Primary: match by UUID in scoreUuid metaData
     if (playerUuid && ps.metaData) {
-      try {
-        const md = JSON.parse(ps.metaData);
-        if (md.scoreUuid === playerUuid) return true;
-      } catch(e) {}
+      try { if (JSON.parse(ps.metaData).scoreUuid === playerUuid) return true; } catch(e) {}
     }
-    // Fallback: playerRefId === 1 (account owner)
-    return ps.playerRefId === 1;
-  }) || play.playerScores?.[0];
+    // Secondary: skip NPC/bot players (isNpc flag in player list)
+    return false;
+  }) || play.playerScores?.find(ps => ps.playerRefId !== 1) || play.playerScores?.[0];
 
   const ps = myScore || {};
   const win   = !!ps.winner;
@@ -1689,15 +1688,50 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     case 'planetx': {
       const modeMap = {'standard':'Standard','expert':'Expert'};
       const mode = modeMap[(play.board||'').toLowerCase()] || 'Standard';
-      // role = 'Beginner - 8 Clues', '4 Clues', 'Genius - 0 Clues'
       const role = (ps.role||'').toLowerCase();
       let clues = '4 Clues';
       if (role.includes('8') || role.includes('beginner')) clues = '8 Clues (Beginner)';
       else if (role.includes('0') || role.includes('genius')) clues = '0 Clues (Genius)';
-      // comments often has 'Bot X points'
-      const botMatch = (play.comments||'').match(/bot\s+(\d+)/i);
-      const botScore = botMatch ? parseInt(botMatch[1]) : 0;
-      return { ...base, mode, clues, score: parseFloat(ps.score)||0, botScore };
+
+      // Get bot/opponent score — find the non-me player score
+      const botScore_entry = play.playerScores?.find(p => {
+        if (playerUuid && p.metaData) {
+          try { if (JSON.parse(p.metaData).scoreUuid === playerUuid) return false; } catch(e) {}
+        }
+        return true;
+      });
+      const botScore = parseFloat(botScore_entry?.score) || 0;
+
+      // Parse full scoresheet by UUID
+      const ss = ssData; // already parsed above
+      const myUuidSs = playerUuid;
+      function ssPts(key) {
+        // Find the row with this templateId across all groups
+        try {
+          const parsed = JSON.parse(play.scoresheet || '{}');
+          for (const group of parsed.groups || []) {
+            for (const row of group.rows || []) {
+              if (row.templateId === key && row.scores?.[myUuidSs] !== undefined) {
+                return parseInt(row.scores[myUuidSs]) || 0;
+              }
+            }
+          }
+        } catch(e) {}
+        return 0;
+      }
+
+      const leaderBonuses  = ssPts('leaderbonuses');
+      const asteroids      = ssPts('asteroids');
+      const comets         = ssPts('comets');
+      const gasClouds      = ssPts('gasclouds');
+      const dwarfPlanets   = ssPts('dwarfplanets');
+      const locatedPlanetX = ssPts('locatingplanetx');
+      const foundPlanetX   = locatedPlanetX > 0;
+
+      return { ...base, mode, clues,
+        score: parseFloat(ps.score)||0, botScore,
+        leaderBonuses, asteroids, comets, gasClouds, dwarfPlanets,
+        locatedPlanetX, foundPlanetX };
     }
     case 'hadrians': {
       const boardParts = (play.board||'').split('／').map(s=>s.trim());
@@ -1800,7 +1834,11 @@ function parseFullExport(jsonText) {
   if (!data.plays) return { error: 'No plays found in this file.' };
 
   const players  = data.players || [];
-  const mePlayer = players.find(p => p.id === 1) || players[0];
+  // Identify self: use meRefId from userInfo, fallback to non-NPC player with lowest id
+  const meRefId  = data.userInfo?.meRefId;
+  const mePlayer = (meRefId ? players.find(p => p.id === meRefId) : null)
+    || players.find(p => { try { return !JSON.parse(p.metaData||'{}').isNpc; } catch(e) { return true; } })
+    || players[0];
   const meUuid   = mePlayer?.uuid;
 
   const gamesById  = {};
@@ -1895,7 +1933,10 @@ function previewImport() {
       return;
     }
     if (!data.plays) { document.getElementById('importPreview').textContent = '⚠ No plays found.'; return; }
-    const mePlayer = (data.players||[]).find(p=>p.id===1) || (data.players||[])[0];
+    const meRefId2 = data.userInfo?.meRefId;
+    const mePlayer = (meRefId2 ? (data.players||[]).find(p=>p.id===meRefId2) : null)
+      || (data.players||[]).find(p => { try { return !JSON.parse(p.metaData||'{}').isNpc; } catch(e) { return true; } })
+      || (data.players||[])[0];
     const meUuid = mePlayer?.uuid;
     const plays = data.plays.map(p => parseSinglePlay(p, importGameId, meUuid, {})).filter(Boolean);
     importParsedPlays = plays.map(p => ({ gid: importGameId, play: p }));
