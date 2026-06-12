@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Config Generator</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --border: #e2e2de;
+    --text: #1a1a1a;
+    --text-2: #6b6b6b;
+    --text-3: #a0a0a0;
+    --green: #3a8a4a;
+    --blue: #2563eb;
+    --red: #dc2626;
+    --amber: #d97706;
+    --purple: #7c3aed;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header p { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 0; min-height: calc(100vh - 57px); }
+  .form-panel { padding: 24px; overflow-y: auto; border-right: 1px solid var(--border); }
+  .output-panel { padding: 24px; background: #1e1e1e; color: #d4d4d4; overflow-y: auto; position: sticky; top: 57px; height: calc(100vh - 57px); }
+
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .section-header {
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-body { padding: 16px; }
+
+  .field-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .field-row:last-child { margin-bottom: 0; }
+
+  label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+  input[type="color"] { padding: 2px 4px; height: 34px; cursor: pointer; }
+  input[type="checkbox"] { width: auto; margin-right: 6px; }
+
+  .fg1 { flex: 1; min-width: 0; }
+  .fg2 { flex: 2; min-width: 0; }
+  .fg3 { flex: 3; min-width: 0; }
+
+  .btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-red { background: #fee2e2; color: var(--red); }
+  .btn-ghost { background: var(--bg); color: var(--text-2); border: 1px solid var(--border); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  .repeater-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--bg);
+    position: relative;
+  }
+  .repeater-item:last-child { margin-bottom: 0; }
+  .repeater-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .repeater-label { font-size: 12px; font-weight: 700; color: var(--text-2); }
+
+  .tier-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tier-bronze { background: #fef3c7; color: #92400e; }
+  .tier-silver { background: #f1f5f9; color: #475569; }
+  .tier-gold { background: #fef9c3; color: #854d0e; }
+  .tier-plat { background: #ede9fe; color: #5b21b6; }
+
+  .condition-params { margin-top: 8px; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--border); }
+
+  /* Output panel */
+  .output-panel h2 { font-size: 13px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .output-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .output-tab {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #374151;
+    color: #9ca3af;
+    background: transparent;
+    transition: all 0.15s;
+  }
+  .output-tab.active { background: var(--blue); color: white; border-color: var(--blue); }
+  .output-tab:hover:not(.active) { border-color: #6b7280; color: #d1d5db; }
+
+  .code-block {
+    background: #111827;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'DM Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+    color: #d4d4d4;
+    min-height: 200px;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+  }
+  .copy-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .copy-btn.copied { background: var(--green); }
+
+  .hint { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+  .empty-state { text-align: center; padding: 20px; color: var(--text-3); font-size: 13px; }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .output-panel { position: static; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎲 Game Config Generator</h1>
+    <p>Build a game definition file for the Solo Achievement Tracker</p>
+  </div>
+</header>
+
+<div class="layout">
+<!-- ── FORM PANEL ── -->
+<div class="form-panel">
+
+  <!-- Game Metadata -->
+  <div class="section">
+    <div class="section-header">Game Info</div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="fg3">
+          <label>Game Name</label>
+          <input type="text" id="gameName" placeholder="e.g. Cascadia" oninput="generate()">
+        </div>
+        <div class="fg1">
+          <label>Icon (emoji)</label>
+          <input type="text" id="gameIcon" placeholder="🎲" maxlength="4" oninput="generate()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="fg2">
+          <label>Game ID (no spaces)</label>
+          <input type="text" id="gameId" placeholder="e.g. cascadia" oninput="generate()">
+          <div class="hint">Lowercase, no spaces. Used as localStorage key.</div>
+        </div>
+        <div class="fg1">
+          <label>BGG ID</label>
+          <input type="number" id="bggId" placeholder="295947" oninput="generate()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="fg2">
+          <label>Genre / Subtitle</label>
+          <input type="text" id="gameGenre" placeholder="e.g. Tile Laying · Wildlife" oninput="generate()">
+        </div>
+        <div class="fg1">
+          <label>Accent Color</label>
+          <input type="color" id="gameColor" value="#3a8a4a" oninput="generate()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="fg2">
+          <label>Personal Best Field (optional)</label>
+          <select id="personalBestField" onchange="generate()">
+            <option value="">— None —</option>
+          </select>
+          <div class="hint">Shows all-time best for this field on the game card.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Fields -->
+  <div class="section">
+    <div class="section-header">
+      Log Fields
+      <button class="btn btn-green btn-sm" onclick="addField()">+ Add Field</button>
+    </div>
+    <div class="section-body" id="fieldsContainer">
+      <div class="empty-state">No fields yet. Add fields to define what gets logged per play.</div>
+    </div>
+  </div>
+
+  <!-- Score Titles -->
+  <div class="section">
+    <div class="section-header">
+      Score Titles (optional)
+      <button class="btn btn-green btn-sm" onclick="addScoreTitle()">+ Add Tier</button>
+    </div>
+    <div class="section-body">
+      <p class="hint" style="margin-bottom:12px">Named tiers shown as a leaderboard on the game card (like Ganz Schön Clever). List from highest to lowest.</p>
+      <div id="scoreTitlesContainer">
+        <div class="empty-state">No score titles. Leave empty if the game doesn't use named tiers.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="section">
+    <div class="section-header">
+      Achievements
+      <button class="btn btn-green btn-sm" onclick="addAchievement()">+ Add Achievement</button>
+    </div>
+    <div class="section-body" id="achievementsContainer">
+      <div class="empty-state">No achievements yet.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── OUTPUT PANEL ── -->
+<div class="output-panel">
+  <h2>Generated Output</h2>
+  <div class="output-tabs">
+    <button class="output-tab active" onclick="switchTab('game')">games/[id].js</button>
+    <button class="output-tab" onclick="switchTab('script')">Script Tag</button>
+    <button class="output-tab" onclick="switchTab('defaults')">Defaults Case</button>
+  </div>
+  <div class="code-block" id="codeOutput">// Fill in the form to generate your game config...</div>
+  <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy to Clipboard</button>
+</div>
+</div>
+
+<script>
+// ── State ──
+let fields = [];
+let achievements = [];
+let scoreTitles = [];
+let activeTab = 'game';
+let fieldIdCounter = 0;
+let achIdCounter = 0;
+let stIdCounter = 0;
+
+// ── Condition type definitions ──
+const CONDITION_TYPES = [
+  { group: 'Count', value: 'min_plays',      label: 'Min plays total',        params: ['count'] },
+  { group: 'Count', value: 'min_wins',       label: 'Min wins total',         params: ['count'] },
+  { group: 'Field (any play)', value: 'field_gte',  label: 'Field ≥ value',   params: ['field','value'] },
+  { group: 'Field (any play)', value: 'field_lte',  label: 'Field ≤ value',   params: ['field','value'] },
+  { group: 'Field (any play)', value: 'field_eq',   label: 'Field = value',   params: ['field','value'] },
+  { group: 'Field (win only)', value: 'win_field_gte',  label: 'Win: field ≥ value',  params: ['field','value'] },
+  { group: 'Field (win only)', value: 'win_field_lte',  label: 'Win: field ≤ value',  params: ['field','value'] },
+  { group: 'Field (win only)', value: 'win_field_eq',   label: 'Win: field = value',  params: ['field','value'] },
+  { group: 'Field (win only)', value: 'win_with_field', label: 'Win: field = value (string)', params: ['field','value'] },
+  { group: 'Toggle', value: 'win_with_toggle',  label: 'Win: toggle is ON',   params: ['field'] },
+  { group: 'Toggle', value: 'toggle_false',     label: 'Any play: toggle is OFF', params: ['field'] },
+  { group: 'Toggle', value: 'win_toggle_false', label: 'Win: toggle is OFF',  params: ['field'] },
+  { group: 'Multi-field', value: 'all_fields_gte',    label: 'All fields ≥ value',   params: ['fields','value'] },
+  { group: 'Multi-field', value: 'n_fields_gte',      label: 'N fields ≥ value',     params: ['fields','value','count'] },
+  { group: 'Multi-field', value: 'any_field_max_gte', label: 'Any field ≥ value',    params: ['fields','value'] },
+  { group: 'Values list', value: 'win_all_values',    label: 'Win with every value in list', params: ['field','values'] },
+  { group: 'Values list', value: 'unique_win_values', label: 'Win with N distinct values',   params: ['field','count'] },
+  { group: 'Cumulative', value: 'cumulative_field_gte', label: 'Sum of field across wins ≥ value', params: ['field','value'] },
+  { group: 'Compound', value: 'win_field_gte_and_field_eq', label: 'Win: field ≥ value AND field2 = value2', params: ['field','value','field2','value2'] },
+  { group: 'Compound', value: 'win_field_lte_and_field_eq', label: 'Win: field ≤ value AND field2 = value2', params: ['field','value','field2','value2'] },
+  { group: 'Compound', value: 'win_with_toggle_and_field_eq', label: 'Win: toggle ON AND field = value', params: ['field','field2','value2'] },
+  { group: 'Compound', value: 'win_two_fields',  label: 'Win: field ≥ value AND field2 ≥ value2', params: ['field','value','field2','value2'] },
+  { group: 'Meta', value: 'all_achievements', label: 'All listed achievements unlocked', params: ['ids'] },
+];
+
+function getFieldIds() {
+  return fields.map(f => f.id).filter(Boolean);
+}
+
+function getAchievementIds() {
+  return achievements.map(a => a.id).filter(Boolean);
+}
+
+// ── Fields ──
+function addField() {
+  const id = `field_${fieldIdCounter++}`;
+  fields.push({ _id: id, id: '', label: '', type: 'number', options: '', trueLabel: '', falseLabel: '', min: '', max: '', default: '' });
+  renderFields();
+  generate();
+}
+
+function removeField(id) {
+  fields = fields.filter(f => f._id !== id);
+  renderFields();
+  updatePersonalBestOptions();
+  generate();
+}
+
+function updateField(id, key, value) {
+  const f = fields.find(f => f._id === id);
+  if (f) { f[key] = value; }
+  if (key === 'id' || key === 'type') {
+    renderFields();
+    updatePersonalBestOptions();
+  }
+  generate();
+}
+
+function renderFields() {
+  const c = document.getElementById('fieldsContainer');
+  if (fields.length === 0) {
+    c.innerHTML = '<div class="empty-state">No fields yet. Add fields to define what gets logged per play.</div>';
+    return;
+  }
+  c.innerHTML = fields.map((f, i) => `
+    <div class="repeater-item" id="fi_${f._id}">
+      <div class="repeater-header">
+        <span class="repeater-label">Field ${i+1}${f.id ? ': ' + f.id : ''}</span>
+        <button class="btn btn-red btn-sm" onclick="removeField('${f._id}')">Remove</button>
+      </div>
+      <div class="field-row">
+        <div class="fg2">
+          <label>Field ID (camelCase)</label>
+          <input type="text" value="${f.id}" placeholder="e.g. score" oninput="updateField('${f._id}','id',this.value)">
+        </div>
+        <div class="fg2">
+          <label>Label</label>
+          <input type="text" value="${f.label}" placeholder="e.g. Total Score" oninput="updateField('${f._id}','label',this.value)">
+        </div>
+        <div class="fg1">
+          <label>Type</label>
+          <select onchange="updateField('${f._id}','type',this.value)">
+            <option value="number" ${f.type==='number'?'selected':''}>number</option>
+            <option value="toggle" ${f.type==='toggle'?'selected':''}>toggle</option>
+            <option value="select" ${f.type==='select'?'selected':''}>select</option>
+            <option value="text" ${f.type==='text'?'selected':''}>text</option>
+          </select>
+        </div>
+      </div>
+      ${f.type === 'number' ? `
+      <div class="field-row">
+        <div class="fg1"><label>Min</label><input type="number" value="${f.min}" placeholder="0" oninput="updateField('${f._id}','min',this.value)"></div>
+        <div class="fg1"><label>Max</label><input type="number" value="${f.max}" placeholder="150" oninput="updateField('${f._id}','max',this.value)"></div>
+        <div class="fg1"><label>Default</label><input type="number" value="${f.default}" placeholder="0" oninput="updateField('${f._id}','default',this.value)"></div>
+      </div>` : ''}
+      ${f.type === 'toggle' ? `
+      <div class="field-row">
+        <div class="fg1"><label>True Label</label><input type="text" value="${f.trueLabel}" placeholder="Yes ✓" oninput="updateField('${f._id}','trueLabel',this.value)"></div>
+        <div class="fg1"><label>False Label</label><input type="text" value="${f.falseLabel}" placeholder="No ✗" oninput="updateField('${f._id}','falseLabel',this.value)"></div>
+      </div>` : ''}
+      ${f.type === 'select' ? `
+      <div class="field-row">
+        <div class="fg3"><label>Options (comma separated)</label><input type="text" value="${f.options}" placeholder="Easy, Normal, Hard" oninput="updateField('${f._id}','options',this.value)"></div>
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function updatePersonalBestOptions() {
+  const sel = document.getElementById('personalBestField');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— None —</option>' +
+    getFieldIds().map(id => `<option value="${id}" ${id===current?'selected':''}>${id}</option>`).join('');
+}
+
+// ── Score Titles ──
+function addScoreTitle() {
+  const id = `st_${stIdCounter++}`;
+  scoreTitles.push({ _id: id, min: '', title: '' });
+  renderScoreTitles();
+  generate();
+}
+
+function removeScoreTitle(id) {
+  scoreTitles = scoreTitles.filter(s => s._id !== id);
+  renderScoreTitles();
+  generate();
+}
+
+function updateScoreTitle(id, key, value) {
+  const s = scoreTitles.find(s => s._id === id);
+  if (s) { s[key] = value; }
+  generate();
+}
+
+function renderScoreTitles() {
+  const c = document.getElementById('scoreTitlesContainer');
+  if (scoreTitles.length === 0) {
+    c.innerHTML = '<div class="empty-state">No score titles. Leave empty if the game doesn\'t use named tiers.</div>';
+    return;
+  }
+  c.innerHTML = scoreTitles.map((s, i) => `
+    <div class="repeater-item">
+      <div class="repeater-header">
+        <span class="repeater-label">Tier ${i+1}</span>
+        <button class="btn btn-red btn-sm" onclick="removeScoreTitle('${s._id}')">Remove</button>
+      </div>
+      <div class="field-row">
+        <div class="fg1">
+          <label>Min Score</label>
+          <input type="number" value="${s.min}" placeholder="0" oninput="updateScoreTitle('${s._id}','min',this.value)">
+        </div>
+        <div class="fg3">
+          <label>Title</label>
+          <input type="text" value="${s.title}" placeholder='e.g. "You\'re So Clever!"' oninput="updateScoreTitle('${s._id}','title',this.value)">
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Achievements ──
+function addAchievement() {
+  const id = `ach_${achIdCounter++}`;
+  achievements.push({ _id: id, id: '', icon: '🏆', tier: 'bronze', name: '', desc: '', pts: 10, official: false,
+    condType: 'min_wins', p_count: '1', p_field: '', p_value: '', p_fields: '', p_values: '', p_field2: '', p_value2: '', p_ids: '' });
+  renderAchievements();
+  generate();
+}
+
+function removeAchievement(id) {
+  achievements = achievements.filter(a => a._id !== id);
+  renderAchievements();
+  generate();
+}
+
+function updateAchievement(id, key, value) {
+  const a = achievements.find(a => a._id === id);
+  if (a) { a[key] = value; }
+  if (key === 'condType') renderAchievements();
+  generate();
+}
+
+function getCondParams(condType) {
+  const ct = CONDITION_TYPES.find(c => c.value === condType);
+  return ct ? ct.params : [];
+}
+
+function buildConditionTypeOptions(selected) {
+  let html = '';
+  let lastGroup = '';
+  for (const ct of CONDITION_TYPES) {
+    if (ct.group !== lastGroup) {
+      if (lastGroup) html += '</optgroup>';
+      html += `<optgroup label="${ct.group}">`;
+      lastGroup = ct.group;
+    }
+    html += `<option value="${ct.value}" ${ct.value===selected?'selected':''}>${ct.label}</option>`;
+  }
+  html += '</optgroup>';
+  return html;
+}
+
+function renderAchievements() {
+  const c = document.getElementById('achievementsContainer');
+  if (achievements.length === 0) {
+    c.innerHTML = '<div class="empty-state">No achievements yet.</div>';
+    return;
+  }
+  const fieldIds = getFieldIds();
+  const achIds = getAchievementIds();
+
+  c.innerHTML = achievements.map((a, i) => {
+    const params = getCondParams(a.condType);
+    const fieldOptions = fieldIds.map(id => `<option value="${id}" ${id===a.p_field?'selected':''}>${id}</option>`).join('');
+    const field2Options = fieldIds.map(id => `<option value="${id}" ${id===a.p_field2?'selected':''}>${id}</option>`).join('');
+    const achIdOptions = achIds.filter(id => id !== a.id).map(id => `<option value="${id}">${id}</option>`).join('');
+
+    let paramHtml = '';
+    if (params.includes('count')) paramHtml += `
+      <div class="fg1"><label>Count</label><input type="number" value="${a.p_count}" min="1" oninput="updateAchievement('${a._id}','p_count',this.value)"></div>`;
+    if (params.includes('field')) paramHtml += `
+      <div class="fg1"><label>Field</label><select onchange="updateAchievement('${a._id}','p_field',this.value)"><option value="">—</option>${fieldOptions}</select></div>`;
+    if (params.includes('value')) paramHtml += `
+      <div class="fg1"><label>Value</label><input type="text" value="${a.p_value}" placeholder="0" oninput="updateAchievement('${a._id}','p_value',this.value)"></div>`;
+    if (params.includes('field2')) paramHtml += `
+      <div class="fg1"><label>Field 2</label><select onchange="updateAchievement('${a._id}','p_field2',this.value)"><option value="">—</option>${field2Options}</select></div>`;
+    if (params.includes('value2')) paramHtml += `
+      <div class="fg1"><label>Value 2</label><input type="text" value="${a.p_value2}" placeholder="0" oninput="updateAchievement('${a._id}','p_value2',this.value)"></div>`;
+    if (params.includes('fields')) paramHtml += `
+      <div class="fg3"><label>Fields (comma separated)</label><input type="text" value="${a.p_fields}" placeholder="field1, field2, field3" oninput="updateAchievement('${a._id}','p_fields',this.value)"></div>`;
+    if (params.includes('values')) paramHtml += `
+      <div class="fg3"><label>Values (comma separated)</label><input type="text" value="${a.p_values}" placeholder="England, France, Sweden" oninput="updateAchievement('${a._id}','p_values',this.value)"></div>`;
+    if (params.includes('ids')) paramHtml += `
+      <div class="fg3"><label>Achievement IDs (comma separated — use IDs defined above)</label>
+        <input type="text" value="${a.p_ids}" placeholder="ga_first_win, ga_score50" oninput="updateAchievement('${a._id}','p_ids',this.value)">
+      </div>`;
+
+    return `
+    <div class="repeater-item" id="ai_${a._id}">
+      <div class="repeater-header">
+        <span class="repeater-label">${a.icon || '🏆'} ${a.name || 'Achievement ' + (i+1)} <span class="tier-badge tier-${a.tier}">${a.tier}</span></span>
+        <button class="btn btn-red btn-sm" onclick="removeAchievement('${a._id}')">Remove</button>
+      </div>
+      <div class="field-row">
+        <div class="fg1"><label>ID Suffix</label><input type="text" value="${a.id}" placeholder="first_win" oninput="updateAchievement('${a._id}','id',this.value)"></div>
+        <div class="fg1"><label>Icon</label><input type="text" value="${a.icon}" maxlength="4" oninput="updateAchievement('${a._id}','icon',this.value)"></div>
+        <div class="fg1">
+          <label>Tier</label>
+          <select onchange="updateAchievement('${a._id}','tier',this.value)">
+            <option value="bronze" ${a.tier==='bronze'?'selected':''}>Bronze</option>
+            <option value="silver" ${a.tier==='silver'?'selected':''}>Silver</option>
+            <option value="gold" ${a.tier==='gold'?'selected':''}>Gold</option>
+            <option value="plat" ${a.tier==='plat'?'selected':''}>Platinum</option>
+          </select>
+        </div>
+        <div class="fg1"><label>Points</label><input type="number" value="${a.pts}" min="1" oninput="updateAchievement('${a._id}','pts',this.value)"></div>
+      </div>
+      <div class="field-row">
+        <div class="fg2"><label>Name</label><input type="text" value="${a.name}" placeholder="First Blood" oninput="updateAchievement('${a._id}','name',this.value)"></div>
+        <div class="fg1" style="display:flex;align-items:flex-end;padding-bottom:1px">
+          <label style="display:flex;align-items:center;cursor:pointer">
+            <input type="checkbox" ${a.official?'checked':''} onchange="updateAchievement('${a._id}','official',this.checked)"> Official
+          </label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="fg3"><label>Description</label><input type="text" value="${a.desc}" placeholder="Win your first game" oninput="updateAchievement('${a._id}','desc',this.value)"></div>
+      </div>
+      <div class="condition-params">
+        <div class="field-row">
+          <div class="fg3">
+            <label>Condition Type</label>
+            <select onchange="updateAchievement('${a._id}','condType',this.value)">${buildConditionTypeOptions(a.condType)}</select>
+          </div>
+        </div>
+        ${paramHtml ? `<div class="field-row">${paramHtml}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Code Generation ──
+function buildCheck(a) {
+  const params = getCondParams(a.condType);
+  let parts = [`type: '${a.condType}'`];
+  if (params.includes('count')) parts.push(`count: ${a.p_count || 1}`);
+  if (params.includes('field') && a.p_field) parts.push(`field: '${a.p_field}'`);
+  if (params.includes('value') && a.p_value !== '') parts.push(`value: ${isNaN(a.p_value) ? `'${a.p_value}'` : a.p_value}`);
+  if (params.includes('field2') && a.p_field2) parts.push(`field2: '${a.p_field2}'`);
+  if (params.includes('value2') && a.p_value2 !== '') parts.push(`value2: ${isNaN(a.p_value2) ? `'${a.p_value2}'` : a.p_value2}`);
+  if (params.includes('fields') && a.p_fields) {
+    const arr = a.p_fields.split(',').map(s => `'${s.trim()}'`).join(', ');
+    parts.push(`fields: [${arr}]`);
+  }
+  if (params.includes('values') && a.p_values) {
+    const arr = a.p_values.split(',').map(s => `'${s.trim()}'`).join(', ');
+    parts.push(`values: [${arr}]`);
+  }
+  if (params.includes('ids') && a.p_ids) {
+    const arr = a.p_ids.split(',').map(s => `'${s.trim()}'`).join(', ');
+    parts.push(`ids: [${arr}]`);
+  }
+  return `{ ${parts.join(', ')} }`;
+}
+
+function generateGameJs() {
+  const name = document.getElementById('gameName').value || 'My Game';
+  const id = document.getElementById('gameId').value || 'mygame';
+  const icon = document.getElementById('gameIcon').value || '🎲';
+  const bggId = document.getElementById('bggId').value || '000000';
+  const genre = document.getElementById('gameGenre').value || '';
+  const color = document.getElementById('gameColor').value || '#3a8a4a';
+  const pbField = document.getElementById('personalBestField').value;
+
+  let out = `// ── ${id} ──\n`;
+  out += `window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];\n`;
+  out += `window.GAME_DEFINITIONS.push(\n`;
+  out += `{\n`;
+  out += `  id: '${id}',\n`;
+  out += `  name: '${name}',\n`;
+  out += `  icon: '${icon}',\n`;
+  if (genre) out += `  genre: '${genre}',\n`;
+  out += `  bggId: ${bggId},\n`;
+  out += `  color: '${color}',\n`;
+  if (pbField) out += `  personalBestField: '${pbField}',\n`;
+
+  // Score titles
+  if (scoreTitles.length > 0) {
+    out += `  scoreTitles: [\n`;
+    for (const st of scoreTitles) {
+      out += `    { min: ${st.min || 0}, title: '${st.title}' },\n`;
+    }
+    out += `  ],\n`;
+  }
+
+  // Log fields
+  out += `  logFields: [\n`;
+  out += `    { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },\n`;
+  for (const f of fields) {
+    if (!f.id) continue;
+    let line = `    { id: '${f.id}', label: '${f.label}', type: '${f.type}'`;
+    if (f.type === 'number') {
+      if (f.min !== '') line += `, min: ${f.min}`;
+      if (f.max !== '') line += `, max: ${f.max}`;
+      if (f.default !== '') line += `, default: ${f.default}`;
+    }
+    if (f.type === 'toggle') {
+      if (f.trueLabel) line += `, trueLabel: '${f.trueLabel}'`;
+      if (f.falseLabel) line += `, falseLabel: '${f.falseLabel}'`;
+    }
+    if (f.type === 'select' && f.options) {
+      const opts = f.options.split(',').map(o => `'${o.trim()}'`).join(', ');
+      line += `, options: [${opts}]`;
+    }
+    line += ` },\n`;
+    out += line;
+  }
+  out += `  ],\n`;
+
+  // Achievements
+  out += `  achievements: [\n`;
+  for (const a of achievements) {
+    if (!a.id) continue;
+    const fullId = `${id.substring(0,3)}_${a.id}`;
+    out += `    { id: '${fullId}', icon: '${a.icon}', tier: '${a.tier}', pts: ${a.pts},`;
+    if (a.official) out += ` official: true,`;
+    out += `\n`;
+    out += `      name: '${a.name}',\n`;
+    out += `      desc: '${a.desc}',\n`;
+    out += `      check: ${buildCheck(a)} },\n`;
+  }
+  out += `  ]\n`;
+  out += `}\n`;
+  out += `);\n`;
+
+  return out;
+}
+
+function generateScriptTag() {
+  const id = document.getElementById('gameId').value || 'mygame';
+  return `<script src="games/${id}.js"><\/script>`;
+}
+
+function generateDefaultsCase() {
+  const id = document.getElementById('gameId').value || 'mygame';
+  const toggleFields = fields.filter(f => f.type === 'toggle' && f.id);
+  const numberFields = fields.filter(f => f.type === 'number' && f.id);
+
+  let defaults = [];
+  for (const f of toggleFields) defaults.push(`${f.id}: false`);
+  for (const f of numberFields) defaults.push(`${f.id}: ${f.default || 0}`);
+
+  let out = `case '${id}': {\n`;
+  out += `  return { ...base`;
+  if (defaults.length > 0) out += `, ${defaults.join(', ')}`;
+  out += ` };\n`;
+  out += `}`;
+  return out;
+}
+
+function generate() {
+  updatePersonalBestOptions();
+  const outputs = {
+    game: generateGameJs(),
+    script: generateScriptTag(),
+    defaults: generateDefaultsCase(),
+  };
+  document.getElementById('codeOutput').textContent = outputs[activeTab];
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.output-tab').forEach((el, i) => {
+    el.classList.toggle('active', ['game','script','defaults'][i] === tab);
+  });
+  generate();
+}
+
+function copyOutput() {
+  const text = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy to Clipboard';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// Init
+generate();
+</script>
+</body>
+</html>
