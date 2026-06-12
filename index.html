@@ -1062,6 +1062,9 @@ function renderGameDetail(g) {
     } else if (g.id === 'onedeck') {
       if (p.dungeon) parts.push(p.dungeon);
       if (p.difficulty) parts.push('D' + p.difficulty);
+    } else if (g.id === 'planetx') {
+      if (p.score) parts.push(p.score + ' pts');
+      if (p.botScore) parts.push('Bot: ' + p.botScore);
     } else if (g.id === 'frosthaven') {
       if (p.scenario) parts.push(p.scenario);
       if (p.score) parts.push(p.score + ' pts');
