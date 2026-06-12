@@ -3,7 +3,7 @@ window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 window.GAME_DEFINITIONS.push(
 // ── Frosthaven ────────────────────────────────────────────────
   {
-    id: 'frosthaven', name: 'Frosthaven', personalBestField: 'difficulty', icon: '❄️', genre: 'Campaign · Dungeon Crawler',
+    id: 'frosthaven', name: 'Frosthaven',  icon: '❄️', genre: 'Campaign · Dungeon Crawler',
     color: '#2a5a8a', bgColor: '#f0f6ff', dimColor: '#7ab0e0',
     logFields: [
       { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
