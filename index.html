@@ -1145,9 +1145,7 @@ function renderSettings() {
         <span>${g.icon} ${g.name}</span>
         <div style="display:flex;align-items:center;gap:10px">
           <span class="settings-row-val">${plays.length} plays</span>
-          <div class="modal-toggle ${visClass}" onclick="toggleGameVisibility('${g.id}')" style="flex-shrink:0">
-            <div class="toggle-knob"></div>
-          </div>
+          <button class="toggle ${visClass}" onclick="toggleGameVisibility('${g.id}')" style="flex-shrink:0"></button>
         </div>
       </div>`;
     }).join('')}`;
