@@ -45,7 +45,7 @@ Add to your iPhone home screen via Safari → Share → Add to Home Screen for a
 
 ## License
 
-MIT — if this saved you some spreadsheet time, [buy me a coffee](https://ko-fi.com) ☕
+MIT
 
 ## Structure
 
