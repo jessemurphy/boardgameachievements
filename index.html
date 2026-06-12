@@ -799,16 +799,16 @@ function getProgress(check, gameState, allState) {
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let appState = {}, unlocked = {}, newlyUnlocked = new Set(), unlockedDates = {}, sortMode = 'alpha', gameFilter = '';
+let appState = {}, unlocked = {}, newlyUnlocked = new Set(), unlockedDates = {}, sortMode = 'alpha', gameFilter = '', hiddenGames = new Set();
 
 function loadState() {
   try {
     const s = localStorage.getItem('solo_tracker_pub_v4');
-    if (s) { const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{}; }
+    if (s) { const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{}; hiddenGames=new Set(d.hiddenGames||[]); }
   } catch(e){}
 }
 function saveState() {
-  localStorage.setItem('solo_tracker_pub_v4', JSON.stringify({state:appState,unlocked,unlockedDates}));
+  localStorage.setItem('solo_tracker_pub_v4', JSON.stringify({state:appState,unlocked,unlockedDates,hiddenGames:[...hiddenGames]}));
 }
 
 function calcTotalPts() {
@@ -884,7 +884,7 @@ function renderAll() {
 }
 
 function getSortedFilteredGames() {
-  let games = [...GAME_DEFINITIONS];
+  let games = [...GAME_DEFINITIONS].filter(g => !hiddenGames.has(g.id));
   if (gameFilter) games = games.filter(g => g.name.toLowerCase().includes(gameFilter.toLowerCase()));
   switch(sortMode) {
     case 'recent': {
@@ -1136,15 +1136,49 @@ function renderSettings() {
     }
   }
   document.getElementById('settingsGameList').innerHTML = `
-    <div class="card-header"><span class="card-title">Games (${GAME_DEFINITIONS.length})</span><span style="font-size:11px;color:var(--text-3)">A–Z</span></div>
-    ${sorted.map(g=>`
-      <div class="settings-row">
+    <div class="card-header"><span class="card-title">Games (${GAME_DEFINITIONS.length})</span><span style="font-size:11px;color:var(--text-3)">Toggle to show/hide on home screen</span></div>
+    ${sorted.map(g=>{
+      const hidden = hiddenGames.has(g.id);
+      const plays = appState[g.id]?.plays||[];
+      return `<div class="settings-row">
         <span>${g.icon} ${g.name}</span>
-        <span class="settings-row-val">${g.achievements?.length||0} achievements</span>
-      </div>`).join('')}`;
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="settings-row-val">${plays.length} plays</span>
+          <div class="modal-toggle ${hidden?'':'on'}" onclick="toggleGameVisibility('${g.id}')" style="flex-shrink:0">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}`;
 }
 
-function buildSummary(g, p) {
+function toggleGameVisibility(gid) {
+  const plays = appState[gid]?.plays||[];
+  if (!hiddenGames.has(gid) && plays.length > 0) {
+    // Has plays — use double-tap pattern
+    if (!toggleGameVisibility._pending) {
+      toggleGameVisibility._pending = gid;
+      showToast(`Tap again to hide ${GAME_DEFINITIONS.find(g=>g.id===gid)?.name}`);
+      setTimeout(() => { toggleGameVisibility._pending = null; }, 3000);
+      return;
+    }
+    if (toggleGameVisibility._pending !== gid) {
+      toggleGameVisibility._pending = gid;
+      showToast(`Tap again to hide ${GAME_DEFINITIONS.find(g=>g.id===gid)?.name}`);
+      setTimeout(() => { toggleGameVisibility._pending = null; }, 3000);
+      return;
+    }
+    toggleGameVisibility._pending = null;
+  }
+  if (hiddenGames.has(gid)) hiddenGames.delete(gid);
+  else hiddenGames.add(gid);
+  saveState();
+  renderSettings();
+  renderHome();
+}
+toggleGameVisibility._pending = null;
+
+
   if (!g.logFields) return '';
   const parts = g.logFields
     .filter(f=>f.id!=='win')
@@ -1223,9 +1257,25 @@ function openModal(gid, playIdx=-1) {
 
 function editPlay(gid, idx) { openModal(gid, idx); }
 
+let deletePending = false;
 function deletePlay() {
-  deletePlayAt(logGameId, editPlayIndex);
-  closeModal();
+  if (!deletePending) {
+    deletePending = true;
+    const btn = document.getElementById('modalDelete');
+    btn.textContent = 'Tap again to confirm';
+    btn.style.background = '#fff0ee';
+    btn.style.color = 'var(--red)';
+    setTimeout(() => {
+      deletePending = false;
+      btn.textContent = 'Delete This Play';
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 3000);
+  } else {
+    deletePending = false;
+    deletePlayAt(logGameId, editPlayIndex);
+    closeModal();
+  }
 }
 
 function deletePlayAt(gid, idx) {
@@ -1258,6 +1308,8 @@ function submitPlay(){
     else if(f.type==='number') play[f.id]=parseFloat(document.getElementById('fld_'+f.id).value)||0;
     else                       play[f.id]=document.getElementById('fld_'+f.id).value;
   });
+  const notes = document.getElementById('modal_notes')?.value?.trim();
+  if (notes) play.notes = notes;
   if(!appState[logGameId]) appState[logGameId]={plays:[]};
   if(editPlayIndex>=0){
     appState[logGameId].plays[editPlayIndex]=play;
@@ -1801,6 +1853,7 @@ function exportData() {
     state: appState,
     unlocked,
     unlockedDates,
+    hiddenGames: [...hiddenGames],
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -1821,6 +1874,7 @@ function importData(e) {
       appState = data.state || {};
       unlocked = data.unlocked || {};
       unlockedDates = data.unlockedDates || {};
+      hiddenGames = new Set(data.hiddenGames || []);
       saveState();
       checkAll();
       renderAll();
