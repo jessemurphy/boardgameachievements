@@ -312,6 +312,26 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   </button>
 </nav>
 
+<!-- Import Modal -->
+<div class="modal-overlay" id="importOverlay" onclick="handleImportOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="importTitle">Import from BGStats</div>
+    <div style="padding:0 16px 8px;font-size:13px;color:var(--text-2);line-height:1.5">
+      In BGStats: tap a game → tap a play → Share → Export Play. Paste the JSON below.<br>
+      Or export your full history: BGStats Settings → Backup → Export.
+    </div>
+    <div style="padding:0 16px 12px">
+      <label class="modal-label">Paste .bgsplay or BGStatsExport JSON</label>
+      <textarea id="importJson" style="font-family:'DM Mono',monospace;font-size:11px;padding:10px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);outline:none;width:100%;height:120px;resize:none" placeholder='{"plays":[...]}'></textarea>
+    </div>
+    <div id="importPreview" style="padding:0 16px 8px;font-size:13px;color:var(--text-2)"></div>
+    <button class="btn-submit" id="importSubmit" style="background:var(--blue)" onclick="previewImport()">Preview Import</button>
+    <button class="btn-submit" id="importConfirm" style="background:var(--green);display:none" onclick="confirmImport()">Import Plays</button>
+    <button class="btn-cancel" onclick="closeImport()">Cancel</button>
+  </div>
+</div>
+
 <!-- Log/Edit Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
   <div class="modal">
@@ -1049,6 +1069,7 @@ function renderGameDetail(g) {
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn-log" style="background:${g.color};flex:1" onclick="openModal('${g.id}')">+ Log Play</button>
+      <button class="btn-log" style="background:var(--text-3);width:48px;flex:none;font-size:18px" onclick="openImport('${g.id}')" title="Import from BGStats">⬇</button>
     </div>
     ${renderScoreTitles(g)}
     ${renderPersonalBests(g)}
@@ -1542,7 +1563,9 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       return { ...base, avidReader: false };
     }
     case 'skyteam': {
-      return { ...base };
+      // Board field contains the scenario/airport name
+      const scenario = (play.board || role || '').trim() || 'Unknown';
+      return { ...base, scenario };
     }
     case 'sts': {
       const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
@@ -1737,9 +1760,116 @@ function parseFullExport(jsonText) {
 }
 
 // ── Import UI state ──
+let importGameId = null;
+let importParsedPlays = [];
 
-// ═══════════════════════════════════════
-// GLOBAL STATS
+function openImport(gid) {
+  importGameId = gid;
+  importParsedPlays = [];
+  const g = gid ? GAME_DEFINITIONS.find(x=>x.id===gid) : null;
+  document.getElementById('importTitle').textContent = g
+    ? `Import from BGStats — ${g.name}`
+    : 'Import Full BGStats History';
+  document.getElementById('importJson').value = '';
+  document.getElementById('importPreview').textContent = '';
+  document.getElementById('importSubmit').style.display = '';
+  document.getElementById('importConfirm').style.display = 'none';
+  document.getElementById('importOverlay').classList.add('open');
+}
+
+function closeImport() {
+  document.getElementById('importOverlay').classList.remove('open');
+}
+
+function handleImportOverlayClick(e) {
+  if (e.target === document.getElementById('importOverlay')) closeImport();
+}
+
+function previewImport() {
+  const json = document.getElementById('importJson').value.trim();
+  if (!json) { document.getElementById('importPreview').textContent = 'Paste the JSON first.'; return; }
+
+  let result;
+  if (importGameId) {
+    // Single game import
+    let data;
+    try { data = JSON.parse(json); } catch(e) {
+      document.getElementById('importPreview').textContent = '⚠ Invalid JSON.';
+      return;
+    }
+    if (!data.plays) { document.getElementById('importPreview').textContent = '⚠ No plays found.'; return; }
+    const meId = data.userInfo?.meRefId;
+    const mePlayer = (data.players||[]).find(p=>p.id===meId) || (data.players||[])[0];
+    const meUuid = mePlayer?.uuid;
+    const plays = data.plays.map(p => parseSinglePlay(p, importGameId, meUuid, {})).filter(Boolean);
+    importParsedPlays = plays.map(p => ({ gid: importGameId, play: p }));
+  } else {
+    // Full export
+    result = parseFullExport(json);
+    if (result.error) {
+      document.getElementById('importPreview').textContent = '⚠ ' + result.error;
+      return;
+    }
+    importParsedPlays = Object.entries(result.results).flatMap(([gid, plays]) =>
+      plays.map(play => ({ gid, play }))
+    );
+  }
+
+  // Count new vs duplicate
+  const counts = {};
+  let skipped = 0;
+  for (const { gid, play } of importParsedPlays) {
+    const existing = appState[gid]?.plays || [];
+    const isDupe = existing.some(p => p.ts === play.ts && p.win === play.win);
+    if (isDupe) { skipped++; continue; }
+    counts[gid] = (counts[gid] || 0) + 1;
+  }
+
+  const total = Object.values(counts).reduce((a,b)=>a+b,0);
+  if (total === 0) {
+    document.getElementById('importPreview').textContent = skipped
+      ? `All ${skipped} plays already imported.`
+      : 'No matching plays found.';
+    return;
+  }
+
+  const gameLines = Object.entries(counts).map(([gid, n]) => {
+    const g = GAME_DEFINITIONS.find(x=>x.id===gid);
+    return `${g?.name||gid}: ${n} play${n!==1?'s':''}`;
+  }).join(', ');
+
+  document.getElementById('importPreview').innerHTML =
+    `<strong>${total} new play${total!==1?'s':''}</strong> ready to import${skipped?` (${skipped} already imported, skipped)`:''}.<br>
+    <span style="font-size:11px;color:var(--text-3)">${gameLines}</span>`;
+  document.getElementById('importSubmit').style.display = 'none';
+  document.getElementById('importConfirm').style.display = '';
+}
+
+function confirmImport() {
+  let added = 0;
+  for (const { gid, play } of importParsedPlays) {
+    if (!appState[gid]) appState[gid] = { plays: [] };
+    const existing = appState[gid].plays;
+    const isDupe = existing.some(p => p.ts === play.ts && p.win === play.win);
+    if (isDupe) continue;
+    existing.push(play);
+    added++;
+  }
+  const affectedGids = [...new Set(importParsedPlays.map(x=>x.gid))];
+  affectedGids.forEach(gid => appState[gid].plays.sort((a,b) => a.ts - b.ts));
+  appState._lastImport = new Date().toISOString().split('T')[0];
+  const newUnlocks = checkAll();
+  saveState();
+  if (currentGameId && affectedGids.includes(currentGameId)) {
+    renderGameDetail(GAME_DEFINITIONS.find(x=>x.id===currentGameId));
+  }
+  renderAll();
+  closeImport();
+  showToast(`Imported ${added} play${added!==1?'s':''}`);
+  if (newUnlocks.length > 0) setTimeout(() => showUnlockBanner(newUnlocks[0]), 400);
+}
+
+
 // ═══════════════════════════════════════
 function renderStats() {
   const allPlays = GAME_DEFINITIONS.flatMap(g => (appState[g.id]?.plays||[]).map(p=>({...p,game:g})));
