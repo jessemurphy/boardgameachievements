@@ -1036,25 +1036,69 @@ function renderGameDetail(g) {
     </div>`;
   }).join('');
 
-  const histHtml = plays.length===0
+  if (!renderGameDetail._showAll) renderGameDetail._showAll = {};
+  const HISTORY_PAGE = 20;
+  const showAll = renderGameDetail._showAll[g.id] || false;
+  const sortedPlays = [...plays].reverse();
+  const visiblePlays = showAll ? sortedPlays : sortedPlays.slice(0, HISTORY_PAGE);
+  const hasMore = sortedPlays.length > HISTORY_PAGE;
+
+  function playDetailLine(p) {
+    const parts = [];
+    if (g.id === 'spiritisland') {
+      if (p.spirit1 && p.spirit1 !== 'None') parts.push(p.spirit1);
+      if (p.spirit2 && p.spirit2 !== 'None') parts.push(p.spirit2);
+      if (p.adversary && p.adversary !== 'None') parts.push('vs ' + p.adversary + (p.level ? ' L' + p.level : ''));
+      if (p.score) parts.push(p.score + ' pts');
+    } else if (g.id === 'skyteam') {
+      if (p.scenario && p.scenario !== 'Unknown') parts.push(p.scenario);
+    } else if (g.id === 'sts') {
+      if (p.character) parts.push(p.character);
+      if (p.ascension) parts.push('A' + p.ascension);
+      if (p.score) parts.push(p.score + ' pts');
+    } else if (g.id === 'warps') {
+      if (p.ship && p.ship !== 'Any / Unknown') parts.push(p.ship);
+      if (p.warpsUsed !== undefined) parts.push(p.warpsUsed + ' warps');
+    } else if (g.id === 'onedeck') {
+      if (p.dungeon) parts.push(p.dungeon);
+      if (p.difficulty) parts.push('D' + p.difficulty);
+    } else if (g.id === 'frosthaven') {
+      if (p.scenario) parts.push(p.scenario);
+      if (p.score) parts.push(p.score + ' pts');
+    } else {
+      const s = buildSummary(g, p);
+      if (s) parts.push(s);
+    }
+    return parts.join(' · ') || '—';
+  }
+
+  // Store current game id for play history buttons
+  renderGameDetail._currentGid = g.id;
+
+  const histHtml = plays.length === 0
     ? '<div class="empty-state"><div class="empty-icon">📋</div>No plays logged yet.</div>'
-    : [...plays].reverse().slice(0,15).map((p,ri)=>{
-        const realIdx = plays.length - 1 - ri;
-        const d=new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
-        const s=buildSummary(g,p);
-        const noteStr = p.notes ? `<div style="font-size:11px;color:var(--text-3);padding:2px 0 4px 0;grid-column:1/-1">${p.notes}</div>` : '';
-        return `<div class="play-item" style="${p.notes?'flex-wrap:wrap':''}">
-          <div class="play-dot" style="background:${p.win?'var(--green)':'var(--red)'}"></div>
-          <span class="play-date">${d}</span>
-          <span class="play-detail">${s||'—'}</span>
-          <div class="play-actions">
-            <span class="play-badge" style="color:${p.win?'var(--green)':'var(--red)'}">${p.win?'WIN':'LOSS'}</span>
-            <button class="play-action-btn" onclick="editPlay('${g.id}',${realIdx})" title="Edit">✎</button>
-            <button class="play-action-btn" onclick="deletePlayAt('${g.id}',${realIdx})" title="Delete">✕</button>
-          </div>
-          ${noteStr}
-        </div>`;
-      }).join('');
+    : `<div>${
+        visiblePlays.map((p, ri) => {
+          const realIdx = plays.length - 1 - ri;
+          const d = new Date(p.ts).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
+          const detail = playDetailLine(p);
+          return `<div class="play-item">
+            <div class="play-dot" style="background:${p.win?'var(--green)':'var(--red)'}"></div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                <span class="play-date">${d}</span>
+                <span class="play-detail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${detail}</span>
+              </div>
+              ${p.notes ? `<div style="font-size:11px;color:var(--text-3);margin-top:2px;line-height:1.4">${p.notes}</div>` : ''}
+            </div>
+            <div class="play-actions">
+              <span class="play-badge" style="color:${p.win?'var(--green)':'var(--red)'}">${p.win?'WIN':'LOSS'}</span>
+              <button class="play-action-btn" data-gid="${g.id}" data-idx="${realIdx}" onclick="editPlay(this.dataset.gid,+this.dataset.idx)" title="Edit">✎</button>
+              <button class="play-action-btn" data-gid="${g.id}" data-idx="${realIdx}" onclick="deletePlayAt(this.dataset.gid,+this.dataset.idx)" title="Delete">✕</button>
+            </div>
+          </div>`;
+        }).join('')
+      }${hasMore ? `<div style="text-align:center;padding:10px"><button class="btn-ghost" style="font-size:12px;padding:6px 16px" data-gid="${g.id}" onclick="togglePlayHistory(this.dataset.gid)">${showAll ? '▲ Show less' : `▼ Show all ${plays.length} plays`}</button></div>` : ''}</div>`;
 
   document.getElementById('gameDetailContent').innerHTML = `
     <div class="game-hero" style="border-left:4px solid ${g.color}">
@@ -1089,6 +1133,12 @@ function renderGameDetail(g) {
       <div class="card-header"><span class="card-title">Play History</span></div>
       ${histHtml}
     </div>`;
+}
+
+function togglePlayHistory(gid) {
+  if (!renderGameDetail._showAll) renderGameDetail._showAll = {};
+  renderGameDetail._showAll[gid] = !renderGameDetail._showAll[gid];
+  renderGameDetail(GAME_DEFINITIONS.find(g => g.id === gid));
 }
 
 function calcStreak(gid) {
