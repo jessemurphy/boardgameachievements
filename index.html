@@ -1820,6 +1820,15 @@ function handleImportOverlayClick(e) {
   if (e.target === document.getElementById('importOverlay')) closeImport();
 }
 
+function playFingerprint(gid, play) {
+  const base = `${play.date}|${play.win?1:0}`;
+  if (gid === 'skyteam')      return `${base}|${play.scenario||''}`;
+  if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
+  if (gid === 'sts')          return `${base}|${play.character||''}`;
+  if (gid === 'onedeck')      return `${base}|${play.dungeon||''}`;
+  return `${base}|${play.score||0}`;
+}
+
 function previewImport() {
   const json = document.getElementById('importJson').value.trim();
   if (!json) { document.getElementById('importPreview').textContent = 'Paste the JSON first.'; return; }
@@ -1852,17 +1861,6 @@ function previewImport() {
   // Count new vs duplicate
   const counts = {};
   let skipped = 0;
-
-  // Count-based dedup: group by gid+date+win+fingerprint
-  // Build a map of existing play counts per fingerprint
-  function playFingerprint(gid, play) {
-    const base = `${play.date}|${play.win?1:0}`;
-    if (gid === 'skyteam')     return `${base}|${play.scenario||''}`;
-    if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
-    if (gid === 'sts')         return `${base}|${play.character||''}`;
-    if (gid === 'onedeck')     return `${base}|${play.dungeon||''}`;
-    return `${base}|${play.score||0}`;
-  }
 
   // Count existing plays per fingerprint
   const existingCounts = {};
