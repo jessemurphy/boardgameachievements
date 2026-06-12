@@ -268,6 +268,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="content" id="metaContent"></div>
 </div>
 
+<div class="screen" id="screen-stats">
+  <div class="content" id="statsContent"></div>
+</div>
+
 <div class="screen" id="screen-settings">
   <div class="content">
     <div class="card" id="settingsGameList"></div>
@@ -282,7 +286,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     <div class="card">
       <div class="card-header"><span class="card-title">Data</span></div>
       <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px">
-        <div style="font-size:13px;color:var(--text-2);line-height:1.5">Play history and achievements are stored locally in this browser.</div>
+        <div style="font-size:13px;color:var(--text-2);line-height:1.5">Play history and achievements are stored locally in this browser. Export regularly to keep a backup.</div>
+        <button class="btn-log" style="background:var(--green)" onclick="exportData()">⬆ Export My Data</button>
+        <button class="btn-log" style="background:var(--blue)" onclick="document.getElementById('importDataFile').click()">⬇ Import Data</button>
+        <input type="file" id="importDataFile" accept=".json" style="display:none" onchange="importData(event)">
         <div style="font-size:12px;color:var(--text-3)">Version 0.51</div>
         <button class="btn-danger" onclick="resetAll()">Reset All Data</button>
       </div>
@@ -296,6 +303,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   </button>
   <button class="nav-btn" id="nav-meta" onclick="navTo('meta')">
     <span class="nav-icon">🏆</span><span class="nav-label">Meta</span>
+  </button>
+  <button class="nav-btn" id="nav-stats" onclick="navTo('stats')">
+    <span class="nav-icon">📊</span><span class="nav-label">Stats</span>
   </button>
   <button class="nav-btn" id="nav-settings" onclick="navTo('settings')">
     <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
@@ -845,7 +855,8 @@ function navTo(nav) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-'+nav).classList.add('active');
   document.getElementById('nav-'+nav)?.classList.add('active');
-  document.getElementById('topbarTitle').textContent = nav==='home'?'Solo Achievements':nav==='meta'?'Meta Achievements':'Settings';
+  const titles = { home: 'Solo Achievements', meta: 'Meta Achievements', stats: 'Stats', settings: 'Settings' };
+  document.getElementById('topbarTitle').textContent = titles[nav] || 'Solo Achievements';
   document.getElementById('topbarLeft').innerHTML = '';
   renderAll();
 }
@@ -868,6 +879,7 @@ function renderAll() {
   document.getElementById('totalPtsDisplay').textContent = calcTotalPts() + ' pts';
   if (currentNav==='home') renderHome();
   else if (currentNav==='meta') renderMeta();
+  else if (currentNav==='stats') renderStats();
   else if (currentNav==='settings') renderSettings();
 }
 
@@ -1676,7 +1688,150 @@ function parseFullExport(jsonText) {
 // ── Import UI state ──
 
 // ═══════════════════════════════════════
-// INIT
+// GLOBAL STATS
+// ═══════════════════════════════════════
+function renderStats() {
+  const allPlays = GAME_DEFINITIONS.flatMap(g => (appState[g.id]?.plays||[]).map(p=>({...p,game:g})));
+  const totalPlays = allPlays.length;
+  const totalWins = allPlays.filter(p=>p.win).length;
+  const winRate = totalPlays ? Math.round(totalWins/totalPlays*100) : 0;
+  const totalPts = calcTotalPts();
+  const totalAch = Object.keys(unlocked).filter(id=>unlocked[id]).length;
+
+  // Plays per game
+  const gamePlays = GAME_DEFINITIONS.map(g => {
+    const plays = appState[g.id]?.plays||[];
+    const wins = plays.filter(p=>p.win).length;
+    const pts = calcGamePts(g.id).earned;
+    return { g, plays: plays.length, wins, pts, wr: plays.length ? Math.round(wins/plays.length*100) : 0 };
+  }).filter(x=>x.plays>0).sort((a,b)=>b.plays-a.plays);
+
+  // Plays by month (last 12)
+  const now = new Date();
+  const months = [];
+  for (let i=11; i>=0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleString('default',{month:'short'});
+    const count = allPlays.filter(p=>{
+      const pd = new Date(p.ts);
+      return pd.getFullYear()===d.getFullYear() && pd.getMonth()===d.getMonth();
+    }).length;
+    months.push({key,label,count});
+  }
+  const maxMonthCount = Math.max(...months.map(m=>m.count), 1);
+
+  // Best win streak
+  const sortedPlays = [...allPlays].sort((a,b)=>a.ts-b.ts);
+  let streak=0, best=0, cur=0;
+  sortedPlays.forEach(p=>{ if(p.win){cur++;best=Math.max(best,cur);}else cur=0; });
+
+  // Most played game
+  const mostPlayed = gamePlays[0];
+
+  // Recent activity (last 30 days)
+  const thirtyDays = Date.now() - 30*24*60*60*1000;
+  const recentPlays = allPlays.filter(p=>p.ts>thirtyDays).length;
+
+  const statCard = (icon,val,label) =>
+    `<div style="flex:1;min-width:80px;text-align:center;padding:12px 8px;background:var(--bg);border-radius:10px">
+      <div style="font-size:20px;margin-bottom:4px">${icon}</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text)">${val}</div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:2px">${label}</div>
+    </div>`;
+
+  const barChart = months.map(m=>
+    `<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px">
+      <div style="width:100%;display:flex;align-items:flex-end;justify-content:center;height:60px">
+        <div style="width:70%;background:var(--blue);border-radius:3px 3px 0 0;height:${m.count?Math.max(4,Math.round(m.count/maxMonthCount*60)):0}px;opacity:0.8"></div>
+      </div>
+      <div style="font-size:9px;color:var(--text-3)">${m.label}</div>
+      ${m.count?`<div style="font-size:9px;font-weight:700;color:var(--text-2)">${m.count}</div>`:''}
+    </div>`
+  ).join('');
+
+  const gameRows = gamePlays.map(x=>
+    `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:18px">${x.g.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.g.name}</div>
+        <div style="font-size:11px;color:var(--text-3)">${x.plays} plays · ${x.wins} wins · ${x.wr}% win rate</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:13px;font-weight:700;color:${x.g.color}">${x.pts} pts</div>
+      </div>
+    </div>`
+  ).join('');
+
+  document.getElementById('statsContent').innerHTML = `
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header"><span class="card-title">Overview</span></div>
+      <div style="padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px">
+        ${statCard('🎲', totalPlays, 'total plays')}
+        ${statCard('🏆', totalWins, 'total wins')}
+        ${statCard('📈', winRate+'%', 'win rate')}
+        ${statCard('⭐', totalPts, 'points')}
+        ${statCard('🔥', best, 'best streak')}
+        ${statCard('📅', recentPlays, 'last 30 days')}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header"><span class="card-title">Plays per Month</span></div>
+      <div style="padding:12px 14px">
+        ${totalPlays ? `<div style="display:flex;align-items:flex-end;gap:2px">${barChart}</div>` : '<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">No plays logged yet</div>'}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">By Game</span></div>
+      <div style="padding:0 14px">
+        ${gameRows || '<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">No plays logged yet</div>'}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════
+function exportData() {
+  const data = {
+    version: 'solo_tracker_pub_v4',
+    exportDate: new Date().toISOString().split('T')[0],
+    state: appState,
+    unlocked,
+    unlockedDates,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `solo-tracker-backup-${data.exportDate}.json`;
+  a.click();
+  showToast('⬆ Data exported');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.state) { showToast('⚠ Invalid backup file'); return; }
+      appState = data.state || {};
+      unlocked = data.unlocked || {};
+      unlockedDates = data.unlockedDates || {};
+      saveState();
+      checkAll();
+      renderAll();
+      showToast('⬇ Data imported');
+    } catch { showToast('⚠ Could not read file'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+
 // ═══════════════════════════════════════
 loadState(); checkAll(); renderAll();
 </script>
