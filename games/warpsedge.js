@@ -4,6 +4,7 @@ window.GAME_DEFINITIONS.push(
 // ── Warp's Edge ──────────────────────────────────────────────
   {
     id:     'warps',
+    bggId:  296237,
     name:   "Warp's Edge",
     icon:   '🚀',
     genre:  'Bag-Building · Space Combat',

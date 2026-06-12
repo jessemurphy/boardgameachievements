@@ -4,6 +4,7 @@ window.GAME_DEFINITIONS.push(
 // ── Palm Island ──────────────────────────────────────────────
   {
     id:     'palm',
+    bggId:  239464,
     name:   'Palm Island',
     icon:   '🌴',
     genre:  'Hand Management · Resource Building',

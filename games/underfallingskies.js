@@ -4,6 +4,7 @@ window.GAME_DEFINITIONS.push(
 // ── Under Falling Skies ──────────────────────────────────────
   {
     id:     'skies',
+    bggId:  306735,
     name:   'Under Falling Skies',
     icon:   '🌆',
     genre:  'Dice Placement · Sci-Fi Defense',

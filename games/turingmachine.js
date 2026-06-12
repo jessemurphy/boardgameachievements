@@ -4,6 +4,7 @@ window.GAME_DEFINITIONS.push(
 // ── Turing Machine ───────────────────────────────────────────
   {
     id:     'turing',
+    bggId:  356123,
     name:   'Turing Machine',
     icon:   '🖥️',
     genre:  'Deduction · Logic Puzzle',
