@@ -1513,7 +1513,20 @@ function parseBoard(board) {
 
 // Parse a single BGStats play object into our format
 function parseSinglePlay(play, gameId, playerUuid, games) {
-  const ps = play.playerScores?.[0] || {};
+  // Always identify as player id:1 (account owner)
+  const myScore = play.playerScores?.find(ps => {
+    // Match by UUID in metaData scoreUuid field
+    if (playerUuid && ps.metaData) {
+      try {
+        const md = JSON.parse(ps.metaData);
+        if (md.scoreUuid === playerUuid) return true;
+      } catch(e) {}
+    }
+    // Fallback: playerRefId === 1 (account owner)
+    return ps.playerRefId === 1;
+  }) || play.playerScores?.[0];
+
+  const ps = myScore || {};
   const win   = !!ps.winner;
   const score = parseFloat(ps.score) || 0;
   const role  = (ps.role || '').trim();
@@ -1733,9 +1746,8 @@ function parseFullExport(jsonText) {
 
   if (!data.plays) return { error: 'No plays found in this file.' };
 
-  const meId     = data.userInfo?.meRefId;
   const players  = data.players || [];
-  const mePlayer = players.find(p => p.id === meId) || players[0];
+  const mePlayer = players.find(p => p.id === 1) || players[0];
   const meUuid   = mePlayer?.uuid;
 
   const gamesById  = {};
@@ -1821,8 +1833,7 @@ function previewImport() {
       return;
     }
     if (!data.plays) { document.getElementById('importPreview').textContent = '⚠ No plays found.'; return; }
-    const meId = data.userInfo?.meRefId;
-    const mePlayer = (data.players||[]).find(p=>p.id===meId) || (data.players||[])[0];
+    const mePlayer = (data.players||[]).find(p=>p.id===1) || (data.players||[])[0];
     const meUuid = mePlayer?.uuid;
     const plays = data.plays.map(p => parseSinglePlay(p, importGameId, meUuid, {})).filter(Boolean);
     importParsedPlays = plays.map(p => ({ gid: importGameId, play: p }));
@@ -1841,10 +1852,41 @@ function previewImport() {
   // Count new vs duplicate
   const counts = {};
   let skipped = 0;
+
+  // Count-based dedup: group by gid+date+win+fingerprint
+  // Build a map of existing play counts per fingerprint
+  function playFingerprint(gid, play) {
+    const base = `${play.date}|${play.win?1:0}`;
+    if (gid === 'skyteam')     return `${base}|${play.scenario||''}`;
+    if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
+    if (gid === 'sts')         return `${base}|${play.character||''}`;
+    if (gid === 'onedeck')     return `${base}|${play.dungeon||''}`;
+    return `${base}|${play.score||0}`;
+  }
+
+  // Count existing plays per fingerprint
+  const existingCounts = {};
   for (const { gid, play } of importParsedPlays) {
-    const existing = appState[gid]?.plays || [];
-    const isDupe = existing.some(p => p.ts === play.ts && p.win === play.win);
-    if (isDupe) { skipped++; continue; }
+    const fp = playFingerprint(gid, play);
+    const key = `${gid}|${fp}`;
+    if (!existingCounts[key]) {
+      existingCounts[key] = (appState[gid]?.plays || [])
+        .filter(p => playFingerprint(gid, p) === fp).length;
+    }
+  }
+
+  // Count incoming plays per fingerprint
+  const incomingCounts = {};
+  for (const { gid, play } of importParsedPlays) {
+    const key = `${gid}|${playFingerprint(gid, play)}`;
+    incomingCounts[key] = (incomingCounts[key] || 0) + 1;
+  }
+
+  for (const { gid, play } of importParsedPlays) {
+    const key = `${gid}|${playFingerprint(gid, play)}`;
+    const existing = existingCounts[key] || 0;
+    const incoming = incomingCounts[key] || 0;
+    if (existing >= incoming) { skipped++; continue; }
     counts[gid] = (counts[gid] || 0) + 1;
   }
 
@@ -1870,12 +1912,30 @@ function previewImport() {
 
 function confirmImport() {
   let added = 0;
+
+  // Build existing fingerprint counts before import
+  const existingFpCounts = {};
+  const incomingFpCounts = {};
   for (const { gid, play } of importParsedPlays) {
+    const key = `${gid}|${playFingerprint(gid, play)}`;
+    if (!(key in existingFpCounts)) {
+      existingFpCounts[key] = (appState[gid]?.plays || [])
+        .filter(p => playFingerprint(gid, p) === playFingerprint(gid, play)).length;
+    }
+    incomingFpCounts[key] = (incomingFpCounts[key] || 0) + 1;
+  }
+
+  // Track how many we've added per fingerprint
+  const addedPerFp = {};
+  for (const { gid, play } of importParsedPlays) {
+    const key = `${gid}|${playFingerprint(gid, play)}`;
+    const existing = existingFpCounts[key] || 0;
+    const incoming = incomingFpCounts[key] || 0;
+    const alreadyAdded = addedPerFp[key] || 0;
+    if (existing + alreadyAdded >= incoming) continue;
     if (!appState[gid]) appState[gid] = { plays: [] };
-    const existing = appState[gid].plays;
-    const isDupe = existing.some(p => p.ts === play.ts && p.win === play.win);
-    if (isDupe) continue;
-    existing.push(play);
+    appState[gid].plays.push(play);
+    addedPerFp[key] = alreadyAdded + 1;
     added++;
   }
   const affectedGids = [...new Set(importParsedPlays.map(x=>x.gid))];
