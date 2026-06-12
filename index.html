@@ -987,7 +987,7 @@ function renderHome() {
   recentEl.innerHTML = `<div class="card">
     <div class="card-header"><span class="card-title">Recent Plays</span></div>
     ${allPlays.map(p=>{
-      const d=new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const d=new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
       const s=buildSummary(p.game,p);
       return `<div class="play-item">
         <div class="play-dot" style="background:${p.win?'var(--green)':'var(--red)'}"></div>
@@ -1040,7 +1040,7 @@ function renderGameDetail(g) {
     ? '<div class="empty-state"><div class="empty-icon">📋</div>No plays logged yet.</div>'
     : [...plays].reverse().slice(0,15).map((p,ri)=>{
         const realIdx = plays.length - 1 - ri;
-        const d=new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        const d=new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
         const s=buildSummary(g,p);
         const noteStr = p.notes ? `<div style="font-size:11px;color:var(--text-3);padding:2px 0 4px 0;grid-column:1/-1">${p.notes}</div>` : '';
         return `<div class="play-item" style="${p.notes?'flex-wrap:wrap':''}">
