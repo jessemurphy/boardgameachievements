@@ -341,7 +341,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 // Game definitions loaded from games/*.js
 const GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 
-const META_DEFINITIONS = window.META_DEFINITIONS;
+const META_DEFINITIONS = window.META_DEFINITIONS || [
   // ── Active achievements ────────────────────────────────────
   { id: 'm_first_win',    icon: '🌟', tier: 'bronze', pts: 10,  category: 'active',
     name: 'First Blood',        desc: 'Win your first game of any kind',
@@ -1140,11 +1140,12 @@ function renderSettings() {
     ${sorted.map(g=>{
       const hidden = hiddenGames.has(g.id);
       const plays = appState[g.id]?.plays||[];
-      return `<div class="settings-row">
+          const visClass = hidden ? '' : 'on';
+          return `<div class="settings-row">
         <span>${g.icon} ${g.name}</span>
         <div style="display:flex;align-items:center;gap:10px">
           <span class="settings-row-val">${plays.length} plays</span>
-          <div class="modal-toggle ${hidden?'':'on'}" onclick="toggleGameVisibility('${g.id}')" style="flex-shrink:0">
+          <div class="modal-toggle ${visClass}" onclick="toggleGameVisibility('${g.id}')" style="flex-shrink:0">
             <div class="toggle-knob"></div>
           </div>
         </div>
@@ -1178,7 +1179,7 @@ function toggleGameVisibility(gid) {
 }
 toggleGameVisibility._pending = null;
 
-
+function buildSummary(g, p) {
   if (!g.logFields) return '';
   const parts = g.logFields
     .filter(f=>f.id!=='win')
