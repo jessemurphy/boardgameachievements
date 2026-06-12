@@ -1396,13 +1396,13 @@ function resetAll(){
 // BGG ID -> tracker game ID mapping
 const BGG_TO_TRACKER = {
   162886: 'spiritisland',   // Spirit Island
-  356123: 'turing',         // Turing Machine
-  306735: 'skies',          // Under Falling Skies
+  356123: 'turingmachine',  // Turing Machine
+  306735: 'underfallingskies', // Under Falling Skies
   295947: 'cascadia',       // Cascadia
   338960: 'sts',            // Slay the Spire: The Board Game
   370591: 'dorfromantik',   // Dorfromantik: The Board Game
-  239464: 'palm',           // Palm Island
-  296237: 'warps',          // Warp's Edge
+  239464: 'palmisland',     // Palm Island
+  296237: 'warpsedge',      // Warp's Edge
   43570:  'friday',         // Friday
   279537: 'planetx',        // The Search for Planet X
   304783: 'hadrians',       // Hadrian's Wall
@@ -1414,8 +1414,10 @@ const BGG_TO_TRACKER = {
   258779: 'planetunknown',  // Planet Unknown
   263918: 'cartographers',  // Cartographers
   315767: 'cartographers',  // Cartographers Heroes
-  245654: 'railroad',        // Railroad Ink: Deep Blue
-  245655: 'railroad',        // Railroad Ink: Lush Green
+  245654: 'railroad',       // Railroad Ink: Deep Blue
+  245655: 'railroad',       // Railroad Ink: Lush Green
+  373106: 'skyteam',        // Sky Team
+  295374: 'circlewagons',   // Circle the Wagons
 };
 
 // Spirit name normalization (BGStats uses Title Case)
@@ -1547,14 +1549,14 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         adversary: board.adversary, level: board.level,
         difficulty: diff, invaders, dahan, blight, noBlight: blight === 0 };
     }
-    case 'turing': {
+    case 'turingmachine': {
       // board field has difficulty: 'Easy', 'Medium', 'Hard', or puzzle number
       const rawBoard = (play.board || '').trim();
       const diffMap = { 'easy':'Easy', 'medium':'Normal', 'hard':'Hard', 'extreme':'Extreme' };
       const diff = diffMap[rawBoard.toLowerCase()] || (rawBoard.match(/^\d+$/) ? 'Normal' : 'Normal');
       return { ...base, difficulty: diff, rounds: 0, queries: 0, noMistake: false };
     }
-    case 'skies': {
+    case 'underfallingskies': {
       const city = normalizeCity(role);
       return { ...base, city, hardSky: false, roundsLeft: 0, shipsDestroyed: 0 };
     }
@@ -1601,12 +1603,12 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         ba_train:false, ba_wildflower:false,
       };
     }
-    case 'warps': {
+    case 'warpsedge': {
       return { ...base, ship: role || 'Any / Unknown',
         mothership: board.extras[0] || 'Any / Unknown',
         warpsUsed: 3, noLoss: false };
     }
-    case 'palm': {
+    case 'palmisland': {
       return { ...base, round2: false, noWaste: false };
     }
     case 'friday': {
