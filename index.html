@@ -323,6 +323,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
     </div>
     <div style="padding:0 16px 12px">
       <label class="modal-label">Paste .bgsplay or BGStatsExport JSON</label>
+      <div id="importFileRow" style="display:none;margin-bottom:8px">
+        <button class="btn-ghost" style="width:100%;padding:10px;border-radius:9px;font-size:13px" onclick="document.getElementById('importFilePicker').click()">📂 Choose JSON file…</button>
+        <input type="file" id="importFilePicker" accept=".json" style="display:none" onchange="loadImportFile(event)">
+        <div id="importFileName" style="font-size:11px;color:var(--text-3);margin-top:4px;text-align:center"></div>
+      </div>
       <textarea id="importJson" style="font-family:'DM Mono',monospace;font-size:11px;padding:10px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);outline:none;width:100%;height:120px;resize:none" placeholder='{"plays":[...]}'></textarea>
     </div>
     <div id="importPreview" style="padding:0 16px 8px;font-size:13px;color:var(--text-2)"></div>
@@ -1774,7 +1779,23 @@ function openImport(gid) {
   document.getElementById('importPreview').textContent = '';
   document.getElementById('importSubmit').style.display = '';
   document.getElementById('importConfirm').style.display = 'none';
+  document.getElementById('importFileName').textContent = '';
+  // Show file picker only for full export (gid === null)
+  document.getElementById('importFileRow').style.display = gid ? 'none' : '';
   document.getElementById('importOverlay').classList.add('open');
+}
+
+function loadImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('importJson').value = ev.target.result;
+    document.getElementById('importFileName').textContent = `📄 ${file.name}`;
+    document.getElementById('importPreview').textContent = 'File loaded — tap Preview Import to continue.';
+  };
+  reader.readAsText(file);
+  e.target.value = '';
 }
 
 function closeImport() {
