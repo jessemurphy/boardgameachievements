@@ -417,6 +417,29 @@ function addField() {
   generate();
 }
 
+function duplicateField(id, e) {
+  e.stopPropagation();
+  const src = fields.find(f => f._id === id);
+  if (!src) return;
+  const newId = `field_${fieldIdCounter++}`;
+  const idx = fields.indexOf(src);
+  const copy = { ...src, _id: newId, id: src.id ? src.id + '_copy' : '' };
+  fields.splice(idx + 1, 0, copy);
+  renderFields();
+  updatePersonalBestOptions();
+  generate();
+}
+
+function moveField(id, dir, e) {
+  e.stopPropagation();
+  const idx = fields.findIndex(f => f._id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= fields.length) return;
+  [fields[idx], fields[newIdx]] = [fields[newIdx], fields[idx]];
+  renderFields();
+  generate();
+}
+
 function removeField(id, e) {
   e.stopPropagation();
   fields = fields.filter(f => f._id !== id);
@@ -450,7 +473,12 @@ function renderFields() {
           <span class="repeater-chevron">▼</span>
           <span class="repeater-label">${label}</span>
         </div>
-        <button class="btn btn-red btn-sm" onclick="removeField('${f._id}',event)">Remove</button>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="moveField('${f._id}',-1,event)" title="Move up">↑</button>
+          <button class="btn btn-ghost btn-sm" onclick="moveField('${f._id}',1,event)" title="Move down">↓</button>
+          <button class="btn btn-ghost btn-sm" onclick="duplicateField('${f._id}',event)" title="Duplicate">⧉</button>
+          <button class="btn btn-red btn-sm" onclick="removeField('${f._id}',event)">✕</button>
+        </div>
       </div>
       <div class="repeater-body">
         <div class="field-row">
@@ -565,6 +593,28 @@ function addAchievement() {
   generate();
 }
 
+function duplicateAchievement(id, e) {
+  e.stopPropagation();
+  const src = achievements.find(a => a._id === id);
+  if (!src) return;
+  const newId = `ach_${achIdCounter++}`;
+  const idx = achievements.indexOf(src);
+  const copy = { ...src, _id: newId, id: src.id ? src.id + '_copy' : '' };
+  achievements.splice(idx + 1, 0, copy);
+  renderAchievements();
+  generate();
+}
+
+function moveAchievement(id, dir, e) {
+  e.stopPropagation();
+  const idx = achievements.findIndex(a => a._id === id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= achievements.length) return;
+  [achievements[idx], achievements[newIdx]] = [achievements[newIdx], achievements[idx]];
+  renderAchievements();
+  generate();
+}
+
 function removeAchievement(id, e) {
   e.stopPropagation();
   achievements = achievements.filter(a => a._id !== id);
@@ -636,7 +686,12 @@ function renderAchievements() {
           <span class="repeater-label">${headerLabel}</span>
           <span class="tier-badge tier-${a.tier}">${a.tier}</span>
         </div>
-        <button class="btn btn-red btn-sm" onclick="removeAchievement('${a._id}',event)">Remove</button>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-sm" onclick="moveAchievement('${a._id}',-1,event)" title="Move up">↑</button>
+          <button class="btn btn-ghost btn-sm" onclick="moveAchievement('${a._id}',1,event)" title="Move down">↓</button>
+          <button class="btn btn-ghost btn-sm" onclick="duplicateAchievement('${a._id}',event)" title="Duplicate">⧉</button>
+          <button class="btn btn-red btn-sm" onclick="removeAchievement('${a._id}',event)">✕</button>
+        </div>
       </div>
       <div class="repeater-body">
         <div class="field-row">
