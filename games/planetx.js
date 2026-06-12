@@ -1,0 +1,54 @@
+// ── planetx ──
+window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
+window.GAME_DEFINITIONS.push(
+// ── The Search for Planet X ───────────────────────────────────
+  {
+    id: 'planetx', name: 'Search for Planet X', icon: '🔭', genre: 'Deduction · Space',
+    color: '#1a3a6a', bgColor: '#f0f4ff', dimColor: '#7090d0',
+    logFields: [
+      { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
+      { id: 'mode',       label: 'Mode',          type: 'select', options: ['Standard','Expert'] },
+      { id: 'clues',      label: 'Starting Clues',type: 'select', options: ['8 Clues (Beginner)','4 Clues','0 Clues (Genius)'] },
+      { id: 'score',      label: 'Score',         type: 'number', min: 0, max: 60, default: 20 },
+      { id: 'botScore',   label: 'Bot Score',     type: 'number', min: 0, max: 60, default: 15 },
+    ],
+    achievements: [
+      { id: 'px_first',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Discovery',
+        desc: 'Win your first game',
+        check: { type: 'min_wins', count: 1 } },
+      { id: 'px_expert',   icon: '🌌', tier: 'silver', pts: 20,  name: 'Expert Astronomer',
+        desc: 'Win a game on Expert mode',
+        check: { type: 'win_with_field', field: 'mode', value: 'Expert' } },
+      { id: 'px_genius',   icon: '🧠', tier: 'silver', pts: 25,  name: 'Genius',
+        desc: 'Win with 0 starting clues',
+        check: { type: 'win_with_field', field: 'clues', value: '0 Clues (Genius)' } },
+      { id: 'px_eg',       icon: '🔭', tier: 'gold',   pts: 50,  name: 'Expert Genius',
+        desc: 'Win on Expert mode with 0 starting clues',
+        check: { type: 'win_two_fields', field1: 'mode', value1: 'Expert', field2: 'clues', value2: '0 Clues (Genius)' } },
+      { id: 'px_score35',  icon: '⭐', tier: 'silver', pts: 20,  name: 'Sharp Deduction',
+        desc: 'Score 35+ points in a win',
+        check: { type: 'win_field_gte', field: 'score', value: 35 } },
+      { id: 'px_score40',  icon: '🌠', tier: 'gold',   pts: 35,  name: 'Perfect Astronomy',
+        desc: 'Score 40+ points in a win',
+        check: { type: 'win_field_gte', field: 'score', value: 40 } },
+      { id: 'px_score45',  icon: '🏆', tier: 'gold',   pts: 60,  name: 'Flawless Survey',
+        desc: 'Score 45+ points in a win',
+        check: { type: 'win_field_gte', field: 'score', value: 45 } },
+      { id: 'px_dominate', icon: '💫', tier: 'gold',   pts: 35,  name: 'Dominant',
+        desc: 'Beat the bot by 20+ points in a single game',
+        check: { type: 'win_field_beats_by', field: 'score', compareField: 'botScore', margin: 20 } },
+      { id: 'px_crush',    icon: '👑', tier: 'gold',   pts: 50,  name: 'Crushing Victory',
+        desc: 'Beat the bot by 25+ points',
+        check: { type: 'win_field_beats_by', field: 'score', compareField: 'botScore', margin: 25 } },
+      { id: 'px_10wins',   icon: '🔬', tier: 'silver', pts: 25,  name: 'Seasoned Observer',
+        desc: 'Win 10 games',
+        check: { type: 'min_wins', count: 10 } },
+      { id: 'px_20plays',  icon: '🎮', tier: 'silver', pts: 20,  name: 'Dedicated Astronomer',
+        desc: 'Play 20 games',
+        check: { type: 'min_plays', count: 20 } },
+      { id: 'px_plat',     icon: '💎', tier: 'plat',   pts: 100, name: 'Planet X Found',
+        desc: 'Unlock all other Search for Planet X achievements',
+        check: { type: 'all_achievements', ids: ['px_first','px_expert','px_genius','px_eg','px_score35','px_score40','px_score45','px_dominate','px_crush','px_10wins','px_20plays'] } },
+    ]
+  }
+);

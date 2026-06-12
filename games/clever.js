@@ -1,0 +1,60 @@
+// ── clever ──
+window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
+window.GAME_DEFINITIONS.push(
+// ── Ganz Schön Clever ─────────────────────────────────────────
+  {
+    id: 'clever', name: 'Ganz Schön Clever', icon: '🎲', genre: 'Dice Game · Roll & Write',
+    color: '#d44020', bgColor: '#fff5f2', dimColor: '#e89070',
+    scoreTitles: [
+      { min: 0,   title: 'Try Harder!' },
+      { min: 140, title: 'Not Bad…' },
+      { min: 160, title: 'Pretty Good' },
+      { min: 180, title: 'Great Result!' },
+      { min: 200, title: "Hat's Off To You" },
+      { min: 230, title: 'Impressive!' },
+      { min: 260, title: 'What a Genius!' },
+      { min: 280, title: "You're So Clever!" },
+    ],
+    official: true,
+    logFields: [
+      { id: 'win',    label: 'Win?',        type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
+      { id: 'score',  label: 'Score',       type: 'number', min: 0, max: 350, default: 150 },
+      { id: 'mode',   label: 'Mode',        type: 'select', options: ['Solo','2 Player','3-4 Player'] },
+    ],
+    achievements: [
+      { id: 'cl_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Roll',
+        desc: 'Play your first game',
+        check: { type: 'min_plays', count: 1 } },
+      { id: 'cl_150',     icon: '🎯', tier: 'bronze', pts: 10, name: 'Above Average',
+        desc: 'Score 150+ points',
+        check: { type: 'field_gte', field: 'score', value: 150 } },
+      { id: 'cl_175',     icon: '🏅', tier: 'silver', pts: 20, name: 'Sharp Mind',
+        desc: 'Score 175+ points',
+        check: { type: 'field_gte', field: 'score', value: 175 } },
+      { id: 'cl_200',     icon: '✨', tier: 'silver', pts: 25, name: 'Quite Clever',
+        desc: 'Score 200+ points',
+        check: { type: 'field_gte', field: 'score', value: 200 } },
+      { id: 'cl_225',     icon: '🧠', tier: 'gold',   pts: 35, name: 'Very Clever',
+        desc: 'Score 225+ points',
+        check: { type: 'field_gte', field: 'score', value: 225 } },
+      { id: 'cl_250',     icon: '👑', tier: 'gold',   pts: 50, name: 'Extraordinarily Clever',
+        desc: 'Score 250+ points',
+        check: { type: 'field_gte', field: 'score', value: 250 } },
+      { id: 'cl_5wins',   icon: '🏆', tier: 'silver', pts: 20,  name: 'Regular',
+        desc: 'Win 5 solo games',
+        check: { type: 'min_wins', count: 5 } },
+      { id: 'cl_300',     icon: '🧮', tier: 'gold',   pts: 60,  name: 'Extraordinary',
+        desc: 'Score 300+ points',
+        check: { type: 'field_gte', field: 'score', value: 300 } },
+      { id: 'cl_streak3', icon: '🔥', tier: 'silver', pts: 25,  name: 'Dice Streak',
+        desc: 'Win 3 games in a row',
+        check: { type: 'win_streak_game', count: 3 } },
+      { id: 'cl_10plays', icon: '🎮', tier: 'silver', pts: 20, name: 'Dice Master',
+        desc: 'Play 10 games',
+        check: { type: 'min_plays', count: 10 } },
+      { id: 'cl_plat',    icon: '💎', tier: 'plat',   pts: 100, name: 'Ganz Schön Clever',
+        desc: 'Unlock all other achievements',
+        check: { type: 'all_achievements', ids: ['cl_first','cl_150','cl_175','cl_200','cl_225','cl_250','cl_10plays','cl_5wins','cl_300','cl_streak3'] } },
+    ]
+  }
+);

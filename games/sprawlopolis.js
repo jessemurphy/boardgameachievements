@@ -1,0 +1,52 @@
+// ── sprawlopolis ──
+window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
+window.GAME_DEFINITIONS.push(
+// ── Sprawlopolis ──────────────────────────────────────────────
+  {
+    id: 'sprawlopolis', name: 'Sprawlopolis', icon: '🏙️', genre: 'Card Placement · City Building',
+    color: '#3a6a9a', bgColor: '#f0f6ff', dimColor: '#80b0e0',
+    logFields: [
+      { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
+      { id: 'score',      label: 'Final Score',   type: 'number', min: -30, max: 40, default: 0 },
+      { id: 'targetScore',label: 'Target Score',  type: 'number', min: 5, max: 25, default: 9 },
+    ],
+    achievements: [
+      { id: 'sp_first',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First District',
+        desc: 'Win your first game',
+        check: { type: 'min_wins', count: 1 } },
+      { id: 'sp_score30',  icon: '📐', tier: 'bronze', pts: 10,  name: 'Decent Layout',
+        desc: 'Score 30+ points in any game',
+        check: { type: 'field_gte', field: 'score', value: 30 } },
+      { id: 'sp_score50',  icon: '🏗️', tier: 'silver', pts: 20,  name: 'Well Planned',
+        desc: 'Score 50+ points in any game',
+        check: { type: 'field_gte', field: 'score', value: 50 } },
+      { id: 'sp_score65',  icon: '🌆', tier: 'gold',   pts: 40,  name: 'Grand City',
+        desc: 'Score 65+ points in any game',
+        check: { type: 'field_gte', field: 'score', value: 65 } },
+      { id: 'sp_margin5',  icon: '📈', tier: 'silver', pts: 20,  name: 'Clear Victory',
+        desc: 'Beat the target score by 5+',
+        check: { type: 'win_field_beats_by', field: 'score', compareField: 'targetScore', margin: 5 } },
+      { id: 'sp_margin10', icon: '🏅', tier: 'gold',   pts: 35,  name: 'Dominant Planning',
+        desc: 'Beat the target score by 10+',
+        check: { type: 'win_field_beats_by', field: 'score', compareField: 'targetScore', margin: 10 } },
+      { id: 'sp_margin15', icon: '🏆', tier: 'gold',   pts: 50,  name: 'Masterwork',
+        desc: 'Beat the target score by 15+',
+        check: { type: 'win_field_beats_by', field: 'score', compareField: 'targetScore', margin: 15 } },
+      { id: 'sp_hightarget',icon:'🎯', tier: 'gold',   pts: 40,  name: 'Hard Cards',
+        desc: 'Win with a target score of 40+',
+        check: { type: 'win_two_fields_gte', field1: 'targetScore', value1: 40, field2: 'score', value2: 0 } },
+      { id: 'sp_5wins',    icon: '🏙️', tier: 'silver', pts: 25,  name: 'Urban Planner',
+        desc: 'Win 5 games',
+        check: { type: 'min_wins', count: 5 } },
+      { id: 'sp_10wins',   icon: '🌇', tier: 'gold',   pts: 35,  name: 'City Architect',
+        desc: 'Win 10 games',
+        check: { type: 'min_wins', count: 10 } },
+      { id: 'sp_15plays',  icon: '🎮', tier: 'silver', pts: 20,  name: 'City Regular',
+        desc: 'Play 15 games',
+        check: { type: 'min_plays', count: 15 } },
+      { id: 'sp_plat',     icon: '💎', tier: 'plat',   pts: 100, name: 'Master Planner',
+        desc: 'Unlock all other Sprawlopolis achievements',
+        check: { type: 'all_achievements', ids: ['sp_first','sp_score30','sp_score50','sp_score65','sp_margin5','sp_margin10','sp_margin15','sp_hightarget','sp_5wins','sp_10wins','sp_15plays'] } },
+    ]
+  }
+);

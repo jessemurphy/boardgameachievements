@@ -1,0 +1,156 @@
+// ── dorfromantik ──
+window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
+window.GAME_DEFINITIONS.push(
+// ── Dorfromantik ─────────────────────────────────────────────
+  {
+    id:       'dorfromantik',
+    name:     'Dorfromantik',
+    icon:     '🏡',
+    genre:    'Tile Laying · Campaign',
+    color:    '#5b8a3c',
+    bgColor:  '#f2f9ee',
+    dimColor: '#9dc87a',
+    official: true,
+    scoreTitles: [
+      { min: 99,  title: 'Vagabond' },
+      { min: 110, title: 'Newsboy' },
+      { min: 120, title: 'Fisherman' },
+      { min: 130, title: 'Coachman' },
+      { min: 140, title: 'Night Watchman' },
+      { min: 150, title: 'Actress' },
+      { min: 160, title: 'Forest Ranger' },
+      { min: 170, title: "Farmer's Wife" },
+      { min: 180, title: 'Engineer' },
+      { min: 190, title: 'Shipbuilder' },
+      { min: 200, title: 'Captain' },
+      { min: 215, title: 'Sailor' },
+      { min: 225, title: 'Station Master' },
+      { min: 235, title: 'Photographer' },
+      { min: 240, title: 'Merchant' },
+      { min: 250, title: 'Architect' },
+      { min: 260, title: 'Inventor' },
+      { min: 270, title: 'Craftsman' },
+      { min: 280, title: 'Doctor' },
+      { min: 290, title: 'Optionat' },
+      { min: 300, title: 'Gran Hidalgo' },
+      { min: 310, title: 'Manufacturer' },
+      { min: 320, title: 'Gentry' },
+      { min: 330, title: 'Counselor' },
+      { min: 340, title: 'Magnate' },
+      { min: 350, title: 'Baroness' },
+      { min: 375, title: 'Crown Prince' },
+      { min: 400, title: 'Empress' },
+    ],
+
+    logFields: [
+      { id: 'win',     label: 'Win?',         type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
+      { id: 'score',   label: 'Score',         type: 'number', min: 0, max: 500, default: 150 },
+      // Campaign Sheet achievement cards — tap when flipped in-game
+      { id: 'cs_castle',         label: 'Flipped: Castle',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_clouds',         label: 'Flipped: Clouds',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_farm',           label: 'Flipped: Farm',            type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_forest_tunnel',  label: 'Flipped: Forest Tunnel',   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_grain_tunnel',   label: 'Flipped: Grain Tunnel',    type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_shepherdess',    label: 'Flipped: Shepherdess',     type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_signalman',      label: 'Flipped: Signalman',       type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_village_tunnel', label: 'Flipped: Village Tunnel',  type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'cs_flag_meadow',    label: 'Flipped: Flag Meadow',     type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      // Box achievements — tick when earned from box contents
+      { id: 'ba_balloon',       label: 'Earned: Balloon Launch Site',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_construction',  label: 'Earned: Construction Site',        type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_farm',          label: 'Earned: Farm (Box)',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_forest_cabin',  label: 'Earned: Forest Cabin',             type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_golden_heart',  label: 'Earned: Golden Heart',             type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_harbor',        label: 'Earned: Harbor',                   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_harvest',       label: 'Earned: Harvest Festival',         type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_hearts_desire', label: "Earned: Heart's Desire",           type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_locomotive',    label: 'Earned: Locomotive',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_road',          label: 'Earned: On The Road To Success',   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_red_hearts',    label: 'Earned: Red Hearts',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_ship',          label: 'Earned: Ship',                     type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_train',         label: 'Earned: Train Station',            type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'ba_wildflower',    label: 'Earned: Wildflower',               type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+    ],
+
+    achievements: [
+      // Score milestones
+      { id: 'dorf_200',  icon: '🌿', tier: 'bronze', pts: 10, name: 'Village Life',
+        desc: 'Score 200+ points',
+        check: { type: 'field_gte', field: 'score', value: 200 } },
+      { id: 'dorf_300',  icon: '🏘️', tier: 'silver', pts: 20, name: 'Thriving Town',
+        desc: 'Score 300+ points',
+        check: { type: 'field_gte', field: 'score', value: 300 } },
+      { id: 'dorf_400',  icon: '🏰', tier: 'gold',   pts: 35, name: 'Grand Duchy',
+        desc: 'Score 400+ points',
+        check: { type: 'field_gte', field: 'score', value: 400 } },
+
+      // Campaign Sheet achievements — any play where it was flipped
+      { id: 'dorf_cs_castle',         icon: '🏰', tier: 'silver', pts: 15, name: 'Castle',
+        desc: 'Flip the Castle achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_castle' } },
+      { id: 'dorf_cs_clouds',         icon: '☁️',  tier: 'gold',   pts: 30, name: 'Clouds',
+        desc: 'Flip the Clouds achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_clouds' } },
+      { id: 'dorf_cs_farm',           icon: '🌾', tier: 'silver', pts: 15, name: 'Farm',
+        desc: 'Flip the Farm achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_farm' } },
+      { id: 'dorf_cs_forest_tunnel',  icon: '🌲', tier: 'silver', pts: 15, name: 'Forest Tunnel',
+        desc: 'Flip the Forest Tunnel achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_forest_tunnel' } },
+      { id: 'dorf_cs_grain_tunnel',   icon: '🌾', tier: 'silver', pts: 15, name: 'Grain Tunnel',
+        desc: 'Flip the Grain Tunnel achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_grain_tunnel' } },
+      { id: 'dorf_cs_shepherdess',    icon: '🐑', tier: 'silver', pts: 15, name: 'Shepherdess',
+        desc: 'Flip the Shepherdess achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_shepherdess' } },
+      { id: 'dorf_cs_signalman',      icon: '🚂', tier: 'silver', pts: 15, name: 'Signalman',
+        desc: 'Flip the Signalman achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_signalman' } },
+      { id: 'dorf_cs_village_tunnel', icon: '🏡', tier: 'silver', pts: 15, name: 'Village Tunnel',
+        desc: 'Flip the Village Tunnel achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_village_tunnel' } },
+      { id: 'dorf_cs_flag_meadow',    icon: '🚩', tier: 'silver', pts: 15, name: 'Flag Meadow',
+        desc: 'Flip the Flag Meadow achievement card',
+        check: { type: 'win_with_toggle', field: 'cs_flag_meadow' } },
+      { id: 'dorf_all_cs',            icon: '✨', tier: 'gold',   pts: 40, name: 'Campaign Complete',
+        desc: 'Flip all 9 Campaign Sheet achievement cards',
+        check: { type: 'all_achievements', ids: [
+          'dorf_cs_castle','dorf_cs_clouds','dorf_cs_farm','dorf_cs_forest_tunnel',
+          'dorf_cs_grain_tunnel','dorf_cs_shepherdess','dorf_cs_signalman',
+          'dorf_cs_village_tunnel','dorf_cs_flag_meadow'
+        ]}},
+
+      // Box achievements — earned across any play
+      { id: 'dorf_ba_5',  icon: '📦', tier: 'silver', pts: 20, name: 'Box Hunter',
+        desc: 'Earn 5 box achievements',
+        check: { type: 'any_toggle_count_gte', fields: [
+          'ba_balloon','ba_construction','ba_farm','ba_forest_cabin','ba_golden_heart',
+          'ba_harbor','ba_harvest','ba_hearts_desire','ba_locomotive','ba_road',
+          'ba_red_hearts','ba_ship','ba_train','ba_wildflower'
+        ], count: 5 } },
+      { id: 'dorf_ba_all', icon: '🎁', tier: 'gold',   pts: 50, name: 'Everything Unlocked',
+        desc: 'Earn all 14 box achievements',
+        check: { type: 'any_toggle_count_gte', fields: [
+          'ba_balloon','ba_construction','ba_farm','ba_forest_cabin','ba_golden_heart',
+          'ba_harbor','ba_harvest','ba_hearts_desire','ba_locomotive','ba_road',
+          'ba_red_hearts','ba_ship','ba_train','ba_wildflower'
+        ], count: 14 } },
+
+      // Play count
+      { id: 'dorf_10plays', icon: '🎮', tier: 'silver', pts: 20, name: 'Regular Villager',
+        desc: 'Play 10 games',
+        check: { type: 'min_plays', count: 10 } },
+
+      // Platinum
+      { id: 'dorf_plat', icon: '💎', tier: 'plat', pts: 100, name: 'Dorfromantik Master',
+        desc: 'Unlock all other Dorfromantik achievements',
+        check: { type: 'all_achievements', ids: [
+          'dorf_200','dorf_300','dorf_400',
+          'dorf_cs_castle','dorf_cs_clouds','dorf_cs_farm','dorf_cs_forest_tunnel',
+          'dorf_cs_grain_tunnel','dorf_cs_shepherdess','dorf_cs_signalman',
+          'dorf_cs_village_tunnel','dorf_cs_flag_meadow','dorf_all_cs',
+          'dorf_ba_5','dorf_ba_all','dorf_10plays',
+        ]}},
+    ],
+  }
+);
