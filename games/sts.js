@@ -22,8 +22,8 @@ window.GAME_DEFINITIONS.push(
       { id: 'boss',       label: 'Boss Fought',   type: 'select', options: [
         'None',
         'The Guardian','Slime Boss','Hexaghost',
-        'The Champ','The Automaton','The Collector',
-        'The Awakened One','Time Eater','Donu & Deca',
+        'The Champ','Bronze Automaton','The Collector',
+        'Awakened One','Time Eater','Donu & Deca',
         'The Corrupt Heart'
       ] },
       { id: 'ascension',  label: 'Ascension Level',type: 'number', min: 0, max: 13, default: 0 },
