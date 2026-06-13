@@ -244,6 +244,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <script src="games/cartographers.js"></script>
 <script src="games/railroad.js"></script>
 <script src="games/meta.js"></script>
+<script src="games/welcometothemoon.js"></script>
 <script src="games/nextstationlondon.js"></script>
 <script src="games/skyteam.js"></script>
 </head>
@@ -291,7 +292,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
         <button class="btn-log" style="background:var(--green)" onclick="exportData()">⬆ Export My Data</button>
         <button class="btn-log" style="background:var(--blue)" onclick="document.getElementById('importDataFile').click()">⬇ Import Data</button>
         <input type="file" id="importDataFile" accept=".json" style="display:none" onchange="importData(event)">
-        <div style="font-size:12px;color:var(--text-3)">Version 0.51</div>
+        <div style="font-size:12px;color:var(--text-3)">Solo Achievement Tracker — <a href="https://github.com/jessemurphy/boardgameachievements" style="color:var(--text-3)">GitHub</a></div>
+        <a href="https://ko-fi.com/jessemurphy" target="_blank" style="display:block;text-align:center;padding:10px;background:#FF5E5B;color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none">☕ Buy me a coffee</a>
         <button class="btn-danger" onclick="resetAll()">Reset All Data</button>
       </div>
     </div>
@@ -1075,6 +1077,11 @@ function renderGameDetail(g) {
       if (p.rounds) parts.push(p.rounds + ' rounds');
       if (p.queries) parts.push(p.queries + ' queries');
       if (p.noMistake) parts.push('✓ Perfect');
+    } else if (g.id === 'welcometothemoon') {
+      if (p.scenario && p.scenario !== 'Unknown') parts.push(p.scenario);
+      if (p.score) parts.push(p.score + ' pts');
+      if (p.sysErrors) parts.push(p.sysErrors + ' errors');
+      if (p.campaign) parts.push('📋 Campaign');
     } else if (g.id === 'nextstationlondon') {
       if (p.score) parts.push(p.score + ' pts');
       if (p.crossings4 > 0) parts.push('4-line ✓');
@@ -1490,6 +1497,7 @@ const BGG_TO_TRACKER = {
   315767: 'cartographers',  // Cartographers Heroes
   245654: 'railroad',       // Railroad Ink: Deep Blue
   245655: 'railroad',       // Railroad Ink: Lush Green
+  339789: 'welcometothemoon', // Welcome to the Moon
   353545: 'nextstationlondon', // Next Station: London
   373106: 'skyteam',        // Sky Team
   295374: 'circlewagons',   // Circle the Wagons
@@ -1659,6 +1667,36 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     }
     case 'dragonsdown': {
       return { ...base, avidReader: false };
+    }
+    case 'welcometothemoon': {
+      // Board: '#1: The Launch', '#2: The Journey／Campaign', etc.
+      const rawBoard = play.board || '';
+      const isCampaign = rawBoard.toLowerCase().includes('campaign');
+      const scenMatch = rawBoard.match(/#\d+:\s*[^\/]+/);
+      const scenario = scenMatch ? scenMatch[0].trim() : 'Unknown';
+      function ssPtsWtm(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet || '{}');
+          for (const group of parsed.groups || []) {
+            for (const row of group.rows || []) {
+              if (row.templateId === key) {
+                const v = row.scores?.[playerUuid];
+                if (v !== undefined && v !== '') return parseInt(v) || 0;
+              }
+            }
+          }
+        } catch(e) {}
+        return 0;
+      }
+      return { ...base,
+        scenario,
+        campaign: isCampaign,
+        score:     parseFloat(ps.score) || 0,
+        colA:      ssPtsWtm('a'),
+        colB:      ssPtsWtm('b'),
+        colC:      ssPtsWtm('c'),
+        sysErrors: ssPtsWtm('systemerrors'),
+      };
     }
     case 'nextstationlondon': {
       function ssPtsNsl(key) {
@@ -2031,6 +2069,7 @@ function handleImportOverlayClick(e) {
 
 function playFingerprint(gid, play) {
   const base = `${play.date}|${play.win?1:0}`;
+  if (gid === 'welcometothemoon') return `${base}|${play.scenario||''}`;
   if (gid === 'turing')       return `${base}|${play.rounds||0}|${play.queries||0}`;
   if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
   if (gid === 'sts')          return `${base}|${play.character||''}`;
