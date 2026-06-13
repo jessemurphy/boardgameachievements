@@ -244,6 +244,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <script src="games/cartographers.js"></script>
 <script src="games/railroad.js"></script>
 <script src="games/meta.js"></script>
+<script src="games/nextstationlondon.js"></script>
 <script src="games/skyteam.js"></script>
 </head>
 <body>
@@ -1074,6 +1075,17 @@ function renderGameDetail(g) {
       if (p.rounds) parts.push(p.rounds + ' rounds');
       if (p.queries) parts.push(p.queries + ' queries');
       if (p.noMistake) parts.push('✓ Perfect');
+    } else if (g.id === 'nextstationlondon') {
+      if (p.score) parts.push(p.score + ' pts');
+      if (p.crossings4 > 0) parts.push('4-line ✓');
+      if (p.touristSites) parts.push(p.touristSites + ' sites');
+    } else if (g.id === 'clever') {
+      if (p.score) parts.push(p.score + ' pts');
+      if (p.foxes) parts.push('🦊 ' + p.foxes);
+    } else if (g.id === 'hadrians') {
+      if (p.score) parts.push(p.score + ' pts');
+      if (p.fort && p.fort !== 'Any') parts.push(p.fort.replace('Fort ','F'));
+      if (p.disdain !== undefined && p.disdain === 0) parts.push('No Disdain ✓');
     } else if (g.id === 'frosthaven') {
       if (p.scenario) parts.push(p.scenario);
       if (p.score) parts.push(p.score + ' pts');
@@ -1478,6 +1490,7 @@ const BGG_TO_TRACKER = {
   315767: 'cartographers',  // Cartographers Heroes
   245654: 'railroad',       // Railroad Ink: Deep Blue
   245655: 'railroad',       // Railroad Ink: Lush Green
+  353545: 'nextstationlondon', // Next Station: London
   373106: 'skyteam',        // Sky Team
   295374: 'circlewagons',   // Circle the Wagons
 };
@@ -1647,6 +1660,33 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     case 'dragonsdown': {
       return { ...base, avidReader: false };
     }
+    case 'nextstationlondon': {
+      function ssPtsNsl(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet || '{}');
+          for (const group of parsed.groups || []) {
+            for (const row of group.rows || []) {
+              if (row.templateId === key) {
+                const v = row.scores?.[playerUuid];
+                if (v !== undefined && v !== '') return parseInt(v) || 0;
+              }
+            }
+          }
+        } catch(e) {}
+        return 0;
+      }
+      return { ...base,
+        score:        parseFloat(ps.score) || 0,
+        line1:        ssPtsNsl('line1'),
+        line2:        ssPtsNsl('line2'),
+        line3:        ssPtsNsl('line3'),
+        line4:        ssPtsNsl('line4'),
+        touristSites: ssPtsNsl('touristsites'),
+        crossings2:   ssPtsNsl('2lines'),
+        crossings3:   ssPtsNsl('3lines'),
+        crossings4:   ssPtsNsl('4lines'),
+      };
+    }
     case 'skyteam': {
       // Normalize BGStats airport names to our scenario option format
       const AIRPORT_MAP = {
@@ -1786,10 +1826,24 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         else if (part.toLowerCase().startsWith('fort')) fort = part;
         else if (part.toLowerCase().startsWith('solo challenge')) fort = part;
       }
-      return { ...base, difficulty: diff, fort, score: parseFloat(ps.score)||0 };
+      return { ...base, difficulty: diff, fort, score: parseFloat(ps.score)||0,
+        renown:     parseInt(ssData.renown     || 0) || 0,
+        piety:      parseInt(ssData.piety      || 0) || 0,
+        valour:     parseInt(ssData.valour     || 0) || 0,
+        discipline: parseInt(ssData.discipline || 0) || 0,
+        pathcards:  parseInt(ssData.pathcards  || 0) || 0,
+        disdain:    parseInt(ssData.disdain    || 0) || 0,
+      };
     }
     case 'clever': {
-      return { ...base, score: parseFloat(ps.score)||0, mode: 'Solo' };
+      return { ...base, score: parseFloat(ps.score)||0, mode: 'Solo',
+        yellow: parseInt(ssData.yellow || 0) || 0,
+        blue:   parseInt(ssData.blue   || 0) || 0,
+        green:  parseInt(ssData.green  || 0) || 0,
+        orange: parseInt(ssData.orange || 0) || 0,
+        purple: parseInt(ssData.purple || 0) || 0,
+        foxes:  parseInt(ssData.foxes  || 0) || 0,
+      };
     }
     case 'onedeck': {
       const boardParts = (play.board||'').split('／').map(s=>s.trim());
