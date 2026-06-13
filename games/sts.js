@@ -177,8 +177,8 @@ window.GAME_DEFINITIONS.push(
         desc: 'Play 10 runs total',
         check: { type: 'min_plays', count: 10 } },
       { id: 'sts_10wins',    icon: '🏆', tier: 'gold',   pts: 35, name: 'Spire Slayer',
-        desc: 'Win 10 runs',
-        check: { type: 'min_wins', count: 10 } },
+        desc: 'Win 20 runs',
+        check: { type: 'min_wins', count: 20 } },
 
       // ── Platinum ──
       { id: 'sts_plat',      icon: '💎', tier: 'plat',   pts: 100, name: 'Spire Conquered',
