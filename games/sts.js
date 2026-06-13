@@ -146,7 +146,7 @@ window.GAME_DEFINITIONS.push(
         check: { type: 'win_with_field', field: 'boss', value: 'The Champ' } },
       { id: 'sts_b_automaton', icon: '🤖', tier: 'silver', pts: 15, name: 'Deactivated',
         desc: 'Beat The Automaton',
-        check: { type: 'win_with_field', field: 'boss', value: 'The Automaton' } },
+        check: { type: 'win_with_field', field: 'boss', value: 'Bronze Automaton' } },
       { id: 'sts_b_collector', icon: '🧳', tier: 'silver', pts: 15, name: 'Uncollected',
         desc: 'Beat The Collector',
         check: { type: 'win_with_field', field: 'boss', value: 'The Collector' } },
