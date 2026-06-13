@@ -244,6 +244,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <script src="games/cartographers.js"></script>
 <script src="games/railroad.js"></script>
 <script src="games/meta.js"></script>
+<script src="games/nextstationparis.js"></script>
 <script src="games/welcometothemoon.js"></script>
 <script src="games/nextstationlondon.js"></script>
 <script src="games/skyteam.js"></script>
@@ -1077,6 +1078,10 @@ function renderGameDetail(g) {
       if (p.rounds) parts.push(p.rounds + ' rounds');
       if (p.queries) parts.push(p.queries + ' queries');
       if (p.noMistake) parts.push('✓ Perfect');
+    } else if (g.id === 'nextstationparis') {
+      if (p.score) parts.push(p.score + ' pts');
+      if (p.crossings4 > 0) parts.push('4-line ✓');
+      if (p.touristSites) parts.push(p.touristSites + ' sites');
     } else if (g.id === 'welcometothemoon') {
       if (p.scenario && p.scenario !== 'Unknown') parts.push(p.scenario);
       if (p.score) parts.push(p.score + ' pts');
@@ -1286,16 +1291,22 @@ toggleGameVisibility._pending = null;
 
 function buildSummary(g, p) {
   if (!g.logFields) return '';
-  const parts = g.logFields
-    .filter(f=>f.id!=='win')
-    .slice(0,2)
-    .map(f=>{
-      const v=p[f.id];
-      if(v===undefined||v===null) return null;
-      if(typeof v==='boolean') return v?f.trueLabel:null;
-      if(v==='Any / Unknown'||v==='Unknown'||v==='None') return null;
-      return String(v);
-    }).filter(Boolean);
+  const parts = [];
+  // Always show score first if present and non-zero
+  const scoreField = g.logFields.find(f => f.id === 'score');
+  if (scoreField && p.score !== undefined && p.score !== null && p.score !== 0) {
+    parts.push(String(p.score) + ' pts');
+  }
+  // Then show up to 1 more interesting field (skip win, score, toggles that are false)
+  const otherFields = g.logFields
+    .filter(f => f.id !== 'win' && f.id !== 'score' && f.type !== 'toggle')
+    .slice(0, 1);
+  for (const f of otherFields) {
+    const v = p[f.id];
+    if (v === undefined || v === null) continue;
+    if (v === 'Any / Unknown' || v === 'Unknown' || v === 'None' || v === '') continue;
+    parts.push(String(v));
+  }
   return parts.join(' · ');
 }
 
@@ -1497,6 +1508,9 @@ const BGG_TO_TRACKER = {
   315767: 'cartographers',  // Cartographers Heroes
   245654: 'railroad',       // Railroad Ink: Deep Blue
   245655: 'railroad',       // Railroad Ink: Lush Green
+  251678: 'railroad',       // Railroad Ink: Blazing Red
+  337505: 'railroad',       // Railroad Ink Challenge: Solo Board
+  403116: 'nextstationparis', // Next Station: Paris
   339789: 'welcometothemoon', // Welcome to the Moon
   353545: 'nextstationlondon', // Next Station: London
   373106: 'skyteam',        // Sky Team
@@ -1696,6 +1710,13 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         colB:      ssPtsWtm('b'),
         colC:      ssPtsWtm('c'),
         sysErrors: ssPtsWtm('systemerrors'),
+      };
+    }
+    case 'nextstationparis': {
+      return { ...base,
+        score:        parseFloat(ps.score) || 0,
+        line1: 0, line2: 0, line3: 0, line4: 0,
+        touristSites: 0, crossings2: 0, crossings3: 0, crossings4: 0,
       };
     }
     case 'nextstationlondon': {
@@ -2070,6 +2091,7 @@ function handleImportOverlayClick(e) {
 function playFingerprint(gid, play) {
   const base = `${play.date}|${play.win?1:0}`;
   if (gid === 'welcometothemoon') return `${base}|${play.scenario||''}`;
+  if (gid === 'nextstationparis') return `${base}|${play.score||0}`;
   if (gid === 'turing')       return `${base}|${play.rounds||0}|${play.queries||0}`;
   if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
   if (gid === 'sts')          return `${base}|${play.character||''}`;
