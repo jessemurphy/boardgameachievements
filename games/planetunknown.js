@@ -11,7 +11,7 @@ window.GAME_DEFINITIONS.push(
       { id: 'targetScore', label: 'Target Score',       type: 'number', min: 0,  max: 90,  default: 60 },
       { id: 'planet',      label: 'Planet',             type: 'select', options: ['Unknown','KSB-4156','K-273','Gaia','Persphone','Arashi','Petra','Tartarus','Charybdis','Kaax','Pajitnov','Oblivion','Cerberus','Lacuna'] },
       { id: 'corporation', label: 'Corporation',        type: 'select', options: ['Unknown','Universal Coalition','Republic', 'Wormhole Corp.', 'Cosmos Inc.', 'Horizon Group','Jump Drive', 'Oasis Ultd.', 'Makeshift', 'Flux Industries'] },
-      { id: 'asymmetric', label: 'Asymmetric combo?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' }
+      { id: 'asymmetric', label: 'Asymmetric combo?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
       { id: 'metObj',      label: 'Met Private Objective', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
       { id: 'noMeteorites',label: 'No Meteorites Left', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
     ],
