@@ -5,7 +5,6 @@ window.GAME_DEFINITIONS.push(
   {
     id:       'sts',
     name:     'Slay the Spire: TBG',
-    personalBestField: 'ascension',
     icon:     '⚔️',
     genre:    'Deckbuilding · Roguelike',
     color:    '#c0392b',
