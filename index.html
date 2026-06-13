@@ -1069,6 +1069,11 @@ function renderGameDetail(g) {
       if (p.botScore) parts.push('Bot: ' + p.botScore);
       if (p.clues) parts.push(p.clues);
       if (p.foundPlanetX === false) parts.push('No Planet X');
+    } else if (g.id === 'turing') {
+      if (p.difficulty && p.difficulty !== 'Normal') parts.push(p.difficulty);
+      if (p.rounds) parts.push(p.rounds + ' rounds');
+      if (p.queries) parts.push(p.queries + ' queries');
+      if (p.noMistake) parts.push('✓ Perfect');
     } else if (g.id === 'frosthaven') {
       if (p.scenario) parts.push(p.scenario);
       if (p.score) parts.push(p.score + ' pts');
@@ -1619,11 +1624,15 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         difficulty: diff, invaders, dahan, blight, noBlight: blight === 0 };
     }
     case 'turing': {
-      // board field has difficulty: 'Easy', 'Medium', 'Hard', or puzzle number
+      // Board field has difficulty: 'Easy', 'Medium', 'Hard', or puzzle number
       const rawBoard = (play.board || '').trim();
       const diffMap = { 'easy':'Easy', 'medium':'Normal', 'hard':'Hard', 'extreme':'Extreme' };
-      const diff = diffMap[rawBoard.toLowerCase()] || (rawBoard.match(/^\d+$/) ? 'Normal' : 'Normal');
-      return { ...base, difficulty: diff, rounds: 0, queries: 0, noMistake: false };
+      const diff = diffMap[rawBoard.toLowerCase()] || 'Normal';
+      // BGStats uses 'questions' for query count, 'rounds' for rounds
+      const rounds  = parseInt(ssData.rounds  || 0) || 0;
+      const queries = parseInt(ssData.questions || 0) || 0;
+      const noMistake = !ssData.incorrect || parseInt(ssData.incorrect) === 0;
+      return { ...base, difficulty: diff, rounds, queries, noMistake };
     }
     case 'skies': {
       const city = normalizeCity(role);
@@ -1948,7 +1957,7 @@ function handleImportOverlayClick(e) {
 
 function playFingerprint(gid, play) {
   const base = `${play.date}|${play.win?1:0}`;
-  if (gid === 'skyteam')      return `${base}|${play.scenario||''}`;
+  if (gid === 'turing')       return `${base}|${play.rounds||0}|${play.queries||0}`;
   if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
   if (gid === 'sts')          return `${base}|${play.character||''}`;
   if (gid === 'onedeck')      return `${base}|${play.dungeon||''}`;
