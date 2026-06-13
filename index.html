@@ -1820,11 +1820,31 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     case 'hadrians': {
       const boardParts = (play.board||'').split('／').map(s=>s.trim());
       const diffMap = {'easy':'Easy','medium':'Medium','hard':'Hard'};
+      const fortMap = {
+        'fort 1': 'Fort 1: Segedunum', 'fort 1: segedunum': 'Fort 1: Segedunum',
+        'fort 2': 'Fort 2: Pons Aelius', 'fort 2: pons aelius': 'Fort 2: Pons Aelius',
+        'fort 3': 'Fort 3: Condercum', 'fort 3: condercum': 'Fort 3: Condercum',
+        'fort 4': 'Fort 4: Vindobala', 'fort 4: vindobala': 'Fort 4: Vindobala', 'fort 4: vindolanda': 'Fort 4: Vindobala',
+        'fort 5': 'Fort 5: Onnum', 'fort 5: onnum': 'Fort 5: Onnum',
+        'fort 6': 'Fort 6: Cilurnum', 'fort 6: cilurnum': 'Fort 6: Cilurnum',
+        'fort 7': 'Fort 7: Brocolitia', 'fort 7: brocolitia': 'Fort 7: Brocolitia',
+        'fort 8': 'Fort 8: Vercovicium', 'fort 8: vercovicium': 'Fort 8: Vercovicium',
+        'fort 9': 'Fort 9: Aesica', 'fort 9: aesica': 'Fort 9: Aesica',
+        'fort 10': 'Fort 10: Magnis', 'fort 10: magnis': 'Fort 10: Magnis',
+        'fort 11': 'Fort 11: Banna', 'fort 11: banna': 'Fort 11: Banna',
+        'fort 12': 'Fort 12: Camboglanna', 'fort 12: camboglanna': 'Fort 12: Camboglanna',
+        'fort 13': 'Fort 13: Uxelodunum', 'fort 13: uxelodunum': 'Fort 13: Uxelodunum',
+        'fort 14': 'Fort 14: Aballava', 'fort 14: aballava': 'Fort 14: Aballava',
+        'fort 15': 'Fort 15: Coggabata', 'fort 15: coggabata': 'Fort 15: Coggabata',
+        'fort 16': 'Fort 16: Maia', 'fort 16: maia': 'Fort 16: Maia',
+      };
       let diff = 'Easy', fort = 'Any';
       for (const part of boardParts) {
-        if (diffMap[part.toLowerCase()]) diff = diffMap[part.toLowerCase()];
-        else if (part.toLowerCase().startsWith('fort')) fort = part;
-        else if (part.toLowerCase().startsWith('solo challenge')) fort = part;
+        const lc = part.toLowerCase();
+        if (diffMap[lc]) diff = diffMap[lc];
+        else if (fortMap[lc]) fort = fortMap[lc];
+        else if (lc.startsWith('solo challenge')) fort = part;
+        else if (lc.startsWith('fort')) fort = part; // fallback
       }
       return { ...base, difficulty: diff, fort, score: parseFloat(ps.score)||0,
         renown:     parseInt(ssData.renown     || 0) || 0,
