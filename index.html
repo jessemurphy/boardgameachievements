@@ -1052,6 +1052,7 @@ function renderGameDetail(g) {
       if (p.score) parts.push(p.score + ' pts');
     } else if (g.id === 'skyteam') {
       if (p.scenario && p.scenario !== 'Unknown') parts.push(p.scenario);
+      if (p.role && p.role !== 'Solo') parts.push(p.role);
     } else if (g.id === 'sts') {
       if (p.character) parts.push(p.character);
       if (p.ascension) parts.push('A' + p.ascension);
@@ -1638,9 +1639,37 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       return { ...base, avidReader: false };
     }
     case 'skyteam': {
-      // Board field contains the scenario/airport name
-      const scenario = (play.board || role || '').trim() || 'Unknown';
-      return { ...base, scenario };
+      // Normalize BGStats airport names to our scenario option format
+      const AIRPORT_MAP = {
+        'montreal': 'YUL (Green)', 'yul': 'YUL (Green)',
+        'heathrow': 'LHR (Green)', 'lhr green': 'LHR (Green)',
+        'haneda': 'HND (Green)', 'hnd green': 'HND (Green)',
+        'oslo green': 'OSL (Green)', 'osl green': 'OSL (Green)',
+        'atlanta green': 'ATL (Green)', 'atl green': 'ATL (Green)',
+        'prague green': 'PRG (Green)', 'prg green': 'PRG (Green)',
+        'oslo': 'OSL (Green)',
+        'atlanta': 'ATL (Green)',
+        'hanada': 'HND (Green)',
+        'lhr yellow': 'LHR (Yellow)',
+        'tegucigalpa': 'TGU (Yellow)', 'tgu': 'TGU (Yellow)',
+        'rio yellow': 'GIG (Yellow)', 'gig yellow': 'GIG (Yellow)',
+        'keflavik yellow': 'KEF (Yellow)', 'kef yellow': 'KEF (Yellow)',
+        'prague yellow': 'PRG (Yellow)',
+        'kuala lumpur yellow': 'KUL (Yellow)', 'kul yellow': 'KUL (Yellow)',
+        'atlanta yellow': 'ATL (Yellow)',
+        'paro': 'PBH (Red)', 'pbh': 'PBH (Red)',
+        'hnd red': 'HND (Red)',
+        'rio red': 'GIG (Red)',
+        'oslo red': 'OSL (Red)',
+        'tgu red': 'TGU (Red)',
+        'keflavik': 'KEF (Black)', 'kef black': 'KEF (Black)',
+        'kuala lumpur': 'KUL (Black)', 'kul black': 'KUL (Black)',
+        'paro black': 'PBH (Black)',
+      };
+      const boardLower = (play.board || '').toLowerCase().trim();
+      const scenario = AIRPORT_MAP[boardLower] || play.board || 'Unknown';
+      const myRole = role || 'Solo';
+      return { ...base, scenario, role: myRole, coffeeCups: false };
     }
     case 'sts': {
       const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
