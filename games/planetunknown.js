@@ -11,7 +11,7 @@ window.GAME_DEFINITIONS.push(
       { id: 'targetScore', label: 'Target Score',       type: 'number', min: 0,  max: 90,  default: 60 },
       { id: 'planet',      label: 'Planet',             type: 'select', options: ['Unknown','KSB-4156','K-273','Gaia','Persphone','Arashi','Petra','Tartarus','Charybdis','Kaax','Pajitnov','Oblivion','Cerberus','Lacuna'] },
       { id: 'corporation', label: 'Corporation',        type: 'select', options: ['Unknown','Universal Coalition','Republic', 'Wormhole Corp.', 'Cosmos Inc.', 'Horizon Group','Jump Drive', 'Oasis Ultd.', 'Makeshift', 'Flux Industries'] },
-      { id: 'asymmetric',  label: 'Asymmetric Side',   type: 'toggle', trueLabel: 'Yes', falseLabel: 'No (Symmetric)' },
+      { id: 'asymmetric', label: 'Asymmetric combo?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' }
       { id: 'metObj',      label: 'Met Private Objective', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
       { id: 'noMeteorites',label: 'No Meteorites Left', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
     ],
@@ -53,7 +53,7 @@ window.GAME_DEFINITIONS.push(
         desc: 'Win on 4 different planets',
         check: { type: 'unique_win_values', field: 'planet', count: 4 } },
       { id: 'pu_allcorps', icon: '✨', tier: 'gold',   pts: 60,  name: 'Master of Corporations',
-        desc: 'Win with all 8 corporations',
+        desc: 'Win with all 9 corporations',
         check: { type: 'win_all_values', field: 'corporation', values: ['Universal Coalition','Republic', 'Wormhole Corp.', 'Cosmos Inc.', 'Horizon Group','Jump Drive', 'Oasis Ultd.', 'Makeshift', 'Flux Industries'] } },
       { id: 'pu_10plays',  icon: '🎮', tier: 'silver', pts: 20,  name: 'Seasoned Colonist',
         desc: 'Play 10 games',
