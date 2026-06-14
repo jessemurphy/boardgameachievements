@@ -791,6 +791,11 @@ function renderCustomStats(g, plays) {
         const sum = pool.reduce((t, p) => t + (Number(p[s.field]) || 0), 0);
         return (sum / pool.length).toFixed(s.decimals ?? 1);
       }
+      case 'ratio': {
+        const att = plays.filter(p => p[s.field] === s.value).length;
+        const w = wins.filter(p => p[s.field] === s.value).length;
+        return att ? w + ' / ' + att : '—';
+      }
       case 'unique_values': {
         const pool = s.winsOnly ? wins : plays;
         return new Set(pool.map(p => p[s.field]).filter(v => v && v !== 'None' && v !== 'Unknown')).size;

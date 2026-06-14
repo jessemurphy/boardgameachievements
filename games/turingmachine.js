@@ -20,6 +20,14 @@ window.GAME_DEFINITIONS.push(
       { id: 'noMistake',  label: 'No Wrong Guesses?',   type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
     ],
 
+    customStatsTitle: 'Difficulty Breakdown',
+    customStats: [
+      { label: 'Easy (wins / attempts)',    type: 'ratio', field: 'difficulty', value: 'Easy' },
+      { label: 'Normal (wins / attempts)',  type: 'ratio', field: 'difficulty', value: 'Normal' },
+      { label: 'Hard (wins / attempts)',    type: 'ratio', field: 'difficulty', value: 'Hard' },
+      { label: 'Extreme (wins / attempts)', type: 'ratio', field: 'difficulty', value: 'Extreme' },
+    ],
+
     achievements: [
       { id: 't_first',     icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Decryption',
         desc: 'Solve your first puzzle',
