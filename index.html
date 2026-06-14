@@ -830,6 +830,17 @@ function renderCustomStats(g, plays) {
     </div>`;
   }
 
+  if (g.customStats3 && g.customStats3.length) {
+    const rows3 = g.customStats3.map(s => {
+      const val = evalStat(s);
+      return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
+    }).join('');
+    html += `<div class="card">
+      <div class="card-header"><span class="card-title">${g.customStats3Title || 'More Stats'}</span></div>
+      <div class="pb-table">${rows3}</div>
+    </div>`;
+  }
+
   return html;
 }
 

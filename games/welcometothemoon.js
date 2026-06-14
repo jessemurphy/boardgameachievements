@@ -30,7 +30,6 @@ window.GAME_DEFINITIONS.push(
 
     customStatsTitle: 'Adventure Wins',
     customStats: [
-      { label: 'Highest Automata Beaten', type: 'best_win', field: 'automataLevel', minValue: 1, labelMap: ['','Katherine (1)','Neil (2)','Margaret (3)','Buzz (4)','Sergei (5)','Yuri (6)','Valentina (7)','Ada (8)'] },
       { label: '#1: The Launch',   type: 'ratio', field: 'scenario', value: '#1: The Launch' },
       { label: '#2: The Journey',  type: 'ratio', field: 'scenario', value: '#2: The Journey' },
       { label: '#3: The Colony',   type: 'ratio', field: 'scenario', value: '#3: The Colony' },
@@ -51,6 +50,18 @@ window.GAME_DEFINITIONS.push(
       { label: '#6: The Virus',    type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#6: The Virus' } },
       { label: '#7: The Escape',   type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#7: The Escape' } },
       { label: '#8: The Battle',   type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#8: The Battle' } },
+    ],
+
+    customStats3Title: 'Best Automata by Adventure',
+    customStats3: [
+      { label: '#1: The Launch', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#1: The Launch' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#2: The Journey', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#2: The Journey' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#3: The Colony', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#3: The Colony' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#4: The Mine', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#4: The Mine' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#5: The Dome', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#5: The Dome' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#6: The Virus', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#6: The Virus' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#7: The Escape', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#7: The Escape' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
+      { label: '#8: The Battle', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#8: The Battle' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
     ],
 
     achievements: [
