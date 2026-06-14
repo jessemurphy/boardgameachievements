@@ -35,6 +35,8 @@ window.GAME_DEFINITIONS.push(
       { id: 'noBlight',   label: 'No Blight Placed',type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     ],
 
+    personalBestField: 'difficulty',
+
     achievements: [
       // ── First steps ──
       { id: 'si_first',     icon: '🌟', tier: 'bronze', pts: 10, name: 'The Island Awakens',

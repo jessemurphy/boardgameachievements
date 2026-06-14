@@ -28,9 +28,15 @@ window.GAME_DEFINITIONS.push(
       { id: 'ca2_score80', icon: '🗺️', tier: 'gold',   pts: 35,  name: 'Master Cartographer',
         desc: 'Score 80+ points',
         check: { type: 'field_gte', field: 'score', value: 80 } },
-      { id: 'ca2_score95', icon: '👑', tier: 'gold',   pts: 50,  name: 'Royal Surveyor',
+      { id: 'ca2_score95',  icon: '📐', tier: 'silver', pts: 25,  name: 'Royal Surveyor',
         desc: 'Score 95+ points',
         check: { type: 'field_gte', field: 'score', value: 95 } },
+      { id: 'ca2_score115', icon: '🗺️', tier: 'gold',   pts: 40,  name: 'Grand Cartographer',
+        desc: 'Score 115+ points',
+        check: { type: 'field_gte', field: 'score', value: 115 } },
+      { id: 'ca2_score130', icon: '👑', tier: 'gold',   pts: 60,  name: 'Legend of the Realm',
+        desc: 'Score 130+ points',
+        check: { type: 'field_gte', field: 'score', value: 130 } },
       { id: 'ca2_nomon',   icon: '🛡️', tier: 'silver', pts: 20,  name: 'Monster Free',
         desc: 'Win with zero monster penalty',
         check: { type: 'win_field_eq', field: 'monsters', value: 0 } },
@@ -43,9 +49,9 @@ window.GAME_DEFINITIONS.push(
       { id: 'ca2_10plays', icon: '🎮', tier: 'silver', pts: 20,  name: 'Regular Mapmaker',
         desc: 'Play 10 games',
         check: { type: 'min_plays', count: 10 } },
-      { id: 'ca2_plat',    icon: '💎', tier: 'plat',   pts: 100, name: 'Grand Cartographer',
+      { id: 'ca2_plat',    icon: '💎', tier: 'plat',   pts: 100, name: 'Cartographers: Complete',
         desc: 'Unlock all other Cartographers achievements',
-        check: { type: 'all_achievements', ids: ['ca2_first','ca2_score50','ca2_score65','ca2_score80','ca2_score95','ca2_nomon','ca2_allscore','ca2_coins10','ca2_10plays'] } },
+        check: { type: 'all_achievements', ids: ['ca2_first','ca2_score50','ca2_score65','ca2_score80','ca2_score95','ca2_score115','ca2_score130','ca2_nomon','ca2_allscore','ca2_coins10','ca2_10plays'] } },
     ]
   }
 );
