@@ -33,15 +33,15 @@ window.GAME_DEFINITIONS.push(
     { id: 'wt_85',       icon: '🏡', tier: 'bronze', pts: 10, name: 'Suburban Living',
       desc: 'Score 85+ points',
       check: { type: 'field_gte', field: 'score', value: 85 } },
-    { id: 'wt_95',       icon: '🏘️', tier: 'silver', pts: 20, name: 'Nice Neighborhood',
-      desc: 'Score 95+ points',
-      check: { type: 'field_gte', field: 'score', value: 95 } },
-    { id: 'wt_105',      icon: '🏰', tier: 'gold',   pts: 35, name: 'Dream Street',
-      desc: 'Score 105+ points',
-      check: { type: 'field_gte', field: 'score', value: 105 } },
-    { id: 'wt_112',      icon: '👑', tier: 'gold',   pts: 50, name: 'Perfect Suburb',
-      desc: 'Score 112+ points',
-      check: { type: 'field_gte', field: 'score', value: 112 } },
+    { id: 'wt_100',       icon: '🏘️', tier: 'silver', pts: 20, name: 'Nice Neighborhood',
+      desc: 'Score 100+ points',
+      check: { type: 'field_gte', field: 'score', value: 100 } },
+    { id: 'wt_115',      icon: '🏰', tier: 'gold',   pts: 35, name: 'Dream Street',
+      desc: 'Score 115+ points',
+      check: { type: 'field_gte', field: 'score', value: 115 } },
+    { id: ',      icon: '👑', tier: 'gold',   pts: 50, name: 'Perfect Suburb',
+      desc: 'Score 130+ points',
+      check: { type: 'field_gte', field: 'score', value: 130 } },
 
     // ── Objectives ──
     { id: 'wt_allobj',   icon: '✅', tier: 'silver', pts: 25, name: 'Overachiever',
@@ -52,9 +52,9 @@ window.GAME_DEFINITIONS.push(
       check: { type: 'n_fields_gte', fields: ['obj1','obj2','obj3'], value: 10, count: 3 } },
 
     // ── Pools ──
-    { id: 'wt_pools15',  icon: '🏊', tier: 'silver', pts: 20, name: 'Pool Party',
-      desc: 'Score 15+ from pools',
-      check: { type: 'field_gte', field: 'pools', value: 15 } },
+    { id: 'wt_pools18',  icon: '🏊', tier: 'silver', pts: 20, name: 'Pool Party',
+      desc: 'Score 18+ from pools',
+      check: { type: 'field_gte', field: 'pools', value: 18 } },
 
     // ── Parks ──
     { id: 'wt_parks30',  icon: '🌳', tier: 'silver', pts: 20, name: 'Green Spaces',
