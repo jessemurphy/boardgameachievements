@@ -854,6 +854,83 @@ function calcGamePts(gid) {
   return {earned,total};
 }
 
+function findTriggerDate(check, gs, allState, unlockedDates) {
+  const plays = gs?.plays || [];
+  const wins  = plays.filter(p => p.win);
+  const ts2date = ts => ts ? new Date(ts).toISOString().split('T')[0] : null;
+
+  switch (check.type) {
+    case 'min_wins':
+      return ts2date(wins[check.count - 1]?.ts);
+    case 'min_plays':
+      return ts2date(plays[check.count - 1]?.ts);
+    case 'field_gte':
+      return ts2date(plays.find(p => (Number(p[check.field])||0) >= check.value)?.ts);
+    case 'field_lte':
+      return ts2date(plays.find(p => p[check.field] !== undefined && (Number(p[check.field])||0) <= check.value)?.ts);
+    case 'field_eq':
+      return ts2date(plays.find(p => p[check.field] == check.value)?.ts);
+    case 'win_field_gte':
+      return ts2date(wins.find(p => (Number(p[check.field])||0) >= check.value)?.ts);
+    case 'win_field_lte':
+      return ts2date(wins.find(p => p[check.field] !== undefined && (Number(p[check.field])||0) <= check.value)?.ts);
+    case 'win_field_eq':
+      return ts2date(wins.find(p => p[check.field] == check.value)?.ts);
+    case 'win_with_field':
+      return ts2date(wins.find(p => p[check.field] === check.value)?.ts);
+    case 'win_with_toggle':
+      return ts2date(wins.find(p => !!p[check.field])?.ts);
+    case 'win_toggle_false':
+    case 'toggle_false':
+      return ts2date(plays.find(p => (!check.type.startsWith('win') || p.win) && !p[check.field])?.ts);
+    case 'win_field_gte_and_field_eq':
+      return ts2date(wins.find(p => (Number(p[check.field])||0) >= check.value && p[check.field2] == check.value2)?.ts);
+    case 'win_field_lte_and_field_eq':
+      return ts2date(wins.find(p => (Number(p[check.field])||0) <= check.value && p[check.field2] == check.value2)?.ts);
+    case 'win_with_toggle_and_field_eq':
+      return ts2date(wins.find(p => !!p[check.field] && p[check.field2] == check.value2)?.ts);
+    case 'win_two_fields':
+      return ts2date(wins.find(p => (Number(p[check.field])||0) >= check.value && (Number(p[check.field2])||0) >= check.value2)?.ts);
+    case 'win_all_values': {
+      // Date of the last required value being won for the first time
+      const dates = check.values.map(v => wins.find(p => p[check.field] === v)?.ts).filter(Boolean);
+      if (dates.length < check.values.length) return null;
+      return ts2date(Math.max(...dates));
+    }
+    case 'unique_win_values': {
+      const seen = new Set();
+      for (const p of wins) {
+        const v = p[check.field];
+        if (v && v !== 'Unknown' && v !== 'None') seen.add(v);
+        if (seen.size >= check.count) return ts2date(p.ts);
+      }
+      return null;
+    }
+    case 'all_fields_gte':
+      return ts2date(plays.find(p => (check.fields||[]).every(f => (Number(p[f])||0) >= check.value))?.ts);
+    case 'n_fields_gte':
+      return ts2date(plays.find(p => (check.fields||[]).filter(f => (Number(p[f])||0) >= check.value).length >= check.count)?.ts);
+    case 'any_field_max_gte':
+      return ts2date(plays.find(p => (check.fields||[]).some(f => (Number(p[f])||0) >= check.value))?.ts);
+    case 'cumulative_field_gte': {
+      let sum = 0;
+      for (const p of wins) {
+        sum += Number(p[check.field]) || 0;
+        if (sum >= check.value) return ts2date(p.ts);
+      }
+      return null;
+    }
+    case 'all_achievements': {
+      // Use the latest unlock date among all required achievements
+      const dates = (check.ids||[]).map(id => unlockedDates[id]).filter(Boolean);
+      if (dates.length < (check.ids||[]).length) return null;
+      return dates.sort().pop(); // latest date string
+    }
+    default:
+      return new Date().toISOString().split('T')[0];
+  }
+}
+
 function checkAll() {
   const newUnlocks=[];
   GAME_DEFINITIONS.forEach(g=>{
@@ -861,13 +938,17 @@ function checkAll() {
     const gs=appState[g.id]||{plays:[]};
     g.achievements.forEach(a=>{
       if(!unlocked[a.id] && evalCondition(a.check,gs,appState,unlocked,calcTotalPts)){
-        unlocked[a.id]=true; newlyUnlocked.add(a.id); unlockedDates[a.id]=new Date().toISOString().split('T')[0]; newUnlocks.push({...a,source:g.name});
+        unlocked[a.id]=true; newlyUnlocked.add(a.id);
+        unlockedDates[a.id] = findTriggerDate(a.check, gs, appState, unlockedDates) || new Date().toISOString().split('T')[0];
+        newUnlocks.push({...a,source:g.name});
       }
     });
   });
   META_DEFINITIONS.forEach(a=>{
     if(!unlocked[a.id] && evalCondition(a.check,null,appState,unlocked,calcTotalPts)){
-      unlocked[a.id]=true; newlyUnlocked.add(a.id); newUnlocks.push({...a,source:'Meta'});
+      unlocked[a.id]=true; newlyUnlocked.add(a.id);
+      unlockedDates[a.id] = new Date().toISOString().split('T')[0];
+      newUnlocks.push({...a,source:'Meta'});
     }
   });
   return newUnlocks;
