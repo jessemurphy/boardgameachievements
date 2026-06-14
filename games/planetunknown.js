@@ -3,7 +3,7 @@ window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 window.GAME_DEFINITIONS.push(
 // ── Planet Unknown ───────────────────────────────────────────
   {
-    id: 'planetunknown', name: 'Planet Unknown', personalBestField: 'corporation', personalBestField: 'corporation', icon: '🪐', genre: 'Polyomino · Tile Laying · Sci-Fi',
+    id: 'planetunknown', name: 'Planet Unknown', personalBestField: 'score', icon: '🪐', genre: 'Polyomino · Tile Laying · Sci-Fi',
     color: '#4a2a8a', bgColor: '#f6f0ff', dimColor: '#9a70e0',
     logFields: [
       { id: 'win',         label: 'Win?',              type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
@@ -12,8 +12,14 @@ window.GAME_DEFINITIONS.push(
       { id: 'planet',      label: 'Planet',             type: 'select', options: ['Unknown','KSB-4156','K-273','Gaia','Persphone','Arashi','Petra','Tartarus','Charybdis','Kaax','Pajitnov','Oblivion','Cerberus','Lacuna'] },
       { id: 'corporation', label: 'Corporation',        type: 'select', options: ['Unknown','Universal Coalition','Republic', 'Wormhole Corp.', 'Cosmos Inc.', 'Horizon Group','Jump Drive', 'Oasis Ultd.', 'Makeshift', 'Flux Industries'] },
       { id: 'asymmetric', label: 'Asymmetric combo?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
-      { id: 'metObj',      label: 'Met Private Objective', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
-      { id: 'noMeteorites',label: 'No Meteorites Left', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'metObj',       label: 'Met Private Objective', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'noMeteorites', label: 'No Meteorites Left',    type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No' },
+      { id: 'planetScore',  label: 'Planet Score',          type: 'number', min: 0, max: 30, default: 0 },
+      { id: 'resourceScore',label: 'Resource Tracks',       type: 'number', min: 0, max: 30, default: 0 },
+      { id: 'lifepodScore', label: 'Lifepods',              type: 'number', min: 0, max: 20, default: 0 },
+      { id: 'meteoriteScore',label:'Meteorite Points',      type: 'number', min: 0, max: 20, default: 0 },
+      { id: 'civScore',     label: 'CIV Cards',             type: 'number', min: 0, max: 20, default: 0 },
+      { id: 'objectiveScore',label:'Objectives',            type: 'number', min: 0, max: 15, default: 0 },
     ],
     achievements: [
       { id: 'pu_first',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Colony',

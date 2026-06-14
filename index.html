@@ -2099,15 +2099,48 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         scenario, difficulty };
     }
     case 'planetunknown': {
-      // Role format: "KSB-4156／Universal Coalition"
+      // Role format: "KSB-4156／Universal Coalition" or reversed
+      const KNOWN_PLANETS = new Set(['KSB-4156','K-273','Gaia','Persphone','Arashi','Petra','Tartarus','Charybdis','Kaax','Pajitnov','Oblivion','Cerberus','Lacuna']);
+      const KNOWN_CORPS   = new Set(['Universal Coalition','Republic','Wormhole Corp.','Cosmos Inc.','Horizon Group','Jump Drive','Oasis Ultd.','Makeshift','Flux Industries']);
       const roleParts = role.split('／').map(s => s.trim());
-      const planet = roleParts[0] || 'Unknown';
-      const corporation = roleParts[1] || 'Unknown';
+      let planet = 'Unknown', corporation = 'Unknown';
+      for (const part of roleParts) {
+        if (KNOWN_PLANETS.has(part)) planet = part;
+        else if (KNOWN_CORPS.has(part)) corporation = part;
+      }
       const isAsymmetric = planet !== 'KSB-4156' && corporation !== 'Universal Coalition'
         && planet !== 'Unknown' && corporation !== 'Unknown';
+
+      // Parse scoresheet
+      function ssPtsPU(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet || '{}');
+          for (const group of parsed.groups || []) {
+            for (const row of group.rows || []) {
+              if (row.templateId === key) {
+                const v = row.scores?.[playerUuid];
+                if (v !== undefined && v !== '') return parseInt(v) || 0;
+              }
+            }
+          }
+        } catch(e) {}
+        return 0;
+      }
+
+      const targetScore   = ssPtsPU('targetscore') || 60;
+      const planetScore   = ssPtsPU('planet');
+      const resourceScore = ssPtsPU('resourcetracks');
+      const lifepodScore  = ssPtsPU('lifepods');
+      const meteoriteScore= ssPtsPU('meteorites');
+      const civScore      = ssPtsPU('civcards');
+      const objectiveScore= ssPtsPU('objectives');
+
       return { ...base, score: parseFloat(ps.score) || 0,
         planet, corporation, asymmetric: isAsymmetric,
-        targetScore: 60, metObj: false, noMeteorites: false };
+        targetScore, metObj: false, noMeteorites: false,
+        planetScore, resourceScore, lifepodScore,
+        meteoriteScore, civScore, objectiveScore,
+      };
     }
     case 'cartographers': {
       return { ...base, season: 'All Seasons', coins: 0, monsters: 0, allEdicts: false };
