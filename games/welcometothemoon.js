@@ -23,11 +23,16 @@ window.GAME_DEFINITIONS.push(
     { id: 'colA',     label: 'Column A',     type: 'number', min: 0, max: 60, default: 0 },
     { id: 'colB',     label: 'Column B',     type: 'number', min: 0, max: 60, default: 0 },
     { id: 'colC',     label: 'Column C',     type: 'number', min: 0, max: 60, default: 0 },
-    { id: 'sysErrors',label: 'System Errors',type: 'number', min: 0, max: 30, default: 0 },
+    { id: 'sysErrors',   label: 'System Errors',    type: 'number', min: 0, max: 30, default: 0 },
+    { id: 'automataLevel',label: 'Automata Level',  type: 'number', min: 0, max: 8, default: 1 },
   ],
 
-    customStatsTitle: 'Adventure Wins',
+  personalBestField: 'score',
+
+    customStatsTitle: 'Adventure Stats',
     customStats: [
+      { label: 'Personal Best Score', type: 'best_win', field: 'score' },
+      { label: 'Highest Automata Beaten', type: 'best_win', field: 'automataLevel', minValue: 1 },
       { label: '#1: The Launch',   type: 'ratio', field: 'scenario', value: '#1: The Launch' },
       { label: '#2: The Journey',  type: 'ratio', field: 'scenario', value: '#2: The Journey' },
       { label: '#3: The Colony',   type: 'ratio', field: 'scenario', value: '#3: The Colony' },
@@ -93,13 +98,25 @@ window.GAME_DEFINITIONS.push(
         'wtm_s5','wtm_s6','wtm_s7','wtm_s8'
       ]}},
 
+    // ── Automata difficulty ──
+    { id: 'wtm_auto3', icon: '🤖', tier: 'bronze', pts: 10, name: 'Better Than Margaret',
+      desc: 'Beat automata level 3 (Margaret Hamilton) or higher',
+      check: { type: 'win_field_gte', field: 'automataLevel', value: 3 } },
+    { id: 'wtm_auto5', icon: '🛰️', tier: 'silver', pts: 20, name: 'Better Than Sergei',
+      desc: 'Beat automata level 5 (Sergei Korolev) or higher',
+      check: { type: 'win_field_gte', field: 'automataLevel', value: 5 } },
+    { id: 'wtm_auto8', icon: '👾', tier: 'gold',   pts: 40, name: 'Better Than Ada',
+      desc: 'Beat automata level 8 (Ada Lovelace) — the hardest difficulty',
+      check: { type: 'win_field_gte', field: 'automataLevel', value: 8 } },
+
     // ── Platinum ──
     { id: 'wtm_plat', icon: '💎', tier: 'plat', pts: 100, name: 'Welcome to the Moon — Complete',
       desc: 'Unlock all other Welcome to the Moon achievements',
       check: { type: 'all_achievements', ids: [
         'wtm_first','wtm_100','wtm_130','wtm_150','wtm_nosyserr',
         'wtm_s1','wtm_s2','wtm_s3','wtm_s4',
-        'wtm_s5','wtm_s6','wtm_s7','wtm_s8','wtm_campaign'
+        'wtm_s5','wtm_s6','wtm_s7','wtm_s8','wtm_campaign',
+        'wtm_auto3','wtm_auto5','wtm_auto8'
       ]}},
   ]
 }

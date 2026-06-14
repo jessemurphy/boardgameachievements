@@ -783,8 +783,9 @@ function renderCustomStats(g, plays) {
         return pool.filter(p => fields.some(f => p[f] === true)).length;
       }
       case 'best_win': {
-        if (!wins.length) return '—';
-        const best = wins.reduce((m, p) => Math.max(m, Number(p[s.field]) || 0), 0);
+        const pool = wins.filter(p => s.minValue === undefined || (Number(p[s.field])||0) >= s.minValue);
+        if (!pool.length) return '—';
+        const best = pool.reduce((m, p) => Math.max(m, Number(p[s.field]) || 0), 0);
         return best || '—';
       }
       case 'avg': {
@@ -1924,11 +1925,20 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       };
     }
     case 'welcometothemoon': {
-      // Board: '#1: The Launch', '#2: The Journey／Campaign', etc.
+      // Board: '#1: The Launch', '#2: The Journey／Campaign', 'Campaign／#2: The Journey', '#8:  The Battle' (double space), etc.
       const rawBoard = play.board || '';
       const isCampaign = rawBoard.toLowerCase().includes('campaign');
-      const scenMatch = rawBoard.match(/#\d+:\s*[^\/]+/);
-      const scenario = scenMatch ? scenMatch[0].trim() : 'Unknown';
+      const scenMatch = rawBoard.match(/#\d+:\s*[^\uff0f\/]+/);
+      const scenario = scenMatch ? scenMatch[0].replace(/\s+/g, ' ').trim() : 'Unknown';
+      // Extract automata level from NPC player's role field e.g. "Katherine (1)"
+      const AUTOMATA = ['Katherine','Neil','Margaret','Buzz','Sergei','Yuri','Valentina','Ada'];
+      const npcScore = play.playerScores?.find(ps => {
+        const name = AUTOMATA.find(n => (ps.role||'').startsWith(n));
+        return !!name;
+      });
+      const automataMatch = npcScore ? (npcScore.role||'').match(/\((\d+)\)/) : null;
+      const automataLevel = automataMatch ? parseInt(automataMatch[1]) : 0;
+      const automataName = npcScore ? AUTOMATA.find(n => (npcScore.role||'').startsWith(n)) || '' : '';
       function ssPtsWtm(key) {
         try {
           const parsed = JSON.parse(play.scoresheet || '{}');
@@ -1946,6 +1956,8 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       return { ...base,
         scenario,
         campaign: isCampaign,
+        automataLevel,
+        automataName,
         score:     parseFloat(ps.score) || 0,
         colA:      ssPtsWtm('a'),
         colB:      ssPtsWtm('b'),
