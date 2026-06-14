@@ -1964,13 +1964,11 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       if (win && missionMatch) {
         missionToggles['mission_' + missionMatch[1]] = true;
       }
-      const charKey = charNorm.split(',')[0].toLowerCase().trim();
       return { ...base,
-        epicVictory,
         character: charNorm,
-        ['char_' + charKey + '_mission']: win && hasMission,
-        ['char_' + charKey + '_destiny']: win && hasDestiny,
-        ['char_' + charKey + '_epic']:    epicVictory,
+        missionVictory: win && hasMission,
+        destinyVictory: win && hasDestiny,
+        epicVictory,
         ...missionToggles,
         spoiler_count: 0,
       };
