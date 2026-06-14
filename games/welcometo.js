@@ -39,7 +39,7 @@ window.GAME_DEFINITIONS.push(
     { id: 'wt_115',      icon: '🏰', tier: 'gold',   pts: 35, name: 'Dream Street',
       desc: 'Score 115+ points',
       check: { type: 'field_gte', field: 'score', value: 115 } },
-    { id: ',      icon: '👑', tier: 'gold',   pts: 50, name: 'Perfect Suburb',
+    { id: 'wt_130',      icon: '👑', tier: 'gold',   pts: 50, name: 'Perfect Suburb',
       desc: 'Score 130+ points',
       check: { type: 'field_gte', field: 'score', value: 130 } },
 
