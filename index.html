@@ -496,7 +496,8 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       return total >= check.value;
     }
     case 'unique_win_values': {
-      const vals = new Set(wins.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='Any / Unknown'&&v!=='None'));
+      const pool = check.filter ? wins.filter(p => p[check.filter.field] === check.filter.value) : wins;
+      const vals = new Set(pool.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='Any / Unknown'&&v!=='None'));
       return vals.size >= check.count;
     }
     case 'win_all_values':
@@ -881,7 +882,18 @@ let appState = {}, unlocked = {}, newlyUnlocked = new Set(), unlockedDates = {},
 function loadState() {
   try {
     const s = localStorage.getItem('solo_tracker_pub_v4');
-    if (s) { const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{}; hiddenGames=new Set(d.hiddenGames||[]); }
+    if (s) {
+      const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{};
+      // If hiddenGames was saved, use it; otherwise default: hide all zero-play games
+      if (d.hiddenGames) {
+        hiddenGames=new Set(d.hiddenGames);
+      } else {
+        hiddenGames=new Set(GAME_DEFINITIONS.filter(g=>!(d.state?.[g.id]?.plays||[]).length).map(g=>g.id));
+      }
+    } else {
+      // First ever load — hide all games (no plays yet)
+      hiddenGames=new Set(GAME_DEFINITIONS.map(g=>g.id));
+    }
   } catch(e){}
 }
 function saveState() {
@@ -1475,9 +1487,11 @@ function openModal(gid, playIdx=-1) {
   g.logFields.forEach(f=>{
     const existing = existingPlay?.[f.id];
     if(f.type==='toggle'){
-      modalToggles[f.id] = isEdit ? !!existing : (f.id==='win');
+      modalToggles[f.id] = isEdit ? !!existing : false;
       const on=modalToggles[f.id];
-      html+=`<div class="modal-field">
+      const showIfAttr = f.showIf ? ` data-showif-field="${f.showIf.field}" data-showif-value="${f.showIf.value}"` : '';
+      const showIfHide = f.showIf ? ` style="display:none"` : '';
+      html+=`<div class="modal-field"${showIfAttr}${showIfHide} id="wrap_${f.id}">
         <div class="modal-toggle-row">
           <span class="toggle-label">${f.label}</span>
           <button class="toggle ${on?'on':''}" id="tog_${f.id}" onclick="toggleField('${f.id}','${f.trueLabel}','${f.falseLabel}')"></button>
@@ -1486,15 +1500,18 @@ function openModal(gid, playIdx=-1) {
       </div>`;
     } else if(f.type==='select'){
       const selected = isEdit&&existing ? existing : f.options[0];
-      html+=`<div class="modal-field">
+      const onchange = `onchange="updateShowIf('${f.id}', this.value)"`;
+      html+=`<div class="modal-field" id="wrap_${f.id}">
         <label class="modal-label">${f.label}</label>
-        <select class="modal-select" id="fld_${f.id}">
+        <select class="modal-select" id="fld_${f.id}" ${onchange}>
           ${f.options.map(o=>`<option${o===selected?' selected':''}>${o}</option>`).join('')}
         </select>
       </div>`;
     } else if(f.type==='number'){
       const val = isEdit&&existing!==undefined ? existing : f.default;
-      html+=`<div class="modal-field">
+      const showIfAttr = f.showIf ? ` data-showif-field="${f.showIf.field}" data-showif-value="${f.showIf.value}"` : '';
+      const showIfHide = f.showIf ? ` style="display:none"` : '';
+      html+=`<div class="modal-field"${showIfAttr}${showIfHide} id="wrap_${f.id}">
         <label class="modal-label">${f.label}</label>
         <input class="modal-input" type="number" id="fld_${f.id}" min="${f.min}" max="${f.max}" value="${val}">
       </div>`;
@@ -1507,7 +1524,46 @@ function openModal(gid, playIdx=-1) {
     <textarea class="notes-field" id="modal_notes" rows="2" placeholder="Anything to remember…">${existingNotes}</textarea>
   </div>`;
   document.getElementById('modalFields').innerHTML = dateHtml + html + notesHtml;
+  // If editing, apply showIf visibility based on saved values
+  if (isEdit && existingPlay) {
+    const g2 = GAME_DEFINITIONS.find(x=>x.id===gid);
+    g2.logFields.filter(f=>f.type==='select').forEach(f=>{
+      updateShowIf(f.id, existingPlay[f.id] || f.options[0]);
+    });
+  }
+  // Also apply showIf for new plays based on defaults
+  if (!isEdit) {
+    const g2 = GAME_DEFINITIONS.find(x=>x.id===gid);
+    g2.logFields.filter(f=>f.type==='select').forEach(f=>{
+      updateShowIf(f.id, f.options[0]);
+    });
+  }
   document.getElementById('modalOverlay').classList.add('open');
+}
+
+function updateShowIf(selectFieldId, value) {
+  const g = GAME_DEFINITIONS.find(x=>x.id===logGameId);
+  if (!g) return;
+  g.logFields.forEach(f => {
+    if (!f.showIf || f.showIf.field !== selectFieldId) return;
+    const wrap = document.getElementById('wrap_' + f.id);
+    if (!wrap) return;
+    const visible = String(value) === String(f.showIf.value);
+    wrap.style.display = visible ? '' : 'none';
+    // Reset hidden fields
+    if (!visible) {
+      if (f.type === 'toggle') {
+        modalToggles[f.id] = false;
+        const tog = document.getElementById('tog_' + f.id);
+        const lbl = document.getElementById('togLbl_' + f.id);
+        if (tog) tog.classList.remove('on');
+        if (lbl) lbl.textContent = f.falseLabel;
+      } else if (f.type === 'number') {
+        const el = document.getElementById('fld_' + f.id);
+        if (el) el.value = f.default ?? 0;
+      }
+    }
+  });
 }
 
 function editPlay(gid, idx) { openModal(gid, idx); }
@@ -1957,19 +2013,16 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       const boardStr = play.board || '';
       const missionMatch = boardStr.match(/Mission (\d+)/i);
       const destinyMatch  = boardStr.match(/Destiny (\d+)/i);
-      const hasMission = !!missionMatch;
-      const hasDestiny  = !!destinyMatch;
-      const epicVictory = win && hasMission && hasDestiny;
-      const missionToggles = {};
-      if (win && missionMatch) {
-        missionToggles['mission_' + missionMatch[1]] = true;
-      }
+      const missionComplete = win && !!missionMatch;
+      const destinyVictory  = win && !!destinyMatch;
+      const epicVictory     = missionComplete && destinyVictory;
+      const mission = missionMatch ? missionMatch[1] : '';
       return { ...base,
         character: charNorm,
-        missionVictory: win && hasMission,
-        destinyVictory: win && hasDestiny,
+        mission,
+        missionComplete,
+        destinyVictory,
         epicVictory,
-        ...missionToggles,
         spoiler_count: 0,
       };
     }
