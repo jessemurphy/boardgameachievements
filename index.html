@@ -786,7 +786,8 @@ function renderCustomStats(g, plays) {
         const pool = wins.filter(p => s.minValue === undefined || (Number(p[s.field])||0) >= s.minValue);
         if (!pool.length) return '—';
         const best = pool.reduce((m, p) => Math.max(m, Number(p[s.field]) || 0), 0);
-        return best || '—';
+        if (!best) return '—';
+        return s.labelMap ? (s.labelMap[best] || best) : best;
       }
       case 'avg': {
         const pool = s.winsOnly ? wins : plays;

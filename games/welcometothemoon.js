@@ -32,7 +32,7 @@ window.GAME_DEFINITIONS.push(
     customStatsTitle: 'Adventure Stats',
     customStats: [
       { label: 'Personal Best Score', type: 'best_win', field: 'score' },
-      { label: 'Highest Automata Beaten', type: 'best_win', field: 'automataLevel', minValue: 1 },
+      { label: 'Highest Automata Beaten', type: 'best_win', field: 'automataLevel', minValue: 1, labelMap: ['','Katherine (1)','Neil (2)','Margaret (3)','Buzz (4)','Sergei (5)','Yuri (6)','Valentina (7)','Ada (8)'] },
       { label: '#1: The Launch',   type: 'ratio', field: 'scenario', value: '#1: The Launch' },
       { label: '#2: The Journey',  type: 'ratio', field: 'scenario', value: '#2: The Journey' },
       { label: '#3: The Colony',   type: 'ratio', field: 'scenario', value: '#3: The Colony' },
@@ -100,13 +100,13 @@ window.GAME_DEFINITIONS.push(
 
     // ── Automata difficulty ──
     { id: 'wtm_auto3', icon: '🤖', tier: 'bronze', pts: 10, name: 'Better Than Margaret',
-      desc: 'Beat automata level 3 (Margaret Hamilton) or higher',
+      desc: 'Beat Margaret (level 3) or higher',
       check: { type: 'win_field_gte', field: 'automataLevel', value: 3 } },
     { id: 'wtm_auto5', icon: '🛰️', tier: 'silver', pts: 20, name: 'Better Than Sergei',
-      desc: 'Beat automata level 5 (Sergei Korolev) or higher',
+      desc: 'Beat Sergei (level 5) or higher',
       check: { type: 'win_field_gte', field: 'automataLevel', value: 5 } },
     { id: 'wtm_auto8', icon: '👾', tier: 'gold',   pts: 40, name: 'Better Than Ada',
-      desc: 'Beat automata level 8 (Ada Lovelace) — the hardest difficulty',
+      desc: 'Beat Ada (level 8) — the hardest difficulty',
       check: { type: 'win_field_gte', field: 'automataLevel', value: 8 } },
 
     // ── Platinum ──
