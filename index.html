@@ -41,6 +41,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* Game cards */
 .game-card{background:var(--card);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.07);cursor:pointer;display:flex;align-items:center;gap:14px;padding:14px 16px;border-left:4px solid transparent;transition:background .1s;-webkit-user-select:none}
 .game-card:active{background:#f0f0f5}
+.game-card.platted{background:linear-gradient(110deg,#fffdf5,#fff8e0,#fffdf5);box-shadow:0 0 0 1px #f0d870,0 2px 12px rgba(212,160,23,.25);animation:platShimmer 3s ease-in-out infinite}
+@keyframes platShimmer{0%,100%{box-shadow:0 0 0 1px #f0d870,0 2px 12px rgba(212,160,23,.2)}50%{box-shadow:0 0 0 1px #e8c040,0 2px 18px rgba(212,160,23,.45)}}
 .game-card-icon{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .game-card-info{flex:1;min-width:0}
 .game-card-name{font-size:15px;font-weight:600}
@@ -1113,6 +1115,7 @@ function renderHome() {
     const achN  = g.achievements?.filter(a=>unlocked[a.id]).length||0;
     const achT  = g.achievements?.length||0;
     const pct   = total>0?Math.round(earned/total*100):0;
+    const platted = (g.achievements||[]).some(a=>a.id.endsWith('_plat')&&unlocked[a.id]);
     const lastTs = plays.length ? Math.max(...plays.map(p=>p.ts||0)) : 0;
     const lastStr = lastTs ? new Date(lastTs).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : 'Never played';
     return `<div class="game-card" style="border-left-color:${g.color}" onclick="openGame('${g.id}')">
