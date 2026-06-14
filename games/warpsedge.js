@@ -14,8 +14,8 @@ window.GAME_DEFINITIONS.push(
 
     logFields: [
       { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'ship',       label: 'Starfighter',      type: 'select', options: ['Any / Unknown','Starfighter 1','Starfighter 2','Starfighter 3','Starfighter 4'] },
-      { id: 'mothership', label: 'Mothership',       type: 'select', options: ['Any / Unknown','Mothership 1','Mothership 2','Mothership 3','Mothership 4','Mothership 5'] },
+      { id: 'ship',       label: 'Starfighter',      type: 'select', options: ['Any / Unknown','Hermes','Achilles','Titan','Artemis'] },
+      { id: 'mothership', label: 'Mothership',       type: 'select', options: ['Any / Unknown','The Dread','The Hydra','The Duo','The Array','The Revenant'] },
       { id: 'warpsUsed',  label: 'Warps Used',       type: 'number', min: 1, max: 6, default: 3 },
       { id: 'noLoss',     label: 'No Shields Lost',  type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     ],
@@ -26,9 +26,9 @@ window.GAME_DEFINITIONS.push(
       { id: 'w_5wins',        icon: '✨', tier: 'silver', pts: 25,  name: 'Ace Pilot',           desc: 'Win 5 games',
         check: { type: 'min_wins', count: 5 } },
       { id: 'w_all_ships',    icon: '🛸', tier: 'gold',   pts: 40,  name: 'Fleet Commander',     desc: 'Win with all 4 starfighters',
-        check: { type: 'win_all_values', field: 'ship', values: ['Starfighter 1','Starfighter 2','Starfighter 3','Starfighter 4'] } },
+        check: { type: 'win_all_values', field: 'ship', values: ['Hermes','Achilles','Titan','Artemis'] } },
       { id: 'w_all_mothers',  icon: '👾', tier: 'gold',   pts: 50,  name: 'Mothership Graveyard',desc: 'Defeat all 5 motherships',
-        check: { type: 'win_all_values', field: 'mothership', values: ['Mothership 1','Mothership 2','Mothership 3','Mothership 4','Mothership 5'] } },
+        check: { type: 'win_all_values', field: 'mothership', values: ['The Dread','The Hydra','The Duo','The Array','The Revenant'] } },
       { id: 'w_warp1',        icon: '⚡', tier: 'gold',   pts: 60,  name: 'First Warp, No Mercy',desc: 'Win using only 1 warp',
         check: { type: 'win_field_lte', field: 'warpsUsed', value: 1 } },
       { id: 'w_no_shield',    icon: '🛡️', tier: 'gold',   pts: 50,  name: 'Untouchable',         desc: 'Win without losing any shields',
