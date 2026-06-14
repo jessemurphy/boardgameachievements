@@ -27,11 +27,9 @@ window.GAME_DEFINITIONS.push(
     { id: 'automataLevel',label: 'Automata Level',  type: 'number', min: 0, max: 8, default: 1 },
   ],
 
-  personalBestField: 'score',
 
-    customStatsTitle: 'Adventure Stats',
+    customStatsTitle: 'Adventure Wins',
     customStats: [
-      { label: 'Personal Best Score', type: 'best_win', field: 'score' },
       { label: 'Highest Automata Beaten', type: 'best_win', field: 'automataLevel', minValue: 1, labelMap: ['','Katherine (1)','Neil (2)','Margaret (3)','Buzz (4)','Sergei (5)','Yuri (6)','Valentina (7)','Ada (8)'] },
       { label: '#1: The Launch',   type: 'ratio', field: 'scenario', value: '#1: The Launch' },
       { label: '#2: The Journey',  type: 'ratio', field: 'scenario', value: '#2: The Journey' },
@@ -41,6 +39,18 @@ window.GAME_DEFINITIONS.push(
       { label: '#6: The Virus',    type: 'ratio', field: 'scenario', value: '#6: The Virus' },
       { label: '#7: The Escape',   type: 'ratio', field: 'scenario', value: '#7: The Escape' },
       { label: '#8: The Battle',   type: 'ratio', field: 'scenario', value: '#8: The Battle' },
+    ],
+
+    customStats2Title: 'Adventure Best Scores',
+    customStats2: [
+      { label: '#1: The Launch',   type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#1: The Launch' } },
+      { label: '#2: The Journey',  type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#2: The Journey' } },
+      { label: '#3: The Colony',   type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#3: The Colony' } },
+      { label: '#4: The Mine',     type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#4: The Mine' } },
+      { label: '#5: The Dome',     type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#5: The Dome' } },
+      { label: '#6: The Virus',    type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#6: The Virus' } },
+      { label: '#7: The Escape',   type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#7: The Escape' } },
+      { label: '#8: The Battle',   type: 'best_win', field: 'score', filter: { field: 'scenario', value: '#8: The Battle' } },
     ],
 
     achievements: [

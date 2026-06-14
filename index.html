@@ -783,7 +783,8 @@ function renderCustomStats(g, plays) {
         return pool.filter(p => fields.some(f => p[f] === true)).length;
       }
       case 'best_win': {
-        const pool = wins.filter(p => s.minValue === undefined || (Number(p[s.field])||0) >= s.minValue);
+        let pool = wins.filter(p => s.minValue === undefined || (Number(p[s.field])||0) >= s.minValue);
+        if (s.filter) pool = pool.filter(p => String(p[s.filter.field]) === String(s.filter.value));
         if (!pool.length) return '—';
         const best = pool.reduce((m, p) => Math.max(m, Number(p[s.field]) || 0), 0);
         if (!best) return '—';
@@ -813,10 +814,23 @@ function renderCustomStats(g, plays) {
     return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
   }).join('');
 
-  return `<div class="card">
+  let html = `<div class="card">
     <div class="card-header"><span class="card-title">${g.customStatsTitle || 'Game Stats'}</span></div>
     <div class="pb-table">${rows}</div>
   </div>`;
+
+  if (g.customStats2 && g.customStats2.length) {
+    const rows2 = g.customStats2.map(s => {
+      const val = evalStat(s);
+      return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
+    }).join('');
+    html += `<div class="card">
+      <div class="card-header"><span class="card-title">${g.customStats2Title || 'More Stats'}</span></div>
+      <div class="pb-table">${rows2}</div>
+    </div>`;
+  }
+
+  return html;
 }
 
 function getProgress(check, gameState, allState) {
