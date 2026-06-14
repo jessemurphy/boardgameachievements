@@ -12,6 +12,14 @@ window.GAME_DEFINITIONS.push(
       { id: 'score',      label: 'Final Score',   type: 'number', min: -200, max: 200, default: 0 },
       { id: 'lifeLeft',   label: 'Life Points Left', type: 'number', min: 0, max: 20, default: 0 },
     ],
+    customStatsTitle: 'Difficulty Breakdown',
+    customStats: [
+      { label: 'Level 1', type: 'ratio', field: 'difficulty', value: 'Level 1' },
+      { label: 'Level 2', type: 'ratio', field: 'difficulty', value: 'Level 2' },
+      { label: 'Level 3', type: 'ratio', field: 'difficulty', value: 'Level 3' },
+      { label: 'Level 4', type: 'ratio', field: 'difficulty', value: 'Level 4' },
+    ],
+
     achievements: [
       { id: 'fri_first',  icon: '🌟', tier: 'bronze', pts: 10, name: 'Survived',
         desc: 'Win your first game',
