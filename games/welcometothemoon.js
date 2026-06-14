@@ -26,7 +26,19 @@ window.GAME_DEFINITIONS.push(
     { id: 'sysErrors',label: 'System Errors',type: 'number', min: 0, max: 30, default: 0 },
   ],
 
-  achievements: [
+    customStatsTitle: 'Adventure Wins',
+    customStats: [
+      { label: '#1: The Launch',   type: 'ratio', field: 'scenario', value: '#1: The Launch' },
+      { label: '#2: The Journey',  type: 'ratio', field: 'scenario', value: '#2: The Journey' },
+      { label: '#3: The Colony',   type: 'ratio', field: 'scenario', value: '#3: The Colony' },
+      { label: '#4: The Mine',     type: 'ratio', field: 'scenario', value: '#4: The Mine' },
+      { label: '#5: The Dome',     type: 'ratio', field: 'scenario', value: '#5: The Dome' },
+      { label: '#6: The Virus',    type: 'ratio', field: 'scenario', value: '#6: The Virus' },
+      { label: '#7: The Escape',   type: 'ratio', field: 'scenario', value: '#7: The Escape' },
+      { label: '#8: The Battle',   type: 'ratio', field: 'scenario', value: '#8: The Battle' },
+    ],
+
+    achievements: [
     { id: 'wtm_first',    icon: '🚀', tier: 'bronze', pts: 10, name: 'Liftoff!',
       desc: 'Complete your first adventure',
       check: { type: 'min_plays', count: 1 } },
