@@ -2101,6 +2101,7 @@ function handleImportOverlayClick(e) {
 
 function playFingerprint(gid, play) {
   const base = `${play.date}|${play.win?1:0}`;
+  if (gid === 'planetunknown') return `${base}|${play.score||0}|${play.corporation||''}`;
   if (gid === 'welcometothemoon') return `${base}|${play.scenario||''}`;
   if (gid === 'nextstationparis') return `${base}|${play.score||0}`;
   if (gid === 'turing')       return `${base}|${play.rounds||0}|${play.queries||0}`;
