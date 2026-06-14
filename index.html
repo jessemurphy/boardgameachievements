@@ -1078,6 +1078,10 @@ function renderGameDetail(g) {
       if (p.rounds) parts.push(p.rounds + ' rounds');
       if (p.queries) parts.push(p.queries + ' queries');
       if (p.noMistake) parts.push('✓ Perfect');
+    } else if (g.id === 'planetunknown') {
+      if (p.planet && p.planet !== 'Unknown') parts.push(p.planet);
+      if (p.corporation && p.corporation !== 'Unknown') parts.push(p.corporation);
+      if (p.score) parts.push(p.score + ' pts');
     } else if (g.id === 'nextstationparis') {
       if (p.score) parts.push(p.score + ' pts');
       if (p.crossings4 > 0) parts.push('4-line ✓');
@@ -1620,7 +1624,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     }
     // Secondary: skip NPC/bot players (isNpc flag in player list)
     return false;
-  }) || play.playerScores?.find(ps => ps.playerRefId !== 1) || play.playerScores?.[0];
+  }) || play.playerScores?.find(ps => ps.playerRefId === 1) || play.playerScores?.[0];
 
   const ps = myScore || {};
   const win   = !!ps.winner;
@@ -1978,8 +1982,15 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         scenario, difficulty };
     }
     case 'planetunknown': {
-      return { ...base, targetScore: 60, asymmetric: false, metObj: false, noMeteorites: false,
-        planet: 'Unknown', corporation: 'Unknown' };
+      // Role format: "KSB-4156／Universal Coalition"
+      const roleParts = role.split('／').map(s => s.trim());
+      const planet = roleParts[0] || 'Unknown';
+      const corporation = roleParts[1] || 'Unknown';
+      const isAsymmetric = planet !== 'KSB-4156' && corporation !== 'Universal Coalition'
+        && planet !== 'Unknown' && corporation !== 'Unknown';
+      return { ...base, score: parseFloat(ps.score) || 0,
+        planet, corporation, asymmetric: isAsymmetric,
+        targetScore: 60, metObj: false, noMeteorites: false };
     }
     case 'cartographers': {
       return { ...base, season: 'All Seasons', coins: 0, monsters: 0, allEdicts: false };
