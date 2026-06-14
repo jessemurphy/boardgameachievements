@@ -1607,6 +1607,7 @@ const BGG_TO_TRACKER = {
   353545: 'nextstationlondon', // Next Station: London
   373106: 'skyteam',        // Sky Team
   295374: 'circlewagons',   // Circle the Wagons
+  420033: 'vantage',        // Vantage
 };
 
 // Spirit name normalization (BGStats uses Title Case)
@@ -1900,6 +1901,32 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       const scenario = AIRPORT_MAP[boardLower] || play.board || 'Unknown';
       const myRole = role || 'Solo';
       return { ...base, scenario, role: myRole, coffeeCups: false };
+    }
+    case 'vantage': {
+      const VANTAGE_CHARS = ['Jules, the Captain','Soren, the Navigator','Emilien, the Scholar','Ira, the Medic','Ariel, the Engineer','Tina, the Marine'];
+      const roleParts = role.split(/[／\/]/).map(s => s.trim());
+      const charRaw = roleParts.find(r => VANTAGE_CHARS.some(c => c.toLowerCase() === r.toLowerCase())) || roleParts[0] || '';
+      const charNorm = VANTAGE_CHARS.find(c => c.toLowerCase() === charRaw.toLowerCase()) || charRaw;
+      const boardStr = play.board || '';
+      const missionMatch = boardStr.match(/Mission (\d+)/i);
+      const destinyMatch  = boardStr.match(/Destiny (\d+)/i);
+      const hasMission = !!missionMatch;
+      const hasDestiny  = !!destinyMatch;
+      const epicVictory = win && hasMission && hasDestiny;
+      const missionToggles = {};
+      if (win && missionMatch) {
+        missionToggles['mission_' + missionMatch[1]] = true;
+      }
+      const charKey = charNorm.split(',')[0].toLowerCase().trim();
+      return { ...base,
+        epicVictory,
+        character: charNorm,
+        ['char_' + charKey + '_mission']: win && hasMission,
+        ['char_' + charKey + '_destiny']: win && hasDestiny,
+        ['char_' + charKey + '_epic']:    epicVictory,
+        ...missionToggles,
+        spoiler_count: 0,
+      };
     }
     case 'sts': {
       const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
