@@ -950,7 +950,7 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
     case 'win_with_toggle_and_field_eq':
       return ts2date(wins.find(p => !!p[check.field] && p[check.field2] == check.value2)?.ts);
     case 'win_two_fields':
-      return ts2date(wins.find(p => (Number(p[check.field])||0) >= check.value && (Number(p[check.field2])||0) >= check.value2)?.ts);
+      return ts2date(wins.find(p => String(p[check.field1]) === String(check.value1) && String(p[check.field2]) === String(check.value2))?.ts);
     case 'win_all_values': {
       // Date of the last required value being won for the first time
       const dates = check.values.map(v => wins.find(p => p[check.field] === v)?.ts).filter(Boolean);
@@ -1626,6 +1626,10 @@ function submitPlay(){
     appState[logGameId].plays[editPlayIndex]=play;
   } else {
     appState[logGameId].plays.push(play);
+  }
+  // Auto-show game if it was hidden and now has plays
+  if (hiddenGames.has(logGameId) && (appState[logGameId]?.plays||[]).length > 0) {
+    hiddenGames.delete(logGameId);
   }
   const newUnlocks=checkAll();
   saveState();
@@ -2500,6 +2504,10 @@ function confirmImport() {
   }
   const affectedGids = [...new Set(importParsedPlays.map(x=>x.gid))];
   affectedGids.forEach(gid => appState[gid].plays.sort((a,b) => a.ts - b.ts));
+  // Auto-show any previously hidden games that now have plays
+  affectedGids.forEach(gid => {
+    if (hiddenGames.has(gid) && (appState[gid]?.plays||[]).length > 0) hiddenGames.delete(gid);
+  });
   appState._lastImport = new Date().toISOString().split('T')[0];
   const newUnlocks = checkAll();
   saveState();
