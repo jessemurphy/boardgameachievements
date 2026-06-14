@@ -49,21 +49,21 @@ window.GAME_DEFINITIONS.push(
       { id: 'pu_4corps',   icon: '🏢', tier: 'gold',   pts: 40,  name: 'Corporate Diversity',
         desc: 'Win with 4 different corporations',
         check: { type: 'unique_win_values', field: 'corporation', count: 4 } },
+      { id: 'pu_9corps',   icon: '🏢', tier: 'gold',   pts: 60,  name: 'Corporate Overlord',
+        desc: 'Win with 9 different corporations',
+        check: { type: 'unique_win_values', field: 'corporation', count: 9 } },
       { id: 'pu_4planets', icon: '🌏', tier: 'gold',   pts: 40,  name: 'Planetary Explorer',
         desc: 'Win on 4 different planets',
         check: { type: 'unique_win_values', field: 'planet', count: 4 } },
       { id: 'pu_10plays',  icon: '🎮', tier: 'silver', pts: 20,  name: 'Seasoned Colonist',
         desc: 'Play 10 games',
         check: { type: 'min_plays', count: 10 } },
-      { id: 'pu_allcorps',   icon: '🏢', tier: 'gold',   pts: 60,  name: 'Master of Corporations',
-        desc: 'Win with all 9 corporations',
-        check: { type: 'win_all_values', field: 'corporation', values: ['Universal Coalition','Republic', 'Wormhole Corp.', 'Cosmos Inc.', 'Horizon Group','Jump Drive', 'Oasis Ultd.', 'Makeshift', 'Flux Industries'] } },
       { id: 'pu_plat',     icon: '💎', tier: 'plat',   pts: 100, name: 'Planet Master',
         desc: 'Unlock all other Planet Unknown achievements',
         check: { type: 'all_achievements', ids: [
           'pu_first','pu_score60','pu_score70','pu_score80','pu_score90',
           'pu_margin10','pu_margin20','pu_asymmetric','pu_objective',
-          'pu_clean','pu_4corps','pu_4planets','pu_allcorps','pu_10plays'
+          'pu_clean','pu_4corps','pu_4planets','pu_9corps','pu_10plays'
         ]}},
     ]
   }
