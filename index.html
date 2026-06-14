@@ -1113,11 +1113,14 @@ function renderHome() {
     const achN  = g.achievements?.filter(a=>unlocked[a.id]).length||0;
     const achT  = g.achievements?.length||0;
     const pct   = total>0?Math.round(earned/total*100):0;
+    const lastTs = plays.length ? Math.max(...plays.map(p=>p.ts||0)) : 0;
+    const lastStr = lastTs ? new Date(lastTs).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : 'Never played';
     return `<div class="game-card" style="border-left-color:${g.color}" onclick="openGame('${g.id}')">
       <div class="game-card-icon" style="background:${g.bgColor}">${g.icon}</div>
       <div class="game-card-info">
         <div class="game-card-name">${g.name}</div>
         <div class="game-card-sub">${plays.length} plays · ${wins} wins · ${achN}/${achT} achievements</div>
+        <div class="game-card-sub" style="color:var(--text-3);font-size:11px;margin-top:2px">Last played: ${lastStr}</div>
       </div>
       <div class="game-card-right">
         <div class="game-card-pts">${earned} pts</div>
