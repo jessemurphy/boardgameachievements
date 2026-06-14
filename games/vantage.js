@@ -81,6 +81,20 @@ window.GAME_DEFINITIONS.push(
       { id: 'spoiler_count', label: 'Spoiler Pack Items Accessed', type: 'number', min: 0, max: 20, default: 0 },
     ],
 
+    customStatsTitle: 'Campaign Stats',
+    customStats: [
+      { label: 'Losses',              type: 'count_where',  field: 'win', value: false },
+      { label: 'Missions Completed',  type: 'count_toggle', fields: [
+          'char_jules_mission','char_soren_mission','char_emilien_mission',
+          'char_ira_mission','char_ariel_mission','char_tina_mission'] },
+      { label: 'Destinies Fulfilled', type: 'count_toggle', fields: [
+          'char_jules_destiny','char_soren_destiny','char_emilien_destiny',
+          'char_ira_destiny','char_ariel_destiny','char_tina_destiny'] },
+      { label: 'Epic Victories',      type: 'count_toggle', fields: [
+          'char_jules_epic','char_soren_epic','char_emilien_epic',
+          'char_ira_epic','char_ariel_epic','char_tina_epic'] },
+    ],
+
     achievements: [
       // ── First steps ──
       { id: 'vt_first_win', icon: '🌟', tier: 'bronze', pts: 10, name: 'First Contact',

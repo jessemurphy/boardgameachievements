@@ -763,6 +763,52 @@ function renderPersonalBests(g) {
   </div>`;
 }
 
+function renderCustomStats(g, plays) {
+  if (!g.customStats || !g.customStats.length || !plays.length) return '';
+  const wins = plays.filter(p => p.win);
+
+  function evalStat(s) {
+    switch (s.type) {
+      case 'count_where': {
+        const pool = s.winsOnly ? wins : plays;
+        return pool.filter(p => String(p[s.field]) === String(s.value)).length;
+      }
+      case 'count_toggle': {
+        // Count plays where at least one of the listed fields is true (one play = one count)
+        const pool = s.winsOnly ? wins : plays;
+        const fields = s.fields || (s.field ? [s.field] : []);
+        return pool.filter(p => fields.some(f => p[f] === true)).length;
+      }
+      case 'best_win': {
+        if (!wins.length) return '—';
+        const best = wins.reduce((m, p) => Math.max(m, Number(p[s.field]) || 0), 0);
+        return best || '—';
+      }
+      case 'avg': {
+        const pool = s.winsOnly ? wins : plays;
+        if (!pool.length) return '—';
+        const sum = pool.reduce((t, p) => t + (Number(p[s.field]) || 0), 0);
+        return (sum / pool.length).toFixed(s.decimals ?? 1);
+      }
+      case 'unique_values': {
+        const pool = s.winsOnly ? wins : plays;
+        return new Set(pool.map(p => p[s.field]).filter(v => v && v !== 'None' && v !== 'Unknown')).size;
+      }
+      default: return '—';
+    }
+  }
+
+  const rows = g.customStats.map(s => {
+    const val = evalStat(s);
+    return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-header"><span class="card-title">${g.customStatsTitle || 'Game Stats'}</span></div>
+    <div class="pb-table">${rows}</div>
+  </div>`;
+}
+
 function getProgress(check, gameState, allState) {
   const plays = gameState?.plays || [];
   const wins  = plays.filter(p => p.win);
@@ -1249,6 +1295,7 @@ function renderGameDetail(g) {
     </div>
     ${renderScoreTitles(g)}
     ${renderPersonalBests(g)}
+    ${renderCustomStats(g, plays)}
     <div class="card">
       <div class="card-header">
         <span class="card-title">Achievements${g.official ? ' <span class=\"official-badge\">Official</span>' : ''}</span>
