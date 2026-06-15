@@ -65,6 +65,28 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hstat-lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 
 /* Log button */
+.campaign-progress{background:#e8f0e8;border-radius:8px;padding:10px 14px;margin-bottom:8px}
+.campaign-progress-bar{height:6px;background:#e0e0e8;border-radius:3px;margin-top:6px}
+.campaign-progress-fill{height:6px;border-radius:3px;transition:width .3s}
+.scenario-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f5}
+.scenario-num{font-size:12px;font-weight:600;color:var(--text-3);min-width:24px}
+.scenario-title{flex:1;font-size:14px;color:var(--text)}
+.scenario-checks{display:flex;gap:8px}
+.scenario-check{width:28px;height:28px;border-radius:6px;border:1.5px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0}
+.scenario-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.scenario-check.available{background:#fff8e0;border-color:#f0d870}
+.char-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f5}
+.char-name{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+.char-level{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2)}
+.char-level input{width:40px;padding:4px 6px;border:1px solid #ddd;border-radius:6px;font-size:14px;text-align:center}
+.campaign-card-item{background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);cursor:pointer;border-left:4px solid transparent}
+.campaign-card-item:active{opacity:.8}
+.campaign-card-name{font-size:16px;font-weight:600;color:var(--text)}
+.campaign-card-sub{font-size:13px;color:var(--text-2);margin-top:2px}
+.btn-new-campaign{display:block;width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:16px}
+.campaign-section-title{font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;padding:14px 0 6px}
+.btn-complete-campaign{display:block;width:100%;padding:12px;background:var(--gold);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px}
+.btn-delete-campaign{display:block;width:100%;padding:10px;background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
 .btn-log{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;border:none;color:#fff;width:100%;transition:opacity .15s}
 .btn-log:active{opacity:.75}
 
@@ -251,6 +273,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <script src="games/welcometothemoon.js"></script>
 <script src="games/nextstationlondon.js"></script>
 <script src="games/skyteam.js"></script>
+<script src="games/jawsoflion.js"></script>
 <script src="games/vantage.js"></script>
 </head>
 <body>
@@ -279,6 +302,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="content" id="statsContent"></div>
 </div>
 
+<div class="screen" id="screen-campaign-list">
+  <div class="content" id="campaignListContent"></div>
+</div>
+<div class="screen" id="screen-campaign-detail">
+  <div class="content" id="campaignDetailContent"></div>
+</div>
 <div class="screen" id="screen-settings">
   <div class="content">
     <div class="card" id="settingsGameList"></div>
@@ -602,6 +631,10 @@ function getProgressPct(check, gameState, allState) {
       const best = wins.reduce((m,p)=>Math.max(m,Number(p[check.field])||0),0);
       return Math.min(1, best / check.value);
     }
+    case 'campaign_complete': {
+      const gameCamps = campaigns[check.gameId] || [];
+      return gameCamps.some(camp => camp.status === 'complete');
+    }
     case 'all_achievements': {
       const have = check.ids.filter(id=>unlocked[id]).length;
       return have / check.ids.length;
@@ -828,13 +861,13 @@ function getProgress(check, gameState, allState) {
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let appState = {}, unlocked = {}, newlyUnlocked = new Set(), unlockedDates = {}, sortMode = 'alpha', gameFilter = '', hiddenGames = new Set();
+let appState = {}, unlocked = {}, newlyUnlocked = new Set(), unlockedDates = {}, sortMode = 'alpha', gameFilter = '', hiddenGames = new Set(), campaigns = {};
 
 function loadState() {
   try {
     const s = localStorage.getItem('solo_tracker_pub_v4');
     if (s) {
-      const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{};
+      const d=JSON.parse(s); appState=d.state||{}; unlocked=d.unlocked||{}; unlockedDates=d.unlockedDates||{}; campaigns=d.campaigns||{};
       // If hiddenGames was saved, use it; otherwise default: hide all zero-play games
       if (d.hiddenGames) {
         hiddenGames=new Set(d.hiddenGames);
@@ -848,7 +881,7 @@ function loadState() {
   } catch(e){}
 }
 function saveState() {
-  localStorage.setItem('solo_tracker_pub_v4', JSON.stringify({state:appState,unlocked,unlockedDates,hiddenGames:[...hiddenGames]}));
+  localStorage.setItem('solo_tracker_pub_v4', JSON.stringify({state:appState,unlocked,unlockedDates,hiddenGames:[...hiddenGames],campaigns}));
 }
 
 function calcTotalPts() {
@@ -1006,6 +1039,183 @@ function closeGame() { navTo('home'); }
 // ═══════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// CAMPAIGNS
+// ═══════════════════════════════════════
+
+function openCampaignList(gid) {
+  const g = GAME_DEFINITIONS.find(x=>x.id===gid);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-campaign-list').classList.add('active');
+  document.getElementById('topbarTitle').textContent = g.name + ' — Campaigns';
+  document.getElementById('topbarLeft').innerHTML = `<button class="topbar-back" onclick="openGame('${gid}')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1.5 7.5L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> ${g.name}</button>`;
+  renderCampaignList(gid);
+}
+
+function renderCampaignList(gid) {
+  const g = GAME_DEFINITIONS.find(x=>x.id===gid);
+  const list = (campaigns[gid] || []);
+  const active = list.filter(c=>c.status==='active');
+  const completed = list.filter(c=>c.status==='complete');
+
+  let html = `<button class="btn-new-campaign" onclick="createCampaign('${gid}')">+ New Campaign</button>`;
+
+  if (active.length) {
+    html += `<div class="campaign-section-title">Active</div>`;
+    html += active.map(camp => campaignCardHtml(gid, camp)).join('');
+  }
+  if (completed.length) {
+    html += `<div class="campaign-section-title">Completed</div>`;
+    html += completed.map(camp => campaignCardHtml(gid, camp)).join('');
+  }
+  if (!list.length) {
+    html += `<div class="empty-state"><div class="empty-icon">🦁</div>No campaigns yet. Start one!</div>`;
+  }
+  document.getElementById('campaignListContent').innerHTML = html;
+}
+
+function campaignCardHtml(gid, camp) {
+  const cfg = GAME_DEFINITIONS.find(x=>x.id===gid)?.campaignConfig;
+  const total = cfg?.scenarios?.length || 0;
+  const done = Object.values(camp.scenarios||{}).filter(s=>s.complete).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const color = camp.status==='complete' ? 'var(--gold)' : 'var(--green)';
+  return `<div class="campaign-card-item" style="border-left-color:${color}" onclick="openCampaignDetail('${gid}','${camp.id}')">
+    <div class="campaign-card-name">${camp.name}</div>
+    <div class="campaign-card-sub">${done} / ${total} scenarios · Started ${camp.startDate}${camp.endDate?' · Ended '+camp.endDate:''}</div>
+    <div class="campaign-progress-bar" style="margin-top:8px"><div class="campaign-progress-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+
+function createCampaign(gid) {
+  const name = prompt('Campaign name:');
+  if (!name) return;
+  if (!campaigns[gid]) campaigns[gid] = [];
+  const cfg = GAME_DEFINITIONS.find(x=>x.id===gid)?.campaignConfig;
+  const camp = {
+    id: Date.now().toString(),
+    name,
+    status: 'active',
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: null,
+    characters: (cfg?.characters||[]).map(c=>({class:c, level:1})),
+    scenarios: {},
+    notes: '',
+  };
+  // Scenario 1 is always available at start
+  if (cfg?.scenarios?.length) camp.scenarios['1'] = { available: true, complete: false };
+  campaigns[gid].push(camp);
+  saveState();
+  openCampaignDetail(gid, camp.id);
+}
+
+function openCampaignDetail(gid, campId) {
+  const g = GAME_DEFINITIONS.find(x=>x.id===gid);
+  const camp = (campaigns[gid]||[]).find(c=>c.id===campId);
+  if (!camp) return;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-campaign-detail').classList.add('active');
+  document.getElementById('topbarTitle').textContent = camp.name;
+  document.getElementById('topbarLeft').innerHTML = `<button class="topbar-back" onclick="openCampaignList('${gid}')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1.5 7.5L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Campaigns</button>`;
+  renderCampaignDetail(gid, campId);
+}
+
+function renderCampaignDetail(gid, campId) {
+  const g = GAME_DEFINITIONS.find(x=>x.id===gid);
+  const cfg = g?.campaignConfig;
+  const camp = (campaigns[gid]||[]).find(c=>c.id===campId);
+  if (!camp || !cfg) return;
+
+  const total = cfg.scenarios.length;
+  const done = Object.values(camp.scenarios||{}).filter(s=>s.complete).length;
+  const pct = Math.round(done/total*100);
+
+  // Progress bar
+  let html = `<div class="card">
+    <div class="card-header"><span class="card-title">Progress</span><span style="font-size:13px;color:var(--text-2)">${done} / ${total}</span></div>
+    <div class="campaign-progress-bar"><div class="campaign-progress-fill" style="width:${pct}%;background:var(--green)"></div></div>
+  </div>`;
+
+  // Characters
+  html += `<div class="card"><div class="card-header"><span class="card-title">Characters</span></div>`;
+  camp.characters.forEach((ch, i) => {
+    html += `<div class="char-row">
+      <div class="char-name">${ch.class}</div>
+      <div class="char-level">Level <input type="number" min="1" max="9" value="${ch.level||1}" onchange="updateCharLevel('${gid}','${campId}',${i},this.value)"></div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Scenarios
+  html += `<div class="card"><div class="card-header"><span class="card-title">Scenarios</span></div>`;
+  cfg.scenarios.forEach(sc => {
+    const s = camp.scenarios[sc.num] || {};
+    const availClass = s.available ? 'available' : '';
+    const doneClass = s.complete ? 'done' : '';
+    html += `<div class="scenario-row">
+      <div class="scenario-num">${sc.num}</div>
+      <div class="scenario-title">${sc.title}</div>
+      <div class="scenario-checks">
+        <div class="scenario-check ${availClass}" onclick="toggleScenario('${gid}','${campId}',${sc.num},'available')" title="Available">${s.available?'🔓':'🔒'}</div>
+        <div class="scenario-check ${doneClass}" onclick="toggleScenario('${gid}','${campId}',${sc.num},'complete')" title="Complete">${s.complete?'✓':''}</div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Complete / delete campaign buttons
+  if (camp.status === 'active') {
+    html += `<button class="btn-complete-campaign" onclick="completeCampaign('${gid}','${campId}')">🏆 Mark Campaign Complete</button>`;
+  }
+  html += `<button class="btn-delete-campaign" onclick="deleteCampaign('${gid}','${campId}')">Delete Campaign</button>`;
+
+  document.getElementById('campaignDetailContent').innerHTML = html;
+  checkAll(); // re-evaluate campaign achievements
+}
+
+function toggleScenario(gid, campId, num, field) {
+  const camp = (campaigns[gid]||[]).find(c=>c.id===campId);
+  if (!camp) return;
+  if (!camp.scenarios[num]) camp.scenarios[num] = { available: false, complete: false };
+  camp.scenarios[num][field] = !camp.scenarios[num][field];
+  // If completed, automatically mark next scenario as available
+  if (field==='complete' && camp.scenarios[num].complete) {
+    const cfg = GAME_DEFINITIONS.find(x=>x.id===gid)?.campaignConfig;
+    const nextNum = num + 1;
+    if (cfg?.scenarios.find(s=>s.num===nextNum)) {
+      if (!camp.scenarios[nextNum]) camp.scenarios[nextNum] = { available: false, complete: false };
+      camp.scenarios[nextNum].available = true;
+    }
+  }
+  saveState();
+  renderCampaignDetail(gid, campId);
+}
+
+function updateCharLevel(gid, campId, idx, val) {
+  const camp = (campaigns[gid]||[]).find(c=>c.id===campId);
+  if (!camp) return;
+  camp.characters[idx].level = parseInt(val)||1;
+  saveState();
+}
+
+function completeCampaign(gid, campId) {
+  const camp = (campaigns[gid]||[]).find(c=>c.id===campId);
+  if (!camp) return;
+  camp.status = 'complete';
+  camp.endDate = new Date().toISOString().split('T')[0];
+  saveState();
+  const newUnlocks = checkAll();
+  renderCampaignDetail(gid, campId);
+  if (newUnlocks.length) setTimeout(()=>showUnlockBanner(newUnlocks[0]),400);
+}
+
+function deleteCampaign(gid, campId) {
+  if (!confirm('Delete this campaign? This cannot be undone.')) return;
+  campaigns[gid] = (campaigns[gid]||[]).filter(c=>c.id!==campId);
+  saveState();
+  openCampaignList(gid);
+}
+
 function renderAll() {
   document.getElementById('totalPtsDisplay').textContent = calcTotalPts() + ' pts';
   if (currentNav==='home') renderHome();
@@ -1268,6 +1478,7 @@ function renderGameDetail(g) {
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn-log" style="background:${g.color};flex:1" onclick="openModal('${g.id}')">+ Log Play</button>
+      ${g.campaignConfig ? `<button class="btn-log" style="background:#8b2f2f;width:48px;flex:none;font-size:18px" onclick="openCampaignList('${g.id}')" title="Campaigns">📋</button>` : ''}
       <button class="btn-log" style="background:var(--text-3);width:48px;flex:none;font-size:18px" onclick="openImport('${g.id}')" title="Import from BGStats">⬇</button>
     </div>
     ${renderScoreTitles(g)}

@@ -1,0 +1,81 @@
+// ── jawsoflion ──
+window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
+window.GAME_DEFINITIONS.push({
+  id:       'jawsoflion',
+  name:     'Gloomhaven: Jaws of the Lion',
+  icon:     '🦁',
+  genre:    'Cooperative · Dungeon Crawl · Campaign',
+  color:    '#8b2f2f',
+  bgColor:  '#fdf0f0',
+  dimColor: '#c07070',
+
+  logFields: [
+    { id: 'win',      label: 'Outcome',   type: 'toggle', trueLabel: 'Victory ✓', falseLabel: 'Defeat ✗' },
+    { id: 'scenario', label: 'Scenario',  type: 'select', options: [
+      '1 – Roadside Ambush','2 – A Hole in the Wall','3 – The Black Ship',
+      '4 – A Ritual in Stone','5 – A Deeper Understanding','6 – Corrupted Research',
+      '7 – Sunken Tumor','8 – Hidden Tumor','9 – Explosive Evolution',
+      '10 – The Gauntlet','11 – Defiled Sewers','12 – Beguiling Sewers',
+      '13 – Vile Harvest','14 – Toxic Harvest','15 – Tainted Blood',
+      '16 – Mixed Results','17 – Red Twilight','18 – The Heist',
+      '19 – Den of Thieves','20 – Misplaced Goods','21 – Agent of Chaos',
+      '22 – Unfriendly Message','23 – Best of the Best','24 – Warding the Void',
+      '25 – The Greatest Job in the World'
+    ]},
+    { id: 'chars', label: 'Characters', type: 'select', options: [
+      'Demolitionist + Red Guard',
+      'Demolitionist + Hatchet',
+      'Demolitionist + Voidwarden',
+      'Red Guard + Hatchet',
+      'Red Guard + Voidwarden',
+      'Hatchet + Voidwarden',
+      'All Four'
+    ]},
+  ],
+
+  campaignConfig: {
+    characters: ['Demolitionist','Red Guard','Hatchet','Voidwarden'],
+    scenarios: [
+      { num: 1,  title: 'Roadside Ambush' },
+      { num: 2,  title: 'A Hole in the Wall' },
+      { num: 3,  title: 'The Black Ship' },
+      { num: 4,  title: 'A Ritual in Stone' },
+      { num: 5,  title: 'A Deeper Understanding' },
+      { num: 6,  title: 'Corrupted Research' },
+      { num: 7,  title: 'Sunken Tumor' },
+      { num: 8,  title: 'Hidden Tumor' },
+      { num: 9,  title: 'Explosive Evolution' },
+      { num: 10, title: 'The Gauntlet' },
+      { num: 11, title: 'Defiled Sewers' },
+      { num: 12, title: 'Beguiling Sewers' },
+      { num: 13, title: 'Vile Harvest' },
+      { num: 14, title: 'Toxic Harvest' },
+      { num: 15, title: 'Tainted Blood' },
+      { num: 16, title: 'Mixed Results' },
+      { num: 17, title: 'Red Twilight' },
+      { num: 18, title: 'The Heist' },
+      { num: 19, title: 'Den of Thieves' },
+      { num: 20, title: 'Misplaced Goods' },
+      { num: 21, title: 'Agent of Chaos' },
+      { num: 22, title: 'Unfriendly Message' },
+      { num: 23, title: 'Best of the Best' },
+      { num: 24, title: 'Warding the Void' },
+      { num: 25, title: 'The Greatest Job in the World' },
+    ],
+  },
+
+  achievements: [
+    { id: 'jotl_first',  icon: '⚔️',  tier: 'bronze', pts: 10, name: 'Into the Lion\'s Den',
+      desc: 'Complete your first scenario',
+      check: { type: 'min_wins', count: 1 } },
+    { id: 'jotl_10',     icon: '🏰', tier: 'silver', pts: 20, name: 'Seasoned Mercenary',
+      desc: 'Complete 10 scenarios',
+      check: { type: 'min_wins', count: 10 } },
+    { id: 'jotl_campaign', icon: '🦁', tier: 'gold', pts: 100, name: 'Jaws of the Lion',
+      desc: 'Complete a full campaign (all 25 scenarios)',
+      check: { type: 'campaign_complete', gameId: 'jawsoflion' } },
+    { id: 'jotl_plat',  icon: '💎', tier: 'plat',   pts: 150, name: 'Gloomhaven: Complete',
+      desc: 'Unlock all Jaws of the Lion achievements',
+      check: { type: 'all_achievements', ids: ['jotl_first','jotl_10','jotl_campaign'] } },
+  ],
+});
