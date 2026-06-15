@@ -1427,7 +1427,7 @@ function renderGameDetail(g) {
     } else if (g.id === 'hadrians') {
       if (p.score) parts.push(p.score + ' pts');
       if (p.fort && p.fort !== 'Any') parts.push(p.fort.replace('Fort ','F'));
-      if (p.disdain !== undefined && p.disdain === 0) parts.push('No Disdain ✓');
+      if (p.disdain !== undefined && p.disdain === 0 && p.recordedComponents) parts.push('No Disdain ✓');
     } else if (g.id === 'frosthaven') {
       if (p.scenario) parts.push(p.scenario);
       if (p.score) parts.push(p.score + ' pts');
