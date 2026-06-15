@@ -11,7 +11,7 @@ window.GAME_DEFINITIONS.push(
   logFields: [
     { id: 'win', label: 'Win?', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
     { id: 'scenario', label: 'Scenario', type: 'select', options: ['— Select Airport —', 'YUL (Green)', 'LHR (Green)', 'HND (Green)', 'OSL (Green)', 'ATL (Green)', 'PRG (Green)', 'CTP (Green ✈)', 'SYD (Green ✈)', 'PEK (Green ✈)', 'LHR (Yellow)', 'TGU (Yellow)', 'GIG (Yellow)', 'KEF (Yellow)', 'PRG (Yellow)', 'KUL (Yellow)', 'ATL (Yellow)', 'KBP (Yellow ✈)', 'TER (Yellow ✈)', 'SXM (Yellow ✈)', 'DUS (Yellow ✈)', 'MAD (Yellow ✈)', 'WAW (Yellow ✈)', 'PBH (Red)', 'HND (Red)', 'GIG (Red)', 'OSL (Red)', 'TGU (Red)', 'SXM (Red ✈)', 'SYD (Red ✈)', 'WAW (Red ✈)', 'DUS (Red ✈)', 'NZIR (Red ✈)', 'PEK (Red ✈)', 'KEF (Black)', 'KUL (Black)', 'PBH (Black)', 'CPT (Black ✈)', 'MAD (Black ✈)', 'TER (Black ✈)', 'KBP (Black ✈)', 'NZIR (Black ✈)'] },
-    { id: 'role', label: 'Your Role', type: 'select', options: ['Pilot', 'Copilot', 'Solo'] },
+    { id: 'role', label: 'Your Role', type: 'select', options: ['— Select Role —', 'Pilot', 'Copilot', 'Solo'] },
     { id: 'coffeeCups',  label: 'Landed with three cups of coffee?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     { id: 'defeatCause', label: 'Defeat Cause', type: 'select',
       options: ['Mandatory Actions','Going into a Spin','Collision','Overshoot','Crash Landing','Airplane Tokens','Flaps & Landing Gear','Axis','Speed','Turns'],
@@ -56,7 +56,7 @@ window.GAME_DEFINITIONS.push(
     { label: 'Speed',                type: 'count_where', field: 'defeatCause', value: 'Speed' },
     { label: 'Turns',                type: 'count_where', field: 'defeatCause', value: 'Turns' },
   ],
-  completenessFields: ['scenario'],
+  completenessFields: ['scenario', 'role'],
 
   achievements: [
     { id: 'sky_caffeinated', icon: '☕', tier: 'bronze', pts: 10,

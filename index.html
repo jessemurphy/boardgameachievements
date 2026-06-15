@@ -2479,7 +2479,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       };
       const boardLower = (play.board || '').toLowerCase().trim();
       const scenario = AIRPORT_MAP[boardLower] || play.board || 'Unknown';
-      const myRole = role || 'Solo';
+      const myRole = role || '';
       // Extract defeat cause from scoresheet
       const DEFEAT_LABELS = {
         'mandatoryactions': 'Mandatory Actions', 'goingintoaspin': 'Going into a Spin',
