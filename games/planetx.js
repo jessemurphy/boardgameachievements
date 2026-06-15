@@ -18,6 +18,32 @@ window.GAME_DEFINITIONS.push(
       { id: 'dwarfPlanets',  label: 'Dwarf Planet Pts', type: 'number', min: 0, max: 8,  default: 0 },
       { id: 'foundPlanetX',  label: 'Found Planet X?',  type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     ],
+    personalBestField: 'score',
+    personalBestContext: 'mode',
+    personalBestTitle: 'Best Score by Mode',
+
+    customStatsTitle: 'Mode Breakdown',
+    customStats: [
+      { label: 'Standard', type: 'ratio', field: 'mode', value: 'Standard' },
+      { label: 'Expert',   type: 'ratio', field: 'mode', value: 'Expert' },
+    ],
+
+    customStats2Title: 'Clues Breakdown',
+    customStats2: [
+      { label: '8 Clues (Beginner)', type: 'ratio', field: 'clues', value: '8 Clues (Beginner)' },
+      { label: '4 Clues',            type: 'ratio', field: 'clues', value: '4 Clues' },
+      { label: '0 Clues (Genius)',   type: 'ratio', field: 'clues', value: '0 Clues (Genius)' },
+    ],
+
+    customStats3Title: 'Best Score Components',
+    customStats3: [
+      { label: 'Leader Bonuses',  type: 'best_win', field: 'leaderBonuses' },
+      { label: 'Asteroids',       type: 'best_win', field: 'asteroids' },
+      { label: 'Comets',          type: 'best_win', field: 'comets' },
+      { label: 'Gas Clouds',      type: 'best_win', field: 'gasClouds' },
+      { label: 'Dwarf Planets',   type: 'best_win', field: 'dwarfPlanets' },
+    ],
+
     achievements: [
       { id: 'px_first',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Discovery',
         desc: 'Win your first game',
