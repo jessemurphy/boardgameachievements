@@ -2403,14 +2403,25 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         else if (lc.startsWith('solo challenge')) fort = part;
         else if (lc.startsWith('fort')) fort = part; // fallback
       }
-      const hwHasScoresheet = !!(ssData.renown || ssData.piety || ssData.valour || ssData.discipline || ssData.pathcards || ssData.disdain);
+      // Hadrian's Wall uses 'rounds' not 'groups' in scoresheet
+      let hwSsData = {...ssData};
+      try {
+        const ss = JSON.parse(play.scoresheet || '{}');
+        for (const round of ss.rounds || []) {
+          for (const row of round.rows || []) {
+            const val = row.scores?.[playerUuid];
+            if (val !== undefined && val !== '') hwSsData[row.templateId] = val;
+          }
+        }
+      } catch(e) {}
+      const hwHasScoresheet = !!(hwSsData.renown || hwSsData.piety || hwSsData.valour || hwSsData.discipline || hwSsData.pathcards || hwSsData.disdain);
       return { ...base, difficulty: diff, fort, score: parseFloat(ps.score)||0,
-        renown:     parseInt(ssData.renown     || 0) || 0,
-        piety:      parseInt(ssData.piety      || 0) || 0,
-        valour:     parseInt(ssData.valour     || 0) || 0,
-        discipline: parseInt(ssData.discipline || 0) || 0,
-        pathcards:  parseInt(ssData.pathcards  || 0) || 0,
-        disdain:    parseInt(ssData.disdain    || 0) || 0,
+        renown:     parseInt(hwSsData.renown     || 0) || 0,
+        piety:      parseInt(hwSsData.piety      || 0) || 0,
+        valour:     parseInt(hwSsData.valour     || 0) || 0,
+        discipline: parseInt(hwSsData.discipline || 0) || 0,
+        pathcards:  parseInt(hwSsData.pathcards  || 0) || 0,
+        disdain:    parseInt(hwSsData.disdain    || 0) || 0,
         recordedComponents: hwHasScoresheet,
       };
     }
