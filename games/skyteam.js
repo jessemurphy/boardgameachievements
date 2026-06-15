@@ -44,7 +44,7 @@ window.GAME_DEFINITIONS.push(
   ],
 
   customStats2Title: 'Defeat Causes',
-  customStats: [
+  customStats2: [
     { label: 'Mandatory Actions',    type: 'count_where', field: 'defeatCause', value: 'Mandatory Actions' },
     { label: 'Going into a Spin',    type: 'count_where', field: 'defeatCause', value: 'Going into a Spin' },
     { label: 'Collision',            type: 'count_where', field: 'defeatCause', value: 'Collision' },
