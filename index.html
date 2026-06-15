@@ -1666,10 +1666,12 @@ function isPlayIncomplete(g, p) {
     else if (f.type === 'toggle') defaults[f.id] = false;
     else if (f.type === 'select') defaults[f.id] = f.options?.[0] ?? '';
   });
+  const UNSET = ['', 'Unknown', 'None', 'Any / Unknown'];
   return g.completenessFields.every(fid => {
     const val = p[fid];
     const def = defaults[fid];
     if (val === undefined || val === null) return true;
+    if (UNSET.includes(String(val))) return true;
     if (typeof def === 'number') return (Number(val) || 0) === def;
     return String(val) === String(def);
   });
@@ -2500,7 +2502,8 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
           }
         } catch(e) {}
       }
-      return { ...base, scenario, role: myRole, coffeeCups: false, defeatCause };
+      // Only set defeatCause if we actually found one in the scoresheet
+      return { ...base, scenario, role: myRole, coffeeCups: false, defeatCause: defeatCause || '' };
     }
     case 'vantage': {
       const VANTAGE_CHARS = ['Jules, the Captain','Soren, the Navigator','Emilien, the Scholar','Ira, the Medic','Ariel, the Engineer','Tina, the Marine'];
