@@ -122,7 +122,7 @@ window.GAME_DEFINITIONS.push(
 
       { id: 'hw_plat',    icon: '💎', tier: 'plat',   pts: 100, name: "Hadrian's Champion",
         desc: "Unlock all other Hadrian's Wall achievements",
-        check: { type: 'all_achievements', ids: ['hw_first','hw_score70','hw_score80','hw_score90','hw_hard','hw_medium','hw_5wins','hw_10plays','hw_renown20','hw_nodisdain','hw_discipline20','hw_campaign','hw_f1', 'hw_f2', 'hw_f3', 'hw_f4', 'hw_f5', 'hw_f6', 'hw_f7', 'hw_f8', 'hw_f9', 'hw_f10', 'hw_f11', 'hw_f12', 'hw_f13', 'hw_f14', 'hw_f15', 'hw_f16'] } },
+        check: { type: 'all_achievements', ids: ['hw_first','hw_score70','hw_score80','hw_score90','hw_hard','hw_10plays','hw_renown20','hw_nodisdain','hw_discipline20','hw_campaign','hw_f1','hw_f2','hw_f3','hw_f4','hw_f5','hw_f6','hw_f7','hw_f8','hw_f9','hw_f10','hw_f11','hw_f12','hw_f13','hw_f14','hw_f15','hw_f16'] } },
     ]
   }
 );
