@@ -38,6 +38,30 @@ window.GAME_DEFINITIONS.push(
       { label: 'Path Cards', type: 'best_win', field: 'pathcards' },
     ],
 
+    campaignTrail: {
+      title: 'The Wall Campaign',
+      leftLabel: '← Wallsend',
+      rightLabel: 'Bowness-on-Solway →',
+      stops: [
+        { id: 'hw_f1',  label: 'Segedunum' },
+        { id: 'hw_f2',  label: 'Pons Aelius' },
+        { id: 'hw_f3',  label: 'Condercum' },
+        { id: 'hw_f4',  label: 'Vindobala' },
+        { id: 'hw_f5',  label: 'Onnum' },
+        { id: 'hw_f6',  label: 'Cilurnum' },
+        { id: 'hw_f7',  label: 'Brocolitia' },
+        { id: 'hw_f8',  label: 'Vercovicium' },
+        { id: 'hw_f9',  label: 'Aesica' },
+        { id: 'hw_f10', label: 'Magnis' },
+        { id: 'hw_f11', label: 'Banna' },
+        { id: 'hw_f12', label: 'Camboglanna' },
+        { id: 'hw_f13', label: 'Uxelodunum' },
+        { id: 'hw_f14', label: 'Aballava' },
+        { id: 'hw_f15', label: 'Coggabata' },
+        { id: 'hw_f16', label: 'Maia' },
+      ],
+    },
+
     achievements: [
       { id: 'hw_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Watch',
         desc: 'Win your first game',

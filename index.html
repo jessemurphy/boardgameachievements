@@ -65,6 +65,23 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hstat-lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 
 /* Log button */
+.trail-ends{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:#bbb;margin-bottom:6px;padding:0 2px}
+.trail-wrap{position:relative;padding:8px 0 4px}
+.trail-line{position:absolute;top:20px;left:10px;right:10px;height:4px;background:#e0e0e8;border-radius:2px;z-index:0}
+.trail-line-fill{height:4px;border-radius:2px;transition:width .4s ease}
+.trail-forts{display:flex;justify-content:space-between;position:relative;z-index:1}
+.trail-fort{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;flex:1;position:relative}
+.trail-dot{width:14px;height:14px;border-radius:3px;border:2px solid #ddd;background:#fff;transition:all .2s;flex-shrink:0}
+.trail-fort.done .trail-dot{border-color:currentColor}
+.trail-fort.current .trail-dot{background:#fff;box-shadow:0 0 0 3px rgba(128,128,128,.2);transform:scale(1.2)}
+.trail-num{font-size:7px;font-weight:700;color:#bbb;line-height:1}
+.trail-fort.done .trail-num{opacity:.8}
+.trail-tip{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;font-size:9px;font-weight:600;white-space:nowrap;padding:2px 6px;border-radius:4px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:10}
+.trail-fort.active-tip .trail-tip{opacity:1}
+.trail-summary{display:flex;justify-content:space-between;margin-top:22px;padding-top:12px;border-top:1px solid #f0f0f5}
+.trail-stat{text-align:center;flex:1}
+.trail-stat-val{font-size:18px;font-weight:700;color:#1a1a1a}
+.trail-stat-label{font-size:11px;color:#999;margin-top:2px}
 .campaign-progress-bar{height:6px;background:#e0e0e8;border-radius:3px;margin-top:8px}
 .campaign-progress-fill{height:6px;border-radius:3px;transition:width .3s}
 .scenario-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;margin-bottom:4px;transition:background .15s;cursor:pointer}
@@ -807,6 +824,48 @@ function renderCustomStats(g, plays) {
   return html;
 }
 
+function renderCampaignTrail(g) {
+  if (!g.campaignTrail) return '';
+  const trail = g.campaignTrail;
+  const stops = trail.stops || [];
+  const total = stops.length;
+  const done = stops.filter(s => unlocked[s.id]).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const fillPct = total ? (done / total * 100) : 0;
+
+  const dots = stops.map((s, i) => {
+    const isDone = !!unlocked[s.id];
+    const isCurrent = !isDone && i === done;
+    const cls = isDone ? 'done' : isCurrent ? 'current' : '';
+    const dotStyle = isDone ? `style="background:${g.color||'#333'};border-color:${g.color||'#333'}"` : isCurrent ? `style="border-color:${g.color||'#333'}"` : '';
+    return `<div class="trail-fort ${cls}" onclick="this.classList.toggle('active-tip')">
+      <div class="trail-dot" ${dotStyle}></div>
+      <div class="trail-num">${i+1}</div>
+      <div class="trail-tip">${s.label}</div>
+    </div>`;
+  }).join('');
+
+  const leftLabel  = trail.leftLabel  ? `<span>${trail.leftLabel}</span>`  : '';
+  const rightLabel = trail.rightLabel ? `<span>${trail.rightLabel}</span>` : '';
+
+  return `<div class="card">
+    <div class="card-header">
+      <span class="card-title">${trail.title || 'Campaign Progress'}</span>
+      <span style="font-size:12px;font-weight:600;color:var(--green)">${done} / ${total}</span>
+    </div>
+    ${(leftLabel||rightLabel) ? `<div class="trail-ends">${leftLabel}${rightLabel}</div>` : ''}
+    <div class="trail-wrap">
+      <div class="trail-line"><div class="trail-line-fill" style="width:${fillPct}%;background:${g.color||'#333'}"></div></div>
+      <div class="trail-forts">${dots}</div>
+    </div>
+    <div class="trail-summary">
+      <div class="trail-stat"><div class="trail-stat-val" style="color:${g.color||'#333'}">${done}</div><div class="trail-stat-label">Cleared</div></div>
+      <div class="trail-stat"><div class="trail-stat-val">${total-done}</div><div class="trail-stat-label">Remaining</div></div>
+      <div class="trail-stat"><div class="trail-stat-val">${pct}%</div><div class="trail-stat-label">Complete</div></div>
+    </div>
+  </div>`;
+}
+
 function getProgress(check, gameState, allState) {
   const plays = gameState?.plays || [];
   const wins  = plays.filter(p => p.win);
@@ -1520,6 +1579,7 @@ function renderGameDetail(g) {
     ${renderScoreTitles(g)}
     ${renderPersonalBests(g)}
     ${renderCustomStats(g, plays)}
+    ${renderCampaignTrail(g)}
     <div class="card">
       <div class="card-header">
         <span class="card-title">Achievements${g.official ? ' <span class=\"official-badge\">Official</span>' : ''}</span>
