@@ -22,15 +22,11 @@ window.GAME_DEFINITIONS.push({
       '22 – Unfriendly Message','23 – Best of the Best','24 – Warding the Void',
       '25 – The Greatest Job in the World'
     ]},
-    { id: 'chars', label: 'Characters', type: 'select', options: [
-      'Demolitionist + Red Guard',
-      'Demolitionist + Hatchet',
-      'Demolitionist + Voidwarden',
-      'Red Guard + Hatchet',
-      'Red Guard + Voidwarden',
-      'Hatchet + Voidwarden',
-      'All Four'
-    ]},
+    { id: 'char_demo',  label: 'Demolitionist', type: 'toggle', trueLabel: 'Playing', falseLabel: 'Not playing' },
+    { id: 'char_red',   label: 'Red Guard',     type: 'toggle', trueLabel: 'Playing', falseLabel: 'Not playing' },
+    { id: 'char_hatch', label: 'Hatchet',        type: 'toggle', trueLabel: 'Playing', falseLabel: 'Not playing' },
+    { id: 'char_void',  label: 'Voidwarden',     type: 'toggle', trueLabel: 'Playing', falseLabel: 'Not playing' },
+    { id: 'campaign_id', label: 'Campaign',      type: 'select', options: ['None'] },
   ],
 
   campaignConfig: {

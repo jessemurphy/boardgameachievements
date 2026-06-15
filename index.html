@@ -1675,12 +1675,21 @@ function openModal(gid, playIdx=-1) {
         <div class="toggle-val" id="togLbl_${f.id}">${on?f.trueLabel:f.falseLabel}</div>
       </div>`;
     } else if(f.type==='select'){
-      const selected = isEdit&&existing ? existing : f.options[0];
+      // Dynamically populate campaign options
+      let opts = f.options;
+      if (f.id === 'campaign_id') {
+        const activeCamps = (campaigns[gid] || []).filter(x=>x.status==='active');
+        opts = ['None', ...activeCamps.map(x=>x.id+'|'+x.name)];
+      }
+      const selected = isEdit&&existing ? existing : opts[0];
       const onchange = `onchange="updateShowIf('${f.id}', this.value)"`;
+      const optLabels = f.id==='campaign_id'
+        ? opts.map(o => { const [id,name]=(o==='None'?['None','No Campaign']:o.split('|')); return `<option value="${o}"${o===selected?' selected':''}>${name}</option>`; })
+        : opts.map(o=>`<option${o===selected?' selected':''}>${o}</option>`);
       html+=`<div class="modal-field" id="wrap_${f.id}">
         <label class="modal-label">${f.label}</label>
         <select class="modal-select" id="fld_${f.id}" ${onchange}>
-          ${f.options.map(o=>`<option${o===selected?' selected':''}>${o}</option>`).join('')}
+          ${optLabels.join('')}
         </select>
       </div>`;
     } else if(f.type==='number'){
@@ -1806,6 +1815,32 @@ function submitPlay(){
     appState[logGameId].plays.push(play);
   }
   // Auto-show game if it was hidden and now has plays
+  if (hiddenGames.has(logGameId) && (appState[logGameId]?.plays||[]).length > 0) {
+    hiddenGames.delete(logGameId);
+  }
+  // Link play to campaign and auto-complete scenario on win
+  const campField = play['campaign_id'];
+  if (campField && campField !== 'None' && play.win) {
+    const [campId] = campField.split('|');
+    const camp = (campaigns[logGameId]||[]).find(x=>x.id===campId);
+    if (camp && play.scenario) {
+      // Extract scenario number from "1 – Roadside Ambush" format
+      const scenNum = parseInt(play.scenario);
+      if (scenNum) {
+        if (!camp.scenarios[scenNum]) camp.scenarios[scenNum] = { available: false, complete: false };
+        camp.scenarios[scenNum].available = true;
+        camp.scenarios[scenNum].complete = true;
+        // Auto-unlock next scenario
+        const cfg = GAME_DEFINITIONS.find(x=>x.id===logGameId)?.campaignConfig;
+        const nextNum = scenNum + 1;
+        if (cfg?.scenarios.find(s=>s.num===nextNum)) {
+          if (!camp.scenarios[nextNum]) camp.scenarios[nextNum] = { available: false, complete: false };
+          camp.scenarios[nextNum].available = true;
+        }
+      }
+    }
+  }
+  // Auto-show game if hidden
   if (hiddenGames.has(logGameId) && (appState[logGameId]?.plays||[]).length > 0) {
     hiddenGames.delete(logGameId);
   }
