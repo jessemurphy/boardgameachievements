@@ -2403,6 +2403,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         else if (lc.startsWith('solo challenge')) fort = part;
         else if (lc.startsWith('fort')) fort = part; // fallback
       }
+      const hwHasScoresheet = !!(ssData.renown || ssData.piety || ssData.valour || ssData.discipline || ssData.pathcards || ssData.disdain);
       return { ...base, difficulty: diff, fort, score: parseFloat(ps.score)||0,
         renown:     parseInt(ssData.renown     || 0) || 0,
         piety:      parseInt(ssData.piety      || 0) || 0,
@@ -2410,6 +2411,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         discipline: parseInt(ssData.discipline || 0) || 0,
         pathcards:  parseInt(ssData.pathcards  || 0) || 0,
         disdain:    parseInt(ssData.disdain    || 0) || 0,
+        recordedComponents: hwHasScoresheet,
       };
     }
     case 'clever': {
