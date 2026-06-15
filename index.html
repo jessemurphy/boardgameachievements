@@ -1389,7 +1389,7 @@ function renderGameDetail(g) {
       if (p.warpsUsed !== undefined) parts.push(p.warpsUsed + ' warps');
     } else if (g.id === 'onedeck') {
       if (p.dungeon) parts.push(p.dungeon);
-      if (p.difficulty) parts.push('D' + p.difficulty);
+      if (p.difficulty) parts.push(p.difficulty);
     } else if (g.id === 'planetx') {
       if (p.score) parts.push(p.score + ' pts');
       if (p.botScore) parts.push('Bot: ' + p.botScore);
