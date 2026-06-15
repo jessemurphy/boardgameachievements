@@ -43,6 +43,14 @@ window.GAME_DEFINITIONS.push(
       { id: 'infiniteCombo',   label: 'Created Infinite Combo',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
     ],
 
+    customStatsTitle: 'Character Win Rate',
+    customStats: [
+      { label: 'Ironclad', type: 'ratio', field: 'character', value: 'Ironclad' },
+      { label: 'Silent',   type: 'ratio', field: 'character', value: 'Silent' },
+      { label: 'Defect',   type: 'ratio', field: 'character', value: 'Defect' },
+      { label: 'Watcher',  type: 'ratio', field: 'character', value: 'Watcher' },
+    ],
+
     achievements: [
       // ── Character wins (official) ──
       { id: 'sts_ruby', official: true,      icon: '❤️',  tier: 'bronze', pts: 15, name: 'Ruby',
