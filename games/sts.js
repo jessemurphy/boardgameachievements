@@ -13,11 +13,11 @@ window.GAME_DEFINITIONS.push(
 
     logFields: [
       { id: 'win',        label: 'Win?',           type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
-      { id: 'character',  label: 'Character',      type: 'select', options: ['Ironclad','Silent','Defect','Watcher'] },
+      { id: 'character',  label: 'Character',      type: 'select', options: ['— Select —','Ironclad','Silent','Defect','Watcher'] },
       { id: 'character2', label: 'Character 2',    type: 'select', options: ['None','Ironclad','Silent','Defect','Watcher'] },
       { id: 'character3', label: 'Character 3',    type: 'select', options: ['None','Ironclad','Silent','Defect','Watcher'] },
       { id: 'character4', label: 'Character 4',    type: 'select', options: ['None','Ironclad','Silent','Defect','Watcher'] },
-      { id: 'actsCleared', label: 'Acts Cleared',  type: 'select', options: ['Act 1','Act 2','Act 3','Act 4'] },
+      { id: 'actsCleared', label: 'Acts Cleared',  type: 'select', options: ['— Select —','Act 1','Act 2','Act 3','Act 4'] },
       { id: 'boss',       label: 'Boss Fought',   type: 'select', options: [
         'None',
         'The Guardian','Slime Boss','Hexaghost',
@@ -27,7 +27,7 @@ window.GAME_DEFINITIONS.push(
       ] },
       { id: 'ascension',  label: 'Ascension Level',type: 'number', min: 0, max: 13, default: 0 },
       { id: 'playerCount',label: 'Player Count',   type: 'number', min: 1, max: 4, default: 1 },
-      { id: 'deckSize',   label: 'Final Deck Size', type: 'number', min: 1, max: 30, default: 10 },
+      { id: 'deckSize',   label: 'Final Deck Size', type: 'number', min: 0, max: 30, default: 0 },
       { id: 'relicCount', label: 'Relics Held',     type: 'number', min: 0, max: 20, default: 3 },
       { id: 'hpFull',     label: 'All Players at Full HP (boss kill)', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
       { id: 'noRares',    label: 'No Uncommons or Rares in deck', type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
