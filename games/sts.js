@@ -51,6 +51,28 @@ window.GAME_DEFINITIONS.push(
       { label: 'Watcher',  type: 'ratio', field: 'character', value: 'Watcher' },
     ],
 
+    customStats2Title: 'Acts Cleared',
+    customStats2: [
+      { label: 'Act 1', type: 'ratio', field: 'actsCleared', value: 'Act 1' },
+      { label: 'Act 2', type: 'ratio', field: 'actsCleared', value: 'Act 2' },
+      { label: 'Act 3', type: 'ratio', field: 'actsCleared', value: 'Act 3' },
+      { label: 'Act 4', type: 'ratio', field: 'actsCleared', value: 'Act 4' },
+    ],
+
+    customStats3Title: 'Boss Win Rate',
+    customStats3: [
+      { label: 'The Guardian',     type: 'ratio', field: 'boss', value: 'The Guardian' },
+      { label: 'Slime Boss',       type: 'ratio', field: 'boss', value: 'Slime Boss' },
+      { label: 'Hexaghost',        type: 'ratio', field: 'boss', value: 'Hexaghost' },
+      { label: 'The Champ',        type: 'ratio', field: 'boss', value: 'The Champ' },
+      { label: 'Bronze Automaton', type: 'ratio', field: 'boss', value: 'Bronze Automaton' },
+      { label: 'The Collector',    type: 'ratio', field: 'boss', value: 'The Collector' },
+      { label: 'Awakened One',     type: 'ratio', field: 'boss', value: 'Awakened One' },
+      { label: 'Time Eater',       type: 'ratio', field: 'boss', value: 'Time Eater' },
+      { label: 'Donu & Deca',      type: 'ratio', field: 'boss', value: 'Donu & Deca' },
+      { label: 'The Corrupt Heart',type: 'ratio', field: 'boss', value: 'The Corrupt Heart' },
+    ],
+
     achievements: [
       // ── Character wins (official) ──
       { id: 'sts_ruby', official: true,      icon: '❤️',  tier: 'bronze', pts: 15, name: 'Ruby',
