@@ -633,11 +633,25 @@ function getProgressPct(check, gameState, allState) {
     }
     case 'campaign_complete': {
       const gameCamps = campaigns[check.gameId] || [];
-      return gameCamps.some(camp => camp.status === 'complete');
+      if (gameCamps.some(c=>c.status==='complete')) return 1;
+      const cfg = GAME_DEFINITIONS.find(x=>x.id===check.gameId)?.campaignConfig;
+      const total = cfg?.scenarios?.length || 25;
+      const best = Math.max(0, ...gameCamps.map(c=>Object.values(c.scenarios||{}).filter(s=>s.complete).length));
+      return Math.min(0.99, best / total);
     }
     case 'all_achievements': {
       const have = check.ids.filter(id=>unlocked[id]).length;
       return have / check.ids.length;
+    }
+    case 'unique_values': {
+      const pool = check.winsOnly ? wins : plays;
+      const vals = new Set(pool.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='None'&&v!==''));
+      return Math.min(1, vals.size / check.count);
+    }
+    case 'any_toggle_count_gte': {
+      const everTrue = new Set();
+      plays.forEach(p => check.fields.forEach(f => { if(p[f]===true) everTrue.add(f); }));
+      return Math.min(1, everTrue.size / check.count);
     }
     default: return 0;
   }
@@ -852,6 +866,22 @@ function getProgress(check, gameState, allState) {
     case 'win_field_beats_by': {
       const best = wins.reduce((m,p) => Math.max(m, Number(p[check.field])-Number(p[check.compareField])), 0);
       return `Best margin: ${best} / ${check.margin}`;
+    }
+    case 'win_with_toggle': {
+      const count = wins.filter(p=>p[check.field]===true).length;
+      return count > 0 ? `${count} time${count>1?'s':''}` : null;
+    }
+    case 'win_two_fields': {
+      const count = wins.filter(p=>String(p[check.field1])===String(check.value1)&&String(p[check.field2])===String(check.value2)).length;
+      return count > 0 ? `${count} time${count>1?'s':''}` : null;
+    }
+    case 'campaign_complete': {
+      const camps = campaigns[check.gameId] || [];
+      const done = camps.filter(c=>c.status==='complete').length;
+      const active = camps.filter(c=>c.status==='active').length;
+      if (done > 0) return `${done} campaign${done>1?'s':''} complete`;
+      if (active > 0) return `${active} campaign${active>1?'s':''} in progress`;
+      return null;
     }
     case 'win_two_fields': return null;
     case 'win_two_fields_gte': {
