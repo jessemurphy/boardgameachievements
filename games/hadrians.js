@@ -8,6 +8,7 @@ window.GAME_DEFINITIONS.push(
     personalBestField: 'score',
     logFields: [
       { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
+      { id: 'recordedComponents', label: 'Recorded full scoresheet?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
       { id: 'difficulty', label: 'Difficulty',    type: 'select', options: ['Easy','Medium','Hard'] },
       { id: 'fort',       label: 'Fort',          type: 'select', options: ['Any', 'Fort 1: Segedunum', 'Fort 2: Pons Aelius', 'Fort 3: Condercum', 'Fort 4: Vindobala', 'Fort 5: Onnum', 'Fort 6: Cilurnum', 'Fort 7: Brocolitia', 'Fort 8: Vercovicium', 'Fort 9: Aesica', 'Fort 10: Magnis', 'Fort 11: Banna', 'Fort 12: Camboglanna', 'Fort 13: Uxelodunum', 'Fort 14: Aballava', 'Fort 15: Coggabata', 'Fort 16: Maia'] },
       { id: 'score',      label: 'Final Score',   type: 'number', min: -50, max: 120, default: 60 },
@@ -17,7 +18,6 @@ window.GAME_DEFINITIONS.push(
       { id: 'discipline', label: 'Discipline',    type: 'number', min: 0, max: 30, default: 0 },
       { id: 'pathcards',  label: 'Path Cards',    type: 'number', min: 0, max: 20, default: 0 },
       { id: 'disdain',    label: 'Disdain (−)',   type: 'number', min: 0, max: 30, default: 0 },
-      { id: 'recordedComponents', label: 'Recorded full scoresheet?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     ],
     personalBestContext: 'difficulty',
     personalBestTitle: 'Best Score by Difficulty',
