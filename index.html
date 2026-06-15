@@ -2028,30 +2028,25 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
     case 'skyteam': {
       // Normalize BGStats airport names to our scenario option format
       const AIRPORT_MAP = {
+        // BGStats sends "AIRPORT (Color)" format directly — map these first
+        'yul (green)': 'YUL (Green)', 'lhr (green)': 'LHR (Green)',
+        'hnd (green)': 'HND (Green)', 'osl (green)': 'OSL (Green)',
+        'atl (green)': 'ATL (Green)', 'prg (green)': 'PRG (Green)',
+        'lhr (yellow)': 'LHR (Yellow)', 'tgu (yellow)': 'TGU (Yellow)',
+        'gig (yellow)': 'GIG (Yellow)', 'kef (yellow)': 'KEF (Yellow)',
+        'prg (yellow)': 'PRG (Yellow)', 'kul (yellow)': 'KUL (Yellow)',
+        'atl (yellow)': 'ATL (Yellow)',
+        'pbh (red)': 'PBH (Red)', 'hnd (red)': 'HND (Red)',
+        'gig (red)': 'GIG (Red)', 'osl (red)': 'OSL (Red)',
+        'tgu (red)': 'TGU (Red)',
+        'kef (black)': 'KEF (Black)', 'kul (black)': 'KUL (Black)',
+        'pbh (black)': 'PBH (Black)',
+        // Legacy fallbacks
         'montreal': 'YUL (Green)', 'yul': 'YUL (Green)',
-        'heathrow': 'LHR (Green)', 'lhr green': 'LHR (Green)',
-        'haneda': 'HND (Green)', 'hnd green': 'HND (Green)',
-        'oslo green': 'OSL (Green)', 'osl green': 'OSL (Green)',
-        'atlanta green': 'ATL (Green)', 'atl green': 'ATL (Green)',
-        'prague green': 'PRG (Green)', 'prg green': 'PRG (Green)',
-        'oslo': 'OSL (Green)',
-        'atlanta': 'ATL (Green)',
-        'hanada': 'HND (Green)',
-        'lhr yellow': 'LHR (Yellow)',
-        'tegucigalpa': 'TGU (Yellow)', 'tgu': 'TGU (Yellow)',
-        'rio yellow': 'GIG (Yellow)', 'gig yellow': 'GIG (Yellow)',
-        'keflavik yellow': 'KEF (Yellow)', 'kef yellow': 'KEF (Yellow)',
-        'prague yellow': 'PRG (Yellow)',
-        'kuala lumpur yellow': 'KUL (Yellow)', 'kul yellow': 'KUL (Yellow)',
-        'atlanta yellow': 'ATL (Yellow)',
-        'paro': 'PBH (Red)', 'pbh': 'PBH (Red)',
-        'hnd red': 'HND (Red)',
-        'rio red': 'GIG (Red)',
-        'oslo red': 'OSL (Red)',
-        'tgu red': 'TGU (Red)',
-        'keflavik': 'KEF (Black)', 'kef black': 'KEF (Black)',
-        'kuala lumpur': 'KUL (Black)', 'kul black': 'KUL (Black)',
-        'paro black': 'PBH (Black)',
+        'heathrow': 'LHR (Green)', 'haneda': 'HND (Green)',
+        'oslo': 'OSL (Green)', 'atlanta': 'ATL (Green)',
+        'tegucigalpa': 'TGU (Yellow)', 'paro': 'PBH (Red)',
+        'keflavik': 'KEF (Black)', 'kuala lumpur': 'KUL (Black)',
       };
       const boardLower = (play.board || '').toLowerCase().trim();
       const scenario = AIRPORT_MAP[boardLower] || play.board || 'Unknown';
