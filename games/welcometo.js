@@ -35,6 +35,8 @@ window.GAME_DEFINITIONS.push(
     { label: 'Temps',       type: 'best_win', field: 'temps' },
   ],
 
+  completenessFields: ['pools'],
+
   achievements: [
     { id: 'wt_first',    icon: '🌟', tier: 'bronze', pts: 10, name: 'Welcome to the Neighborhood',
       desc: 'Play your first game',

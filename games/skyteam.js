@@ -56,6 +56,8 @@ window.GAME_DEFINITIONS.push(
     { label: 'Speed',                type: 'count_where', field: 'defeatCause', value: 'Speed' },
     { label: 'Turns',                type: 'count_where', field: 'defeatCause', value: 'Turns' },
   ],
+  completenessFields: ['scenario'],
+
   achievements: [
     { id: 'sky_caffeinated', icon: '☕', tier: 'bronze', pts: 10,
       name: 'Fully Caffeinated',

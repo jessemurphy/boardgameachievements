@@ -73,6 +73,8 @@ window.GAME_DEFINITIONS.push(
       { label: 'The Corrupt Heart',type: 'ratio', field: 'boss', value: 'The Corrupt Heart' },
     ],
 
+    completenessFields: ['character', 'actsCleared'],
+
     achievements: [
       // ── Character wins (official) ──
       { id: 'sts_ruby', official: true,      icon: '❤️',  tier: 'bronze', pts: 15, name: 'Ruby',

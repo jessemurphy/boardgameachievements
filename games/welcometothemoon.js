@@ -64,6 +64,8 @@ window.GAME_DEFINITIONS.push(
       { label: '#8: The Battle', type: 'best_win', field: 'automataLevel', minValue: 1, filter: { field: 'scenario', value: '#8: The Battle' }, labelMap: ['', 'Katherine (1)', 'Neil (2)', 'Margaret (3)', 'Buzz (4)', 'Sergei (5)', 'Yuri (6)', 'Valentina (7)', 'Ada (8)'] },
     ],
 
+    completenessFields: ['scenario'],
+
     achievements: [
     { id: 'wtm_first',    icon: '🚀', tier: 'bronze', pts: 10, name: 'Liftoff!',
       desc: 'Complete your first adventure',

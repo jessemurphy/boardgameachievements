@@ -47,6 +47,8 @@ window.GAME_DEFINITIONS.push(
       { label: 'Epic Victories',      type: 'count_toggle', field: 'epicVictory'     },
     ],
 
+    completenessFields: ['character', 'mission'],
+
     achievements: [
       // ── First steps ──
       { id: 'vt_first_win', icon: '🌟', tier: 'bronze', pts: 10, name: 'First Contact',

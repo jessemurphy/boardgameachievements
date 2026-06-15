@@ -28,6 +28,8 @@ window.GAME_DEFINITIONS.push(
       { label: 'Heroic',   type: 'ratio', field: 'difficulty', value: 'Heroic' },
     ],
 
+    completenessFields: ['dungeon'],
+
     achievements: [
       { id: 'od_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Delve',
         desc: 'Win your first dungeon',

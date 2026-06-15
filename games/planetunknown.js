@@ -21,6 +21,8 @@ window.GAME_DEFINITIONS.push(
       { id: 'civScore',     label: 'CIV Cards',             type: 'number', min: 0, max: 20, default: 0 },
       { id: 'objectiveScore',label:'Objectives',            type: 'number', min: 0, max: 15, default: 0 },
     ],
+    completenessFields: ['planet'],
+
     achievements: [
       { id: 'pu_first',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Colony',
         desc: 'Win your first game',

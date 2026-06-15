@@ -65,6 +65,15 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hstat-lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 
 /* Log button */
+.hist-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0f5;cursor:pointer}
+.hist-row:active{background:#f5f5f5}
+.hist-game-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center}
+.hist-info{flex:1;min-width:0}
+.hist-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-sub{font-size:12px;color:var(--text-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.hist-date{font-size:11px;color:var(--text-3)}
+.hist-incomplete{font-size:10px;font-weight:700;color:#ff9500;background:#fff8ee;border:1px solid #ffd080;border-radius:4px;padding:1px 5px}
 .trail-ends{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:#bbb;margin-bottom:6px;padding:0 2px}
 .trail-wrap{position:relative;padding:8px 0 4px}
 .trail-line{position:absolute;top:20px;left:10px;right:10px;height:4px;background:#e0e0e8;border-radius:2px;z-index:0}
@@ -319,6 +328,24 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="content" id="statsContent"></div>
 </div>
 
+<div class="screen" id="screen-history">
+  <div class="content">
+    <div class="card" style="padding:12px 14px">
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <select id="hist-game-filter" class="modal-select" style="flex:1;font-size:13px" onchange="renderHistory()">
+          <option value="">All Games</option>
+        </select>
+        <button id="hist-incomplete-btn" class="sort-chip" onclick="toggleHistIncomplete()" style="white-space:nowrap;font-size:12px">⚠️ Incomplete</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input type="date" id="hist-date-from" class="modal-input" style="flex:1;font-size:12px;padding:6px 8px" onchange="renderHistory()">
+        <input type="date" id="hist-date-to" class="modal-input" style="flex:1;font-size:12px;padding:6px 8px" onchange="renderHistory()">
+      </div>
+    </div>
+    <div id="historyList"></div>
+    <button id="hist-show-more" class="btn-show-more" style="display:none;width:100%;margin-top:8px" onclick="historyShowMore()">Show more</button>
+  </div>
+</div>
 <div class="screen" id="screen-campaign-list">
   <div class="content" id="campaignListContent"></div>
 </div>
@@ -360,6 +387,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   </button>
   <button class="nav-btn" id="nav-stats" onclick="navTo('stats')">
     <span class="nav-icon">📊</span><span class="nav-label">Stats</span>
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="navTo('history')">
+    <span class="nav-icon">📋</span><span class="nav-label">History</span>
   </button>
   <button class="nav-btn" id="nav-settings" onclick="navTo('settings')">
     <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
@@ -1112,7 +1142,7 @@ function navTo(nav) {
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-'+nav).classList.add('active');
   document.getElementById('nav-'+nav)?.classList.add('active');
-  const titles = { home: 'Solo Achievements', meta: 'Meta Achievements', stats: 'Stats', settings: 'Settings' };
+  const titles = { home: 'Solo Achievements', meta: 'Meta Achievements', stats: 'Stats', settings: 'Settings', history: 'Play History' };
   document.getElementById('topbarTitle').textContent = titles[nav] || 'Solo Achievements';
   document.getElementById('topbarLeft').innerHTML = '';
   renderAll();
@@ -1317,6 +1347,7 @@ function renderAll() {
   else if (currentNav==='meta') renderMeta();
   else if (currentNav==='stats') renderStats();
   else if (currentNav==='settings') renderSettings();
+  else if (currentNav==='history') renderHistory();
 }
 
 function getSortedFilteredGames() {
@@ -1606,6 +1637,131 @@ function calcStreak(gid) {
 }
 
 // ── Dorfromantik campaign ──
+
+// ═══════════════════════════════════════
+// HISTORY TAB
+// ═══════════════════════════════════════
+
+let histIncompleteOnly = false;
+let histPage = 1;
+const HIST_PAGE_SIZE = 50;
+
+function toggleHistIncomplete() {
+  histIncompleteOnly = !histIncompleteOnly;
+  histPage = 1;
+  document.getElementById('hist-incomplete-btn').classList.toggle('active', histIncompleteOnly);
+  renderHistory();
+}
+
+function historyShowMore() {
+  histPage++;
+  renderHistory(true);
+}
+
+function isPlayIncomplete(g, p) {
+  if (!g.completenessFields || !g.completenessFields.length) return false;
+  const defaults = {};
+  (g.logFields || []).forEach(f => {
+    if (f.type === 'number') defaults[f.id] = f.default ?? 0;
+    else if (f.type === 'toggle') defaults[f.id] = false;
+    else if (f.type === 'select') defaults[f.id] = f.options?.[0] ?? '';
+  });
+  return g.completenessFields.every(fid => {
+    const val = p[fid];
+    const def = defaults[fid];
+    if (val === undefined || val === null) return true;
+    if (typeof def === 'number') return (Number(val) || 0) === def;
+    return String(val) === String(def);
+  });
+}
+
+function initHistoryFilters() {
+  const sel = document.getElementById('hist-game-filter');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All Games</option>' +
+    GAME_DEFINITIONS
+      .filter(g => (appState[g.id]?.plays||[]).length > 0)
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .map(g => `<option value="${g.id}"${g.id===current?' selected':''}>${g.name}</option>`)
+      .join('');
+}
+
+function renderHistory(append = false) {
+  initHistoryFilters();
+  const gameFilter = document.getElementById('hist-game-filter')?.value || '';
+  const dateFrom   = document.getElementById('hist-date-from')?.value || '';
+  const dateTo     = document.getElementById('hist-date-to')?.value || '';
+
+  // Collect all plays
+  let allPlays = [];
+  GAME_DEFINITIONS.forEach(g => {
+    (appState[g.id]?.plays || []).forEach(p => {
+      allPlays.push({ g, p });
+    });
+  });
+
+  // Filter
+  allPlays = allPlays.filter(({g, p}) => {
+    if (gameFilter && g.id !== gameFilter) return false;
+    if (dateFrom && p.date < dateFrom) return false;
+    if (dateTo   && p.date > dateTo)   return false;
+    if (histIncompleteOnly && !isPlayIncomplete(g, p)) return false;
+    return true;
+  });
+
+  // Sort newest first
+  allPlays.sort((a, b) => b.p.ts - a.p.ts);
+
+  const total = allPlays.length;
+  const shown = allPlays.slice(0, histPage * HIST_PAGE_SIZE);
+
+  const listEl = document.getElementById('historyList');
+  const moreBtn = document.getElementById('hist-show-more');
+
+  const rows = shown.map(({g, p}) => {
+    const incomplete = isPlayIncomplete(g, p);
+    const d = new Date(p.ts).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'2-digit'});
+    const detail = (() => {
+      const parts = [];
+      if (p.score) parts.push(p.score + ' pts');
+      (g.logFields||[]).filter(f=>f.type==='select'&&f.id!=='campaign_id').forEach(f=>{
+        const v = p[f.id];
+        if (v && v !== f.options?.[0]) parts.push(v);
+      });
+      return parts.slice(0,2).join(' · ') || (p.win ? 'Win' : 'Loss');
+    })();
+
+    const idx = (appState[g.id]?.plays||[]).indexOf(p);
+    return `<div class="hist-row" onclick="openGameAndEdit('${g.id}', ${idx})">
+      <div class="hist-game-icon">${g.icon}</div>
+      <div class="hist-info">
+        <div class="hist-title">${g.name}</div>
+        <div class="hist-sub">${detail}</div>
+      </div>
+      <div class="hist-right">
+        <div class="hist-date">${d}</div>
+        <div class="play-result ${p.win?'win':'loss'}">${p.win?'WIN':'LOSS'}</div>
+        ${incomplete ? '<div class="hist-incomplete">⚠️ Incomplete</div>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  if (!append) {
+    listEl.innerHTML = `<div class="card" style="padding:0;overflow:hidden">${rows || '<div style="padding:20px;text-align:center;color:#999">No plays found</div>'}</div>`;
+  } else {
+    const card = listEl.querySelector('.card');
+    if (card) card.insertAdjacentHTML('beforeend', rows);
+  }
+
+  moreBtn.style.display = shown.length < total ? '' : 'none';
+  moreBtn.textContent = `Show more (${total - shown.length} remaining)`;
+}
+
+function openGameAndEdit(gid, idx) {
+  openGame(gid);
+  setTimeout(() => openModal(gid, idx), 100);
+}
 
 function renderMeta() {
   const active = META_DEFINITIONS.filter(a=>a.category==='active');

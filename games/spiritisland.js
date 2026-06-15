@@ -63,6 +63,8 @@ window.GAME_DEFINITIONS.push(
       { label: 'Austria-Habsburg',   type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Austria-Habsburg' } },
     ],
 
+    completenessFields: ['adversary'],
+
     achievements: [
       // ── First steps ──
       { id: 'si_first',     icon: '🌟', tier: 'bronze', pts: 10, name: 'The Island Awakens',

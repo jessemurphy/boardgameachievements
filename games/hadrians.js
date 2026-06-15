@@ -62,6 +62,8 @@ window.GAME_DEFINITIONS.push(
       ],
     },
 
+    completenessFields: ['fort', 'recordedComponents'],
+
     achievements: [
       { id: 'hw_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Watch',
         desc: 'Win your first game',

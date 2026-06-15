@@ -37,6 +37,8 @@ window.GAME_DEFINITIONS.push(
       { label: 'The Revenant', type: 'ratio', field: 'mothership', value: 'The Revenant' },
     ],
 
+    completenessFields: ['ship', 'mothership'],
+
     achievements: [
       { id: 'w_first_win',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Contact',       desc: 'Win your first game',
         check: { type: 'min_wins', count: 1 } },

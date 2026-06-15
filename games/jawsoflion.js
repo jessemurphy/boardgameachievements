@@ -60,6 +60,8 @@ window.GAME_DEFINITIONS.push({
     ],
   },
 
+  completenessFields: ['scenario'],
+
   achievements: [
     { id: 'jotl_first',  icon: '⚔️',  tier: 'bronze', pts: 10, name: 'Into the Lion\'s Den',
       desc: 'Complete your first scenario',
