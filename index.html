@@ -1562,33 +1562,31 @@ function openModal(gid, playIdx=-1) {
     <textarea class="notes-field" id="modal_notes" rows="2" placeholder="Anything to remember…">${existingNotes}</textarea>
   </div>`;
   document.getElementById('modalFields').innerHTML = dateHtml + html + notesHtml;
-  // If editing, apply showIf visibility based on saved values
-  if (isEdit && existingPlay) {
+  // Apply showIf visibility based on saved values (edit) or defaults (new)
+  {
     const g2 = GAME_DEFINITIONS.find(x=>x.id===gid);
     g2.logFields.filter(f=>f.type==='select').forEach(f=>{
-      updateShowIf(f.id, existingPlay[f.id] || f.options[0]);
+      const val = isEdit && existingPlay ? (existingPlay[f.id] || f.options[0]) : f.options[0];
+      updateShowIf(f.id, val);
     });
-  }
-  // Also apply showIf for new plays based on defaults
-  if (!isEdit) {
-    const g2 = GAME_DEFINITIONS.find(x=>x.id===gid);
-    g2.logFields.filter(f=>f.type==='select').forEach(f=>{
-      updateShowIf(f.id, f.options[0]);
+    g2.logFields.filter(f=>f.type==='toggle').forEach(f=>{
+      const val = isEdit && existingPlay ? !!existingPlay[f.id] : false;
+      updateShowIf(f.id, val);
     });
   }
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function updateShowIf(selectFieldId, value) {
+function updateShowIf(fieldId, value) {
   const g = GAME_DEFINITIONS.find(x=>x.id===logGameId);
   if (!g) return;
   g.logFields.forEach(f => {
-    if (!f.showIf || f.showIf.field !== selectFieldId) return;
+    if (!f.showIf || f.showIf.field !== fieldId) return;
     const wrap = document.getElementById('wrap_' + f.id);
     if (!wrap) return;
     const visible = String(value) === String(f.showIf.value);
     wrap.style.display = visible ? '' : 'none';
-    // Reset hidden fields
+    // Reset hidden fields to defaults
     if (!visible) {
       if (f.type === 'toggle') {
         modalToggles[f.id] = false;
@@ -1599,6 +1597,9 @@ function updateShowIf(selectFieldId, value) {
       } else if (f.type === 'number') {
         const el = document.getElementById('fld_' + f.id);
         if (el) el.value = f.default ?? 0;
+      } else if (f.type === 'select') {
+        const el = document.getElementById('fld_' + f.id);
+        if (el) el.value = f.options[0];
       }
     }
   });
@@ -1643,6 +1644,7 @@ function toggleField(id,tl,fl){
   modalToggles[id]=!modalToggles[id];
   document.getElementById('tog_'+id).classList.toggle('on',modalToggles[id]);
   document.getElementById('togLbl_'+id).textContent=modalToggles[id]?tl:fl;
+  updateShowIf(id, modalToggles[id]);
 }
 function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
@@ -2051,7 +2053,29 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       const boardLower = (play.board || '').toLowerCase().trim();
       const scenario = AIRPORT_MAP[boardLower] || play.board || 'Unknown';
       const myRole = role || 'Solo';
-      return { ...base, scenario, role: myRole, coffeeCups: false };
+      // Extract defeat cause from scoresheet
+      const DEFEAT_LABELS = {
+        'mandatoryactions': 'Mandatory Actions', 'goingintoaspin': 'Going into a Spin',
+        'collision': 'Collision', 'overshoot': 'Overshoot', 'crashlanding': 'Crash Landing',
+        'airplanetokens': 'Airplane Tokens', 'flapslandinggear': 'Flaps & Landing Gear',
+        'axis': 'Axis', 'speed': 'Speed', 'turns': 'Turns',
+      };
+      let defeatCause = '';
+      if (!win) {
+        try {
+          const ss = JSON.parse(play.scoresheet || '{}');
+          for (const group of ss.groups || []) {
+            for (const row of group.rows || []) {
+              if (Object.values(row.scores||{}).includes('lose') && DEFEAT_LABELS[row.templateId]) {
+                defeatCause = DEFEAT_LABELS[row.templateId];
+                break;
+              }
+            }
+            if (defeatCause) break;
+          }
+        } catch(e) {}
+      }
+      return { ...base, scenario, role: myRole, coffeeCups: false, defeatCause };
     }
     case 'vantage': {
       const VANTAGE_CHARS = ['Jules, the Captain','Soren, the Navigator','Emilien, the Scholar','Ira, the Medic','Ariel, the Engineer','Tina, the Marine'];
