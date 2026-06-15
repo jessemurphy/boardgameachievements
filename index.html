@@ -502,6 +502,11 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       const vals = new Set(pool.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='Any / Unknown'&&v!=='None'));
       return vals.size >= check.count;
     }
+    case 'unique_values': {
+      const pool = check.winsOnly ? wins : plays;
+      const vals = new Set(pool.map(p=>p[check.field]).filter(v=>v&&v!=='None'&&v!=='Unknown'&&v!==''));
+      return vals.size >= check.count;
+    }
     case 'win_all_values':
       return check.values.every(v => wins.some(p => p[check.field] === v));
     case 'win_all_values_multifield':
@@ -990,6 +995,16 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
       const dates = check.values.map(v => wins.find(p => p[check.field] === v)?.ts).filter(Boolean);
       if (dates.length < check.values.length) return null;
       return ts2date(Math.max(...dates));
+    }
+    case 'unique_values': {
+      const pool = check.winsOnly ? wins : plays;
+      const seen = new Set();
+      for (const p of pool) {
+        const v = p[check.field];
+        if (v && v !== 'Unknown' && v !== 'None' && v !== '') seen.add(v);
+        if (seen.size >= check.count) return ts2date(p.ts);
+      }
+      return null;
     }
     case 'unique_win_values': {
       const seen = new Set();
