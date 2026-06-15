@@ -1158,17 +1158,14 @@ function renderCampaignDetail(gid, campId) {
     if (s.complete) {
       rowClass = 'complete';
       statusIcon = '✅';
-      clickAction = `toggleScenario('${gid}','${campId}',${sc.num},'complete')`;
     } else if (s.available) {
       rowClass = 'available';
       statusIcon = '⬜';
-      clickAction = `toggleScenario('${gid}','${campId}',${sc.num},'complete')`;
     } else {
       rowClass = 'locked';
       statusIcon = '';
-      clickAction = `toggleScenario('${gid}','${campId}',${sc.num},'available')`;
     }
-    html += `<div class="scenario-row ${rowClass}" onclick="${clickAction}">
+    html += `<div class="scenario-row ${rowClass}" onclick="toggleScenario('${gid}','${campId}',${sc.num})">
       <div class="scenario-num">${sc.num}</div>
       <div class="scenario-title">${sc.title}</div>
       <div class="scenario-status">${statusIcon}</div>
@@ -1186,20 +1183,26 @@ function renderCampaignDetail(gid, campId) {
   checkAll(); // re-evaluate campaign achievements
 }
 
-function toggleScenario(gid, campId, num, field) {
+function toggleScenario(gid, campId, num) {
   const camp = (campaigns[gid]||[]).find(c=>c.id===campId);
   if (!camp) return;
-  if (!camp.scenarios[num]) camp.scenarios[num] = { available: false, complete: false };
-  camp.scenarios[num][field] = !camp.scenarios[num][field];
-  // If completed, automatically mark next scenario as available
-  if (field==='complete' && camp.scenarios[num].complete) {
+  const s = camp.scenarios[num] || { available: false, complete: false };
+  // Cycle: locked → available → complete → locked
+  if (s.complete) {
+    s.available = false; s.complete = false;
+  } else if (s.available) {
+    s.complete = true;
+    // Auto-unlock next scenario
     const cfg = GAME_DEFINITIONS.find(x=>x.id===gid)?.campaignConfig;
     const nextNum = num + 1;
-    if (cfg?.scenarios.find(s=>s.num===nextNum)) {
+    if (cfg?.scenarios.find(x=>x.num===nextNum)) {
       if (!camp.scenarios[nextNum]) camp.scenarios[nextNum] = { available: false, complete: false };
       camp.scenarios[nextNum].available = true;
     }
+  } else {
+    s.available = true;
   }
+  camp.scenarios[num] = s;
   saveState();
   renderCampaignDetail(gid, campId);
 }
