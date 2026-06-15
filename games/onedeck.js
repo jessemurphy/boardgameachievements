@@ -12,6 +12,22 @@ window.GAME_DEFINITIONS.push(
       { id: 'dungeon',    label: 'Dungeon',        type: 'select', options: ["Dragon's Cave","Hydra's Reef","Yeti's Peak","Dragonshard Mines"] },
       { id: 'difficulty', label: 'Difficulty',    type: 'select', options: ['Novice','Standard','Veteran','Heroic'] },
     ],
+    customStatsTitle: 'Dungeon Stats',
+    customStats: [
+      { label: "Dragon's Cave", type: 'ratio', field: 'dungeon', value: "Dragon's Cave" },
+      { label: "Hydra's Reef",  type: 'ratio', field: 'dungeon', value: "Hydra's Reef" },
+      { label: "Yeti's Peak",   type: 'ratio', field: 'dungeon', value: "Yeti's Peak" },
+      { label: 'Dragonshard Mines', type: 'ratio', field: 'dungeon', value: 'Dragonshard Mines' },
+    ],
+
+    customStats2Title: 'Difficulty Stats',
+    customStats2: [
+      { label: 'Novice',   type: 'ratio', field: 'difficulty', value: 'Novice' },
+      { label: 'Standard', type: 'ratio', field: 'difficulty', value: 'Standard' },
+      { label: 'Veteran',  type: 'ratio', field: 'difficulty', value: 'Veteran' },
+      { label: 'Heroic',   type: 'ratio', field: 'difficulty', value: 'Heroic' },
+    ],
+
     achievements: [
       { id: 'od_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Delve',
         desc: 'Win your first dungeon',
