@@ -2321,6 +2321,14 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
   } catch(e) {}
 
   const board = parseBoard(play.board);
+  // Parse [key=value] tags from BGStats comments field
+  const commentTags = {};
+  try {
+    const comments = play.comments || '';
+    for (const m of comments.matchAll(/\[(\w+)=([^\]]+)\]/g)) {
+      commentTags[m[1].toLowerCase()] = m[2].trim();
+    }
+  } catch(e) {}
   const base = { date: playDate, ts, win, score };
 
   switch (gameId) {
@@ -2552,7 +2560,9 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         actsCleared, ascension: board.ascension,
         boss,
         playerCount: (play.playerScores||[]).length || 1,
-        deckSize: 0, relicCount: 0, hpFull: false, noRares: false,
+        deckSize:    commentTags.decksize   ? parseInt(commentTags.decksize)   : 0,
+        relicCount:  commentTags.relics     ? parseInt(commentTags.relics)     : 0,
+        hpFull: false, noRares: false,
         noRelics: false, dailyClimb: false, bossT1: false,
         hitStrength: false, hitPoison: false, hitBlock: false,
         play7shivs: false, have7powers: false, killedTransient: false, infiniteCombo: false,
