@@ -43,23 +43,31 @@ window.GAME_DEFINITIONS.push(
       { id: 'infiniteCombo',   label: 'Created Infinite Combo',      type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
     ],
 
-    customStatsTitle: 'Character Win Rate',
+    customStatsTitle: 'Player Count',
     customStats: [
+      { label: 'Solo (1p)',  type: 'ratio', field: 'playerCount', value: 1 },
+      { label: '2 Players',  type: 'ratio', field: 'playerCount', value: 2 },
+      { label: '3 Players',  type: 'ratio', field: 'playerCount', value: 3 },
+      { label: '4 Players',  type: 'ratio', field: 'playerCount', value: 4 },
+    ],
+
+    customStats2Title: 'Character Win Rate',
+    customStats2: [
       { label: 'Ironclad', type: 'ratio', field: 'character', value: 'Ironclad' },
       { label: 'Silent',   type: 'ratio', field: 'character', value: 'Silent' },
       { label: 'Defect',   type: 'ratio', field: 'character', value: 'Defect' },
       { label: 'Watcher',  type: 'ratio', field: 'character', value: 'Watcher' },
     ],
 
-    customStats2Title: 'Acts Cleared',
-    customStats2: [
+    customStats3Title: 'Acts Cleared',
+    customStats4: [
       { label: 'Act 1', type: 'ratio', field: 'actsCleared', value: 'Act 1' },
       { label: 'Act 2', type: 'ratio', field: 'actsCleared', value: 'Act 2' },
       { label: 'Act 3', type: 'ratio', field: 'actsCleared', value: 'Act 3' },
       { label: 'Act 4', type: 'ratio', field: 'actsCleared', value: 'Act 4' },
     ],
 
-    customStats3Title: 'Boss Win Rate',
+    customStats4Title: 'Boss Win Rate',
     customStats3: [
       { label: 'The Guardian',     type: 'ratio', field: 'boss', value: 'The Guardian' },
       { label: 'Slime Boss',       type: 'ratio', field: 'boss', value: 'Slime Boss' },

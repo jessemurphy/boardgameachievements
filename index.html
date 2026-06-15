@@ -851,6 +851,17 @@ function renderCustomStats(g, plays) {
     </div>`;
   }
 
+  if (g.customStats4 && g.customStats4.length) {
+    const rows4 = g.customStats4.map(s => {
+      const val = evalStat(s);
+      return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
+    }).join('');
+    html += `<div class="card">
+      <div class="card-header"><span class="card-title">${g.customStats4Title || 'More Stats'}</span></div>
+      <div class="pb-table">${rows4}</div>
+    </div>`;
+  }
+
   return html;
 }
 
@@ -2540,8 +2551,8 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         character4: chars[3] || 'None',
         actsCleared, ascension: board.ascension,
         boss,
-        playerCount: 1,
-        deckSize: 10, relicCount: 0, hpFull: false, noRares: false,
+        playerCount: (play.playerScores||[]).length || 1,
+        deckSize: 0, relicCount: 0, hpFull: false, noRares: false,
         noRelics: false, dailyClimb: false, bossT1: false,
         hitStrength: false, hitPoison: false, hitBlock: false,
         play7shivs: false, have7powers: false, killedTransient: false, infiniteCombo: false,
