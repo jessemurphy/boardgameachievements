@@ -24,6 +24,17 @@ window.GAME_DEFINITIONS.push(
     { id: 'allObj',   label: 'All 3 objectives?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
   ],
 
+  customStatsTitle: 'Best Score Components',
+  customStats: [
+    { label: 'Pools',       type: 'best_win', field: 'pools' },
+    { label: 'Parks',       type: 'best_win', field: 'parks' },
+    { label: 'Objective 1', type: 'best_win', field: 'obj1' },
+    { label: 'Objective 2', type: 'best_win', field: 'obj2' },
+    { label: 'Objective 3', type: 'best_win', field: 'obj3' },
+    { label: 'Bis',         type: 'best_win', field: 'bis' },
+    { label: 'Temps',       type: 'best_win', field: 'temps' },
+  ],
+
   achievements: [
     { id: 'wt_first',    icon: '🌟', tier: 'bronze', pts: 10, name: 'Welcome to the Neighborhood',
       desc: 'Play your first game',
