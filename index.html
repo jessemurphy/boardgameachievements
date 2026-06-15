@@ -661,12 +661,15 @@ function getPersonalBests(g) {
   if (!g.personalBestField) return null;
   const plays = appState[g.id]?.plays || [];
   const wins  = plays.filter(p => p.win);
-  const field = g.personalBestField;
+  // personalBestContext: group by context field, show best score
+  // personalBestField alone: group by that field, show best score for each value
+  const groupField = g.personalBestContext || g.personalBestField;
+  const scoreField = g.personalBestContext ? 'score' : g.personalBestField;
   const byValue = {};
   wins.forEach(p => {
-    const key = p[field];
+    const key = p[groupField];
     if (!key || key === 'Unknown' || key === 'None') return;
-    const s = Number(p.score) || 0;
+    const s = Number(p[scoreField]) || 0;
     if (!byValue[key] || s > byValue[key]) byValue[key] = s;
   });
   return byValue;
@@ -705,8 +708,9 @@ function renderPersonalBests(g) {
     .sort((a,b) => b[1]-a[1])
     .map(([k,v]) => `<div class="pb-row"><span class="pb-label">${k}</span><span class="pb-val">${v} pts</span></div>`)
     .join('');
+  const title = g.personalBestTitle || `Best Score by ${label}`;
   return `<div class="card">
-    <div class="card-header"><span class="card-title">Best Score by ${label}</span></div>
+    <div class="card-header"><span class="card-title">${title}</span></div>
     <div class="pb-table">${rows}</div>
   </div>`;
 }

@@ -3,7 +3,7 @@ window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 window.GAME_DEFINITIONS.push(
 // ── Planet Unknown ───────────────────────────────────────────
   {
-    id: 'planetunknown', name: 'Planet Unknown', personalBestField: 'score', icon: '🪐', genre: 'Polyomino · Tile Laying · Sci-Fi',
+    id: 'planetunknown', name: 'Planet Unknown', personalBestField: 'score', personalBestContext: 'planet', personalBestTitle: 'Best Score by Planet', icon: '🪐', genre: 'Polyomino · Tile Laying · Sci-Fi',
     color: '#4a2a8a', bgColor: '#f6f0ff', dimColor: '#9a70e0',
     logFields: [
       { id: 'win',         label: 'Win?',              type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
