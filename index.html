@@ -65,20 +65,20 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hstat-lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
 
 /* Log button */
-.campaign-progress{background:#e8f0e8;border-radius:8px;padding:10px 14px;margin-bottom:8px}
-.campaign-progress-bar{height:6px;background:#e0e0e8;border-radius:3px;margin-top:6px}
+.campaign-progress-bar{height:6px;background:#e0e0e8;border-radius:3px;margin-top:8px}
 .campaign-progress-fill{height:6px;border-radius:3px;transition:width .3s}
-.scenario-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f5}
-.scenario-num{font-size:12px;font-weight:600;color:var(--text-3);min-width:24px}
+.scenario-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;margin-bottom:4px;transition:background .15s;cursor:pointer}
+.scenario-row.locked{background:#fff0f0}
+.scenario-row.complete{background:#f0faf4}
+.scenario-row.available{background:#fff}
+.scenario-num{font-size:12px;font-weight:700;color:var(--text-3);min-width:22px}
 .scenario-title{flex:1;font-size:14px;color:var(--text)}
-.scenario-checks{display:flex;gap:8px}
-.scenario-check{width:28px;height:28px;border-radius:6px;border:1.5px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0}
-.scenario-check.done{background:var(--green);border-color:var(--green);color:#fff}
-.scenario-check.available{background:#fff8e0;border-color:#f0d870}
+.scenario-row.locked .scenario-title{color:var(--text-3)}
+.scenario-status{font-size:16px;flex-shrink:0}
 .char-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f5}
 .char-name{flex:1;font-size:14px;font-weight:600;color:var(--text)}
 .char-level{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2)}
-.char-level input{width:40px;padding:4px 6px;border:1px solid #ddd;border-radius:6px;font-size:14px;text-align:center}
+.char-level input{width:44px;padding:4px 6px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;text-align:center;font-weight:600}
 .campaign-card-item{background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);cursor:pointer;border-left:4px solid transparent}
 .campaign-card-item:active{opacity:.8}
 .campaign-card-name{font-size:16px;font-weight:600;color:var(--text)}
@@ -1136,7 +1136,7 @@ function renderCampaignDetail(gid, campId) {
 
   // Progress bar
   let html = `<div class="card">
-    <div class="card-header"><span class="card-title">Progress</span><span style="font-size:13px;color:var(--text-2)">${done} / ${total}</span></div>
+    <div class="card-header"><span class="card-title">Progress</span><span style="font-size:13px;color:var(--text-2);font-weight:600">${done} / ${total} scenarios</span></div>
     <div class="campaign-progress-bar"><div class="campaign-progress-fill" style="width:${pct}%;background:var(--green)"></div></div>
   </div>`;
 
@@ -1154,15 +1154,24 @@ function renderCampaignDetail(gid, campId) {
   html += `<div class="card"><div class="card-header"><span class="card-title">Scenarios</span></div>`;
   cfg.scenarios.forEach(sc => {
     const s = camp.scenarios[sc.num] || {};
-    const availClass = s.available ? 'available' : '';
-    const doneClass = s.complete ? 'done' : '';
-    html += `<div class="scenario-row">
+    let rowClass, statusIcon, clickAction;
+    if (s.complete) {
+      rowClass = 'complete';
+      statusIcon = '✅';
+      clickAction = `toggleScenario('${gid}','${campId}',${sc.num},'complete')`;
+    } else if (s.available) {
+      rowClass = 'available';
+      statusIcon = '⬜';
+      clickAction = `toggleScenario('${gid}','${campId}',${sc.num},'complete')`;
+    } else {
+      rowClass = 'locked';
+      statusIcon = '';
+      clickAction = `toggleScenario('${gid}','${campId}',${sc.num},'available')`;
+    }
+    html += `<div class="scenario-row ${rowClass}" onclick="${clickAction}">
       <div class="scenario-num">${sc.num}</div>
       <div class="scenario-title">${sc.title}</div>
-      <div class="scenario-checks">
-        <div class="scenario-check ${availClass}" onclick="toggleScenario('${gid}','${campId}',${sc.num},'available')" title="Available">${s.available?'🔓':'🔒'}</div>
-        <div class="scenario-check ${doneClass}" onclick="toggleScenario('${gid}','${campId}',${sc.num},'complete')" title="Complete">${s.complete?'✓':''}</div>
-      </div>
+      <div class="scenario-status">${statusIcon}</div>
     </div>`;
   });
   html += `</div>`;
