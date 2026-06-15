@@ -37,6 +37,32 @@ window.GAME_DEFINITIONS.push(
 
     personalBestField: 'difficulty',
 
+    customStatsTitle: 'Adversary Breakdown',
+    customStats: [
+      { label: 'No Adversary',       type: 'ratio', field: 'adversary', value: 'None' },
+      { label: 'Brandenburg-Prussia',type: 'ratio', field: 'adversary', value: 'Brandenburg-Prussia' },
+      { label: 'England',            type: 'ratio', field: 'adversary', value: 'England' },
+      { label: 'Sweden',             type: 'ratio', field: 'adversary', value: 'Sweden' },
+      { label: 'France',             type: 'ratio', field: 'adversary', value: 'France' },
+      { label: 'Habsburg Miners',    type: 'ratio', field: 'adversary', value: 'Habsburg Miners' },
+      { label: 'Russia',             type: 'ratio', field: 'adversary', value: 'Russia' },
+      { label: 'Scotland',           type: 'ratio', field: 'adversary', value: 'Scotland' },
+      { label: 'Austria-Habsburg',   type: 'ratio', field: 'adversary', value: 'Austria-Habsburg' },
+    ],
+
+    customStats2Title: 'Best Score by Adversary',
+    customStats2: [
+      { label: 'No Adversary',       type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'None' } },
+      { label: 'Brandenburg-Prussia',type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Brandenburg-Prussia' } },
+      { label: 'England',            type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'England' } },
+      { label: 'Sweden',             type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Sweden' } },
+      { label: 'France',             type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'France' } },
+      { label: 'Habsburg Miners',    type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Habsburg Miners' } },
+      { label: 'Russia',             type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Russia' } },
+      { label: 'Scotland',           type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Scotland' } },
+      { label: 'Austria-Habsburg',   type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Austria-Habsburg' } },
+    ],
+
     achievements: [
       // ── First steps ──
       { id: 'si_first',     icon: '🌟', tier: 'bronze', pts: 10, name: 'The Island Awakens',

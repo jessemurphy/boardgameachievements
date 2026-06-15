@@ -20,6 +20,23 @@ window.GAME_DEFINITIONS.push(
       { id: 'noLoss',     label: 'No Shields Lost',  type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     ],
 
+    customStatsTitle: 'Starfighter Stats',
+    customStats: [
+      { label: 'Hermes',   type: 'ratio', field: 'ship', value: 'Hermes' },
+      { label: 'Achilles', type: 'ratio', field: 'ship', value: 'Achilles' },
+      { label: 'Titan',    type: 'ratio', field: 'ship', value: 'Titan' },
+      { label: 'Artemis',  type: 'ratio', field: 'ship', value: 'Artemis' },
+    ],
+
+    customStats2Title: 'Boss Stats',
+    customStats2: [
+      { label: 'The Dread',    type: 'ratio', field: 'mothership', value: 'The Dread' },
+      { label: 'The Hydra',    type: 'ratio', field: 'mothership', value: 'The Hydra' },
+      { label: 'The Duo',      type: 'ratio', field: 'mothership', value: 'The Duo' },
+      { label: 'The Array',    type: 'ratio', field: 'mothership', value: 'The Array' },
+      { label: 'The Revenant', type: 'ratio', field: 'mothership', value: 'The Revenant' },
+    ],
+
     achievements: [
       { id: 'w_first_win',    icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Contact',       desc: 'Win your first game',
         check: { type: 'min_wins', count: 1 } },
