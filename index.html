@@ -868,6 +868,11 @@ function getProgress(check, gameState, allState) {
       const vals = new Set(wins.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='None'));
       return `${vals.size} / ${check.count}`;
     }
+    case 'unique_values': {
+      const pool = check.winsOnly ? wins : plays;
+      const vals = new Set(pool.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='None'&&v!==''));
+      return `${vals.size} / ${check.count}`;
+    }
     case 'field_gte':    return `Best: ${plays.reduce((m,p)=>Math.max(m,Number(p[check.field])||0),0)} / ${check.value}`;
     case 'win_field_gte':return `Best win: ${wins.reduce((m,p)=>Math.max(m,Number(p[check.field])||0),0)} / ${check.value}`;
     case 'total_plays_gte': {
