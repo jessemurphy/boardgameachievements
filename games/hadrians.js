@@ -5,7 +5,7 @@ window.GAME_DEFINITIONS.push(
   {
     id: 'hadrians', name: "Hadrian's Wall", icon: '🧱', genre: 'Roll & Write · Solo Campaign',
     color: '#6a4a2a', bgColor: '#fff8f0', dimColor: '#c09060',
-    personalBestField: 'difficulty',
+    personalBestField: 'score',
     logFields: [
       { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
       { id: 'difficulty', label: 'Difficulty',    type: 'select', options: ['Easy','Medium','Hard'] },
@@ -18,6 +18,25 @@ window.GAME_DEFINITIONS.push(
       { id: 'pathcards',  label: 'Path Cards',    type: 'number', min: 0, max: 20, default: 0 },
       { id: 'disdain',    label: 'Disdain (−)',   type: 'number', min: 0, max: 30, default: 0 },
     ],
+    personalBestContext: 'difficulty',
+    personalBestTitle: 'Best Score by Difficulty',
+
+    customStatsTitle: 'Difficulty Breakdown',
+    customStats: [
+      { label: 'Easy',   type: 'ratio', field: 'difficulty', value: 'Easy' },
+      { label: 'Medium', type: 'ratio', field: 'difficulty', value: 'Medium' },
+      { label: 'Hard',   type: 'ratio', field: 'difficulty', value: 'Hard' },
+    ],
+
+    customStats2Title: 'Score Components (Best Win)',
+    customStats2: [
+      { label: 'Renown',     type: 'best_win', field: 'renown' },
+      { label: 'Piety',      type: 'best_win', field: 'piety' },
+      { label: 'Valour',     type: 'best_win', field: 'valour' },
+      { label: 'Discipline', type: 'best_win', field: 'discipline' },
+      { label: 'Path Cards', type: 'best_win', field: 'pathcards' },
+    ],
+
     achievements: [
       { id: 'hw_first',   icon: '🌟', tier: 'bronze', pts: 10, name: 'First Watch',
         desc: 'Win your first game',
