@@ -2310,9 +2310,13 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       };
     }
     case 'warps': {
-      return { ...base, ship: role || 'Any / Unknown',
-        mothership: board.extras[0] || 'Any / Unknown',
-        warpsUsed: 3, noLoss: false };
+      const WARPS_SHIPS = ['Hermes','Achilles','Titan','Artemis'];
+      const WARPS_BOSSES = ['The Dread','The Hydra','The Duo','The Array','The Revenant'];
+      // Role = starfighter, board = mothership
+      const shipNorm = WARPS_SHIPS.find(s => s.toLowerCase() === (role||'').toLowerCase()) || role || 'Any / Unknown';
+      const boardStr = (play.board || '').trim();
+      const motherNorm = WARPS_BOSSES.find(b => b.toLowerCase() === boardStr.toLowerCase()) || boardStr || 'Any / Unknown';
+      return { ...base, ship: shipNorm, mothership: motherNorm, warpsUsed: 3, noLoss: false };
     }
     case 'palm': {
       return { ...base, round2: false, noWaste: false };
