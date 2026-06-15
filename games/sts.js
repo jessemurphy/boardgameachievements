@@ -22,7 +22,7 @@ window.GAME_DEFINITIONS.push(
         'None',
         'The Guardian','Slime Boss','Hexaghost',
         'The Champ','Bronze Automaton','The Collector',
-        'Awakened One','Time Eater','Donu & Deca',
+        'The Awakened One','Time Eater','Donu & Deca',
         'The Corrupt Heart'
       ] },
       { id: 'ascension',  label: 'Ascension Level',type: 'number', min: 0, max: 13, default: 0 },
@@ -67,7 +67,7 @@ window.GAME_DEFINITIONS.push(
       { label: 'The Champ',        type: 'ratio', field: 'boss', value: 'The Champ' },
       { label: 'Bronze Automaton', type: 'ratio', field: 'boss', value: 'Bronze Automaton' },
       { label: 'The Collector',    type: 'ratio', field: 'boss', value: 'The Collector' },
-      { label: 'Awakened One',     type: 'ratio', field: 'boss', value: 'Awakened One' },
+      { label: 'The Awakened One',     type: 'ratio', field: 'boss', value: 'The Awakened One' },
       { label: 'Time Eater',       type: 'ratio', field: 'boss', value: 'Time Eater' },
       { label: 'Donu & Deca',      type: 'ratio', field: 'boss', value: 'Donu & Deca' },
       { label: 'The Corrupt Heart',type: 'ratio', field: 'boss', value: 'The Corrupt Heart' },
