@@ -1140,16 +1140,6 @@ function renderCampaignDetail(gid, campId) {
     <div class="campaign-progress-bar"><div class="campaign-progress-fill" style="width:${pct}%;background:var(--green)"></div></div>
   </div>`;
 
-  // Characters
-  html += `<div class="card"><div class="card-header"><span class="card-title">Characters</span></div>`;
-  camp.characters.forEach((ch, i) => {
-    html += `<div class="char-row">
-      <div class="char-name">${ch.class}</div>
-      <div class="char-level">Level <input type="number" min="1" max="9" value="${ch.level||1}" onchange="updateCharLevel('${gid}','${campId}',${i},this.value)"></div>
-    </div>`;
-  });
-  html += `</div>`;
-
   // Scenarios
   html += `<div class="card"><div class="card-header"><span class="card-title">Scenarios</span></div>`;
   cfg.scenarios.forEach(sc => {
