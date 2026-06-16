@@ -44,6 +44,7 @@ and omitting the tag entirely means "not tracked."
 ## Planet Unknown
 - **Role:** `Corporation／Planet` or `Planet／Corporation` (order doesn't matter)
 - **Comment tags:** `[meteorites=0]` to flag a no-meteorites game
+- In 2-player games, "target/opponent score" is taken from the other player's score automatically (no extra tag needed)
 
 ## One Deck Dungeon
 - **Board:** Dungeon name — `Dragon's Cave`, `Hydra's Reef`, etc.
@@ -59,6 +60,15 @@ and omitting the tag entirely means "not tracked."
 ## Railroad Ink (any edition)
 - Score components come from the BGStats scoresheet (Networks, Longest Highway, Longest Railway, Central Spaces, Errors)
 - Edition is inferred from the BGG game entry you log against
+- Deep Blue, Lush Green, Shining Yellow, and Blazing Red are different BGG entries that all roll up into one tracker game — make sure you're logging against the correct edition's entry in BGStats so the edition tag comes through right
+
+## Railroad Ink Challenge: Solo Board
+- Tracked as its own separate game (different scoring/structures from the base editions above)
+- Currently win/score only — no scoresheet import yet
+
+## Sprawlopolis
+- **Board:** the three scoring cards drawn, separated by `／`, each prefixed with its card number, e.g. `13 Park Hopping／14 Looping Lanes／16 Morning Commute`
+- The card numbers and names are read directly from this field — no special formatting needed beyond entering the scoring cards as the board/scenario
 
 ## Search for Planet X
 - **Board:** `Standard` or `Expert`
