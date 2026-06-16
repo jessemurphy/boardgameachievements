@@ -502,6 +502,22 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       return check.values.every(v => wins.some(p => p[check.field] === v));
     case 'win_all_values_multifield':
       return check.values.every(v => wins.some(p => check.fields.some(f => p[f] === v)));
+    case 'unique_field_pair_combos': {
+      // Tracks unique combinations of two fields across wins; expandable since it compares
+      // against the live count of possible combos rather than a hardcoded number.
+      const f1opts = (GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[])
+        .find(f=>f.id===check.field1)?.options?.filter(o=>o!=='Unknown') || [];
+      const f2opts = (GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[])
+        .find(f=>f.id===check.field2)?.options?.filter(o=>o!=='Unknown') || [];
+      const totalCombos = f1opts.length * f2opts.length;
+      const seen = new Set();
+      wins.forEach(p => {
+        if (p[check.field1] && p[check.field2] && p[check.field1]!=='Unknown' && p[check.field2]!=='Unknown') {
+          seen.add(p[check.field1]+'|'+p[check.field2]);
+        }
+      });
+      return totalCombos > 0 && seen.size >= totalCombos;
+    }
     case 'unique_win_values_multifield': {
       const vals = new Set();
       wins.forEach(p => check.fields.forEach(f => { if(p[f]&&p[f]!=='None') vals.add(p[f]); }));
@@ -854,6 +870,21 @@ function getProgressPct(check, gameState, allState) {
       const best = Math.max(0, ...Object.values(monthCounts).map(s=>s.size));
       return total ? Math.min(1, best/total) : 0;
     }
+    case 'unique_field_pair_combos': {
+      const f1opts = (GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[])
+        .find(f=>f.id===check.field1)?.options?.filter(o=>o!=='Unknown') || [];
+      const f2opts = (GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[])
+        .find(f=>f.id===check.field2)?.options?.filter(o=>o!=='Unknown') || [];
+      const totalCombos = f1opts.length * f2opts.length;
+      const seen = new Set();
+      const allWins = allState[check.gameId]?.plays?.filter(p=>p.win) || [];
+      allWins.forEach(p => {
+        if (p[check.field1] && p[check.field2] && p[check.field1]!=='Unknown' && p[check.field2]!=='Unknown') {
+          seen.add(p[check.field1]+'|'+p[check.field2]);
+        }
+      });
+      return totalCombos > 0 ? Math.min(1, seen.size/totalCombos) : 0;
+    }
     case 'n_different_games_won_same_day': {
       const dateGames = {};
       GAME_DEFINITIONS.forEach(g => {
@@ -1152,6 +1183,21 @@ function getProgress(check, gameState, allState) {
 
   switch (check.type) {
     case 'min_plays':    return `${plays.length} / ${check.count} plays`;
+    case 'unique_field_pair_combos': {
+      const f1opts = (GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[])
+        .find(f=>f.id===check.field1)?.options?.filter(o=>o!=='Unknown') || [];
+      const f2opts = (GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[])
+        .find(f=>f.id===check.field2)?.options?.filter(o=>o!=='Unknown') || [];
+      const totalCombos = f1opts.length * f2opts.length;
+      const seen = new Set();
+      const allWins = allState[check.gameId]?.plays?.filter(p=>p.win) || [];
+      allWins.forEach(p => {
+        if (p[check.field1] && p[check.field2] && p[check.field1]!=='Unknown' && p[check.field2]!=='Unknown') {
+          seen.add(p[check.field1]+'|'+p[check.field2]);
+        }
+      });
+      return `${seen.size} / ${totalCombos} combos`;
+    }
     case 'min_wins':     return `${wins.length} / ${check.count} wins`;
     case 'win_all_values': {
       const have = check.values.filter(v => wins.some(p=>p[check.field]===v)).length;
