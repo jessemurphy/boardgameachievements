@@ -1,4 +1,4 @@
-// BGStats comment tags: [decksize=N] [relics=N]
+// BGStats comment tags: [decksize=N] [relics=N] [hpfull=1] [norares=1] [norelics=1] [daily=1]
 // Use [key=?] if you tracked it but didn't record the value
 // ── sts ──
 window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];

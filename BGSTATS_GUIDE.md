@@ -19,7 +19,7 @@ and omitting the tag entirely means "not tracked."
 ## Slay the Spire: The Board Game
 - **Board:** `Act I`, `Act II: Hexaghost`, etc. — act reached, optionally with boss name
 - **Role:** Character name — `Ironclad`, `Silent`, `Defect`, `Watcher`
-- **Comment tags:** `[decksize=N]`, `[relics=N]`
+- **Comment tags:** `[decksize=N]` `[relics=N]` `[hpfull=1]` (all players at full HP on boss kill) `[norares=1]` (no uncommons/rares in deck) `[norelics=1]` (no relics/boss relics) `[daily=1]` (Daily Climb run)
 
 ## Spirit Island
 - **Role:** Spirit name, e.g. `River Surges in Sunlight`. Two spirits: separate with `/` or `,`
