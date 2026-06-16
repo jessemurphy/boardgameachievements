@@ -24,6 +24,23 @@ window.GAME_DEFINITIONS.push(
     { id: 'crossings4',   label: '4-Line Crossings',type: 'number', min: 0, max: 15,  default: 0 },
   ],
 
+  personalBestField: 'score',
+  personalBestTitle: 'Best Score',
+
+  completenessFields: ['line1'],
+
+  customStatsTitle: 'Best Score Components',
+  customStats: [
+    { label: 'Line 1',             type: 'best_win', field: 'line1' },
+    { label: 'Line 2',             type: 'best_win', field: 'line2' },
+    { label: 'Line 3',             type: 'best_win', field: 'line3' },
+    { label: 'Line 4',             type: 'best_win', field: 'line4' },
+    { label: 'Tourist Sites',      type: 'best_win', field: 'touristSites' },
+    { label: '2-Line Crossings',   type: 'best_win', field: 'crossings2' },
+    { label: '3-Line Crossings',   type: 'best_win', field: 'crossings3' },
+    { label: '4-Line Crossings',   type: 'best_win', field: 'crossings4' },
+  ],
+
   achievements: [
     { id: 'nsl_first',     icon: '🌟', tier: 'bronze', pts: 10, name: 'First Departure',
       desc: 'Play your first game',

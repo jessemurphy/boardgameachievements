@@ -770,7 +770,8 @@ function renderPersonalBests(g) {
     .sort((a,b) => b[1].score-a[1].score)
     .map(([k,v]) => {
       const date = v.ts ? new Date(v.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-      return `<div class="pb-row"><span class="pb-label">${k}${date?`<span style="font-size:10px;color:var(--text-3);font-weight:400;margin-left:6px">${date}</span>`:''}</span><span class="pb-val">${v.score} pts</span></div>`;
+      const label = k === String(v.score) ? (date || k) : k;
+      return `<div class="pb-row"><span class="pb-label">${label}${(k !== String(v.score) && date)?`<span style="font-size:10px;color:var(--text-3);font-weight:400;margin-left:6px">${date}</span>`:''}</span><span class="pb-val">${v.score} pts</span></div>`;
     })
     .join('');
   const title = g.personalBestTitle || `Best Score by ${label}`;
