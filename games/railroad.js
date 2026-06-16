@@ -14,6 +14,14 @@ window.GAME_DEFINITIONS.push(
       { id: 'centre',      label: 'Centre Squares',     type: 'number', min: 0, max: 4, default: 2 },
       { id: 'errors',      label: 'Errors',             type: 'number', min: 0, max: 10, default: 0 },
     ],
+    customStatsTitle: 'Edition Breakdown',
+    customStats: [
+      { label: 'Deep Blue',      type: 'ratio', field: 'edition', value: 'Deep Blue' },
+      { label: 'Lush Green',     type: 'ratio', field: 'edition', value: 'Lush Green' },
+      { label: 'Shining Yellow', type: 'ratio', field: 'edition', value: 'Shining Yellow' },
+      { label: 'Blazing Red',    type: 'ratio', field: 'edition', value: 'Blazing Red' },
+    ],
+
     achievements: [
       { id: 'ri_first',   icon: '🌟', tier: 'bronze', pts: 10,  name: 'First Network',
         desc: 'Play your first game',
