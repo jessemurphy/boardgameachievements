@@ -3234,7 +3234,23 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       return { ...base, season: 'All Seasons', coins: 0, monsters: 0, allEdicts: false };
     }
     case 'railroad': {
-      return { ...base, exits: 0, longest: 0, centre: 0, errors: 0, edition: 'Deep Blue' };
+      function ssRI(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet||'{}');
+          for (const g of parsed.groups||[]) for (const r of g.rows||[]) {
+            if (r.templateId===key) { const v=r.scores?.[playerUuid]; if(v!==undefined&&v!=='') return parseInt(v)||0; }
+          }
+        } catch(e) {} return 0;
+      }
+      const editionMap = {245654:'Deep Blue',245655:'Lush Green',245656:'Blazing Red',263918:'Shining Yellow'};
+      const edition = editionMap[play.bggId] || 'Deep Blue';
+      return { ...base,
+        exits:   ssRI('networks'),
+        longest: Math.max(ssRI('longesthighway'), ssRI('longestrailway')),
+        centre:  ssRI('centralspaces'),
+        errors:  ssRI('errors'),
+        edition
+      };
     }
     default:
       return base;
