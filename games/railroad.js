@@ -46,11 +46,10 @@ window.GAME_DEFINITIONS.push(
         desc: 'Unlock all other Railroad Ink achievements',
         check: { type: 'all_achievements', ids: ['ri_first','ri_score25','ri_score35','ri_score45','ri_noerror','ri_allexit','ri_centre4','ri_editions','ri_10plays'] } },
     ]
-  },
+  }
 
   // ── ADD YOUR NEXT GAME HERE ───────────────────────────────────
   // Copy a block above, change the id/name/fields/achievements.
   // The app will automatically add a tab and page for it.
 
-];
 );
