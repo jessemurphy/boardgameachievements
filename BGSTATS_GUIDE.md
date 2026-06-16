@@ -16,7 +16,11 @@ number), and omitting the tag entirely means "not tracked."
 
 ### Hadrian's Wall
 - **Board/Scenario field:** difficulty, optionally with the fort — `Easy`, `Medium`, or `Hard`, optionally followed by `／Fort N: Name`, e.g. `Medium／Fort 3: Condercum`
-- If you don't include the fort in the board field, use the `[fort=N]` comment tag instead
+
+**Comment tags:**
+| Tag | Meaning |
+|---|---|
+| `[fort=N]` | Fort number, if not already included in the board field |
 
 ### Jaws of the Lion
 - **Board/Scenario field:** `Scenario N`, where N is 1–25, e.g. `Scenario 7`
@@ -32,7 +36,11 @@ number), and omitting the tag entirely means "not tracked."
 ### Planet Unknown
 - **Role field:** `Corporation／Planet` or `Planet／Corporation` — order doesn't matter, both get parsed out
 - In 2-player games, the "target/opponent score" panel is filled in automatically from the other player's score — no extra tag needed
-- Use `[meteorites=0]` if you want to flag a no-meteorites game
+
+**Comment tags:**
+| Tag | Meaning |
+|---|---|
+| `[meteorites=0]` | Flags a no-meteorites game |
 
 ### Railroad Ink (any edition)
 - No special board/role formatting needed — fill in the BGStats scoresheet (Networks, Longest Highway, Longest Railway, Central Spaces, Errors) and the edition is inferred automatically from which BGG game entry you logged the play against
@@ -53,7 +61,16 @@ number), and omitting the tag entirely means "not tracked."
 - **Board/Scenario field:** the act reached, optionally with the boss fought, e.g. `Act I`, `Act II: Hexaghost`, `Act III: The Awakened One`
 - **Role field:** the character played — `Ironclad`, `Silent`, `Defect`, or `Watcher`
 - Player count is pulled automatically from how many players are listed on the play
-- Comment tags let you record things the scoresheet doesn't capture — see the table below
+
+**Comment tags:**
+| Tag | Meaning |
+|---|---|
+| `[decksize=N]` | Final deck size |
+| `[relics=N]` | Number of relics held |
+| `[hpfull=1]` | All players were at full HP when the boss was defeated |
+| `[norares=1]` | No uncommons or rares ended up in the deck |
+| `[norelics=1]` | No relics or boss relics were collected |
+| `[daily=1]` | This was a Daily Climb run |
 
 ### Spirit Island
 - **Role field:** the spirit name, e.g. `River Surges in Sunlight` — for a two-spirit game, separate with `/` or `,`
@@ -74,26 +91,6 @@ number), and omitting the tag entirely means "not tracked."
 ### Welcome to the Moon
 - **Board/Scenario field:** the scenario, e.g. `#8: The Battle` — extra spaces and a "Campaign" prefix/suffix in the name are both handled automatically
 - **Role field:** the automata's name, if you played against one
-
----
-
-## Comment Tag Reference
-
-All comment tags go in the **Comments** field on the play, in `[key=value]`
-format. Multiple tags can be combined in one comment, e.g.
-`[decksize=12][relics=7]`. Use `[key=?]` instead of a number if you tracked
-the stat but don't remember the value — it still counts as "recorded."
-
-| Game | Tag | Meaning |
-|---|---|---|
-| Hadrian's Wall | `[fort=N]` | Fort number, if not already included in the board field |
-| Planet Unknown | `[meteorites=0]` | Flags a no-meteorites game |
-| Slay the Spire | `[decksize=N]` | Final deck size |
-| Slay the Spire | `[relics=N]` | Number of relics held |
-| Slay the Spire | `[hpfull=1]` | All players were at full HP when the boss was defeated |
-| Slay the Spire | `[norares=1]` | No uncommons or rares ended up in the deck |
-| Slay the Spire | `[norelics=1]` | No relics or boss relics were collected |
-| Slay the Spire | `[daily=1]` | This was a Daily Climb run |
 
 ---
 
