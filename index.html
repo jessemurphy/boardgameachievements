@@ -2413,6 +2413,7 @@ const BGG_TO_TRACKER = {
   295374: 'circlewagons',   // Circle the Wagons
   420033: 'vantage',        // Vantage
   380165: 'nextstationtokyo', // Next Station: Tokyo
+  291457: 'jawsoflion',      // Gloomhaven: Jaws of the Lion
 };
 
 // Spirit name normalization (BGStats uses Title Case)
@@ -2798,6 +2799,27 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       }
       // Only set defeatCause if we actually found one in the scoresheet
       return { ...base, scenario, role: myRole, coffeeCups: false, defeatCause: defeatCause || '' };
+    }
+    case 'jawsoflion': {
+      // board: "Scenario 1" through "Scenario 25"
+      const scenMatch = (play.board||'').match(/Scenario\s*(\d+)/i);
+      const scenario = scenMatch ? scenMatch[1] + ' – ' + ([
+        'Roadside Ambush','A Hole in the Wall','The Black Ship','A Ritual in Stone',
+        'A Deeper Understanding','Corrupted Research','Sunken Tumor','Hidden Tumor',
+        'Explosive Evolution','The Gauntlet','Defiled Sewers','Beguiling Sewers',
+        'Vile Harvest','Toxic Harvest','Tainted Blood','Mixed Results','Red Twilight',
+        'The Heist','Den of Thieves','Misplaced Goods','Agent of Chaos',
+        'Unfriendly Message','Best of the Best','Warding the Void',
+        'The Greatest Job in the World'
+      ][parseInt(scenMatch[1])-1] || '') : '';
+      // role: "Hatchet／Red Guard" — characters played
+      const CHARS = ['Demolitionist','Red Guard','Hatchet','Voidwarden'];
+      const roleParts = role.split(/[／\/,]/).map(s=>s.trim()).filter(Boolean);
+      const char_demo  = roleParts.some(r=>r==='Demolitionist');
+      const char_red   = roleParts.some(r=>r==='Red Guard');
+      const char_hatch = roleParts.some(r=>r==='Hatchet');
+      const char_void  = roleParts.some(r=>r==='Voidwarden');
+      return { ...base, scenario, char_demo, char_red, char_hatch, char_void };
     }
     case 'vantage': {
       const VANTAGE_CHARS = ['Jules, the Captain','Soren, the Navigator','Emilien, the Scholar','Ira, the Medic','Ariel, the Engineer','Tina, the Marine'];
@@ -3204,6 +3226,7 @@ function playFingerprint(gid, play) {
   if (gid === 'turing')       return `${base}|${play.rounds||0}|${play.queries||0}`;
   if (gid === 'spiritisland') return `${base}|${play.adversary||''}|${play.level||0}`;
   if (gid === 'sts')          return `${base}|${play.character||''}`;
+  if (gid === 'jawsoflion')   return `${base}|${play.scenario||''}`;
   if (gid === 'onedeck')      return `${base}|${play.dungeon||''}`;
   return `${base}|${play.score||0}`;
 }

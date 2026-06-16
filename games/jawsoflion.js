@@ -29,6 +29,8 @@ window.GAME_DEFINITIONS.push({
     { id: 'campaign_id', label: 'Campaign',      type: 'select', options: ['None'] },
   ],
 
+  completenessFields: ['scenario'],
+
   campaignConfig: {
     characters: ['Demolitionist','Red Guard','Hatchet','Voidwarden'],
     scenarios: [
