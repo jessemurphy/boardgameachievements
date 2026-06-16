@@ -30,6 +30,14 @@ window.GAME_DEFINITIONS.push(
     ],
 
     achievements: [
+      { id: 'sp_allcards', icon: '🗂️', tier: 'plat', pts: 60, name: 'City Planner Supreme',
+        desc: 'Win at least once with every scoring card',
+        check: { type: 'win_all_values_multifield', fields: ['card1','card2','card3'], values: [
+          'The Outskirts','Bloom Boom','Go Green','Block Party','Suburban Sprawl','Greener Pastures',
+          'Central Perks','Highway to the Danger Zone','Sunny Side','The Strip','City Limits',
+          'The Superhighway','Park Hopping','Looping Lanes','Skid Row','Morning Commute',
+          'Tourist Traps','Sprawlopolis'
+        ] } },
       { id: 'sp_card18', icon: '🃏', tier: 'gold', pts: 25, name: 'The Eighteenth Card',
         desc: 'Win a game that includes the "Sprawlopolis" scoring card',
         check: { type: 'win_with_any_field', fields: ['card1','card2','card3'], value: 'Sprawlopolis' } },
