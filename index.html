@@ -472,6 +472,7 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
     case 'min_wins':          return wins.length >= check.count;
     case 'win_with_field':    return wins.some(p => String(p[check.field]) === String(check.value));
     case 'win_with_toggle':   return wins.some(p => p[check.field] === true);
+    case 'win_with_any_field': return wins.some(p => check.fields.some(f => p[f] === check.value));
     case 'toggle_false':      return plays.some(p => p[check.field] === false);
     case 'win_toggle_false':  return wins.some(p => p[check.field] === false);
     case 'field_eq':          return plays.some(p => String(p[check.field]) === String(check.value));
@@ -1041,6 +1042,12 @@ function renderCustomStats(g, plays) {
       case 'ratio': {
         const att = plays.filter(p => p[s.field] === s.value).length;
         const w = wins.filter(p => p[s.field] === s.value).length;
+        return att ? w + ' / ' + att : '—';
+      }
+      case 'ratio_any_field': {
+        const match = p => s.fields.some(f => p[f] === s.value);
+        const att = plays.filter(match).length;
+        const w = wins.filter(match).length;
         return att ? w + ' / ' + att : '—';
       }
       case 'unique_values': {
@@ -3160,10 +3167,12 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         const m = p.match(/^(\d+)/);
         return sum + (m ? parseInt(m[1]) : 0);
       }, 0);
+      const cardNames = boardParts.map(p => p.replace(/^\d+\s*/, '')).filter(Boolean);
       // score string may be complex like '2+3+3+4-14+3+14+14'
       let parsedScore = 0;
       try { parsedScore = eval((ps.score||'0').replace(/--/g,'+')) || 0; } catch(e) {}
-      return { ...base, score: parsedScore, targetScore: targetScore || 9 };
+      return { ...base, score: parsedScore, targetScore: targetScore || 9,
+        card1: cardNames[0]||'', card2: cardNames[1]||'', card3: cardNames[2]||'' };
     }
     case 'orchard': {
       return { ...base, score: parseFloat(ps.score)||0, perfect: false };
