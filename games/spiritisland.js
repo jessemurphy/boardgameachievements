@@ -63,7 +63,7 @@ window.GAME_DEFINITIONS.push(
       { label: 'Austria-Habsburg',   type: 'best_win', field: 'score', filter: { field: 'adversary', value: 'Austria-Habsburg' } },
     ],
 
-    completenessFields: ['adversary'],
+    completenessFields: ['spirit1'],
 
     achievements: [
       // ── First steps ──

@@ -2344,7 +2344,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
   switch (gameId) {
     case 'spiritisland': {
       const roles = role.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
-      const s1 = normalizeSpirit(roles[0]);
+      const s1 = normalizeSpirit(roles[0]) || '';
       const s2 = normalizeSpirit(roles[1]) || 'None';
       const dahan   = parseInt(ssData.livingdahan || 0) || 0;
       const blight  = parseInt(ssData.blight || 0) || 0;
