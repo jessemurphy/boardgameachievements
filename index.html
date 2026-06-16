@@ -2798,7 +2798,14 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         return 0;
       }
 
-      const targetScore   = ssPtsPU('targetscore') || 60;
+      // Solo: use targetscore from scoresheet; 2-player: use opponent's score
+      const ssTargetScore = ssPtsPU('targetscore');
+      const opponentScore = play.playerScores?.length === 2
+        ? parseFloat(play.playerScores.find(s => {
+            try { return JSON.parse(s.metaData||'{}').scoreUuid !== playerUuid; } catch(e) { return s.playerRefId !== myScore?.playerRefId; }
+          })?.score || 0) || 0
+        : 0;
+      const targetScore = ssTargetScore || opponentScore || 0;
       const planetScore   = ssPtsPU('planet');
       const resourceScore = ssPtsPU('resourcetracks');
       const lifepodScore  = ssPtsPU('lifepods');

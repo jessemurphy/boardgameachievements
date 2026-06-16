@@ -8,7 +8,7 @@ window.GAME_DEFINITIONS.push(
     logFields: [
       { id: 'win',         label: 'Win?',              type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
       { id: 'score',       label: 'Final Score',        type: 'number', min: 0,  max: 120, default: 55 },
-      { id: 'targetScore', label: 'Target Score',       type: 'number', min: 0,  max: 90,  default: 60 },
+      { id: 'targetScore', label: 'Target / Opponent Score', type: 'number', min: 0, max: 90, default: 0 },
       { id: 'planet',      label: 'Planet',             type: 'select', options: ['Unknown','KSB-4156','K-273','Gaia','Persphone','Arashi','Petra','Tartarus','Charybdis','Kaax','Pajitnov','Oblivion','Cerberus','Lacuna'] },
       { id: 'corporation', label: 'Corporation',        type: 'select', options: ['Unknown','Universal Coalition','Republic', 'Wormhole Corp.', 'Cosmos Inc.', 'Horizon Group','Jump Drive', 'Oasis Ultd.', 'Makeshift', 'Flux Industries'] },
       { id: 'asymmetric', label: 'Asymmetric combo?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
