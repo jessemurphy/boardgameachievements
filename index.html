@@ -732,7 +732,7 @@ function getPersonalBests(g) {
     const key = p[groupField];
     if (!key || key === 'Unknown' || key === 'None') return;
     const s = Number(p[scoreField]) || 0;
-    if (!byValue[key] || s > byValue[key]) byValue[key] = s;
+    if (!byValue[key] || s > byValue[key].score) byValue[key] = { score: s, ts: p.ts };
   });
   return byValue;
 }
@@ -767,8 +767,11 @@ function renderPersonalBests(g) {
   const field = g.personalBestField;
   const label = g.logFields?.find(f=>f.id===field)?.label || field;
   const rows = Object.entries(bests)
-    .sort((a,b) => b[1]-a[1])
-    .map(([k,v]) => `<div class="pb-row"><span class="pb-label">${k}</span><span class="pb-val">${v} pts</span></div>`)
+    .sort((a,b) => b[1].score-a[1].score)
+    .map(([k,v]) => {
+      const date = v.ts ? new Date(v.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      return `<div class="pb-row"><span class="pb-label">${k}${date?`<span style="font-size:10px;color:var(--text-3);font-weight:400;margin-left:6px">${date}</span>`:''}</span><span class="pb-val">${v.score} pts</span></div>`;
+    })
     .join('');
   const title = g.personalBestTitle || `Best Score by ${label}`;
   return `<div class="card">
