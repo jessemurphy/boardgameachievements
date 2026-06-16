@@ -781,6 +781,36 @@ function getProgressPct(check, gameState, allState) {
       plays.forEach(p => check.fields.forEach(f => { if(p[f]===true) everTrue.add(f); }));
       return Math.min(1, everTrue.size / check.count);
     }
+    case 'all_games_in_month': {
+      // Show best month coverage
+      const monthCounts = {};
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).forEach(p => {
+          const d = new Date(p.ts);
+          const key = d.getFullYear() + '-' + (d.getMonth()+1);
+          if (!monthCounts[key]) monthCounts[key] = new Set();
+          monthCounts[key].add(g.id);
+        });
+      });
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      let best = 0, bestKey = '';
+      Object.entries(monthCounts).forEach(([k,s]) => { if(s.size > best){best=s.size;bestKey=k;} });
+      if (!bestKey) return null;
+      const [yr,mo] = bestKey.split('-');
+      const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(mo)-1];
+      return `Best: ${mon} ${yr} — ${best} / ${total} games`;
+    }
+    case 'n_different_games_won_same_day': {
+      const dateGames = {};
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).filter(p=>p.win).forEach(p => {
+          if (!dateGames[p.date]) dateGames[p.date] = new Set();
+          dateGames[p.date].add(g.id);
+        });
+      });
+      const best = Math.max(0, ...Object.values(dateGames).map(s=>s.size));
+      return best > 0 ? `Best day: ${best} / ${check.count} games` : null;
+    }
     case 'all_games_played': {
       const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
       const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).length>0).length;
@@ -802,6 +832,37 @@ function getProgressPct(check, gameState, allState) {
     case 'plat_count_gte': {
       const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
       return Math.min(1, platIds.filter(id=>unlocked[id]).length/check.count);
+    }
+    case 'win_streak': {
+      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({win:p.win,ts:p.ts}))).sort((a,b)=>a.ts-b.ts);
+      let best=0, cur=0;
+      for(const p of all){if(p.win){cur++;best=Math.max(best,cur);}else cur=0;}
+      return Math.min(1, best/check.count);
+    }
+    case 'all_games_in_month': {
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const monthCounts = {};
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).forEach(p => {
+          const d = new Date(p.ts);
+          const key = d.getFullYear()+'-'+(d.getMonth()+1);
+          if (!monthCounts[key]) monthCounts[key] = new Set();
+          monthCounts[key].add(g.id);
+        });
+      });
+      const best = Math.max(0, ...Object.values(monthCounts).map(s=>s.size));
+      return total ? Math.min(1, best/total) : 0;
+    }
+    case 'n_different_games_won_same_day': {
+      const dateGames = {};
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).filter(p=>p.win).forEach(p => {
+          if (!dateGames[p.date]) dateGames[p.date] = new Set();
+          dateGames[p.date].add(g.id);
+        });
+      });
+      const best = Math.max(0, ...Object.values(dateGames).map(s=>s.size));
+      return Math.min(1, best/check.count);
     }
     case 'played_every_day_of_month': {
       const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
@@ -1117,9 +1178,10 @@ function getProgress(check, gameState, allState) {
       return `${n} / ${check.count} games`;
     }
     case 'win_streak': {
-      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({win:p.win,ts:p.ts}))).sort((a,b)=>b.ts-a.ts);
-      let streak=0; for(const p of all){if(p.win)streak++;else break;}
-      return `Current streak: ${streak} / ${check.count}`;
+      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({win:p.win,ts:p.ts}))).sort((a,b)=>a.ts-b.ts);
+      let best=0, cur=0;
+      for(const p of all){if(p.win){cur++;best=Math.max(best,cur);}else cur=0;}
+      return `Best streak: ${best} / ${check.count}`;
     }
     case 'all_achievements': {
       const have = check.ids.filter(id=>unlocked[id]).length;
