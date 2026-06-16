@@ -14,7 +14,7 @@ window.GAME_DEFINITIONS.push(
     { id: 'role', label: 'Your Role', type: 'select', options: ['— Select Role —', 'Solo', 'Pilot', 'Copilot'] },
     { id: 'coffeeCups',  label: 'Landed with three cups of coffee?', type: 'toggle', trueLabel: 'Yes', falseLabel: 'No' },
     { id: 'defeatCause', label: 'Defeat Cause', type: 'select',
-      options: ['Mandatory Actions','Going into a Spin','Collision','Overshoot','Crash Landing','Airplane Tokens','Flaps & Landing Gear','Axis','Speed','Turns'],
+      options: ['— Unknown —','Mandatory Actions','Going into a Spin','Collision','Overshoot','Crash Landing','Airplane Tokens','Flaps & Landing Gear','Axis','Speed','Turns'],
       showIf: { field: 'win', value: false } },
   ],
 
@@ -45,6 +45,7 @@ window.GAME_DEFINITIONS.push(
 
   customStats2Title: 'Defeat Causes',
   customStats2: [
+    { label: 'Unknown',              type: 'count_where', field: 'defeatCause', value: '' },
     { label: 'Mandatory Actions',    type: 'count_where', field: 'defeatCause', value: 'Mandatory Actions' },
     { label: 'Going into a Spin',    type: 'count_where', field: 'defeatCause', value: 'Going into a Spin' },
     { label: 'Collision',            type: 'count_where', field: 'defeatCause', value: 'Collision' },
