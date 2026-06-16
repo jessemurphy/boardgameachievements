@@ -5,7 +5,7 @@ window.GAME_DEFINITIONS.push(
   {
     id: 'friday', name: 'Friday', icon: '🌴', genre: 'Solo Deckbuilder · Survival',
     color: '#c0742a', bgColor: '#fff8f0', dimColor: '#e0b070',
-    personalBestField: 'difficulty',
+
     logFields: [
       { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
       { id: 'difficulty', label: 'Difficulty',    type: 'select', options: ['Level 1','Level 2','Level 3','Level 4'] },
