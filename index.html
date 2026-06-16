@@ -584,37 +584,47 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
 
     // n_different_games_won_same_day: won N+ different games on the same calendar date
     case 'played_every_day_of_month': {
-      // Check if any calendar month has all days covered
+      // All days of a specific month in a single year (e.g. every day in June 2025)
       const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
-      const playedDays = new Set();
+      const playedByYearMonth = new Set();
       Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
         if (!p.ts) return;
         const d = new Date(p.ts);
-        playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+        playedByYearMonth.add(d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate());
       }));
-      for (let mi = 0; mi < 12; mi++) {
-        let allCovered = true;
-        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
-          if (!playedDays.has((mi+1)+'-'+d)) { allCovered = false; break; }
+      // Check every year-month combination
+      const years = [...new Set([...playedByYearMonth].map(s => parseInt(s)))];
+      for (const yr of years) {
+        for (let mi = 0; mi < 12; mi++) {
+          let allCovered = true;
+          for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+            if (!playedByYearMonth.has(yr + '-' + (mi+1) + '-' + d)) { allCovered = false; break; }
+          }
+          if (allCovered) return true;
         }
-        if (allCovered) return true;
       }
       return false;
     }
     case 'played_every_day_of_year': {
+      // All 365 days in a specific calendar year
       const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
-      const playedDays = new Set();
+      const playedByYearMonth = new Set();
       Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
         if (!p.ts) return;
         const d = new Date(p.ts);
-        playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+        playedByYearMonth.add(d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate());
       }));
-      for (let mi = 0; mi < 12; mi++) {
-        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
-          if (!playedDays.has((mi+1)+'-'+d)) return false;
+      const years = [...new Set([...playedByYearMonth].map(s => parseInt(s)))];
+      for (const yr of years) {
+        let allCovered = true;
+        outer: for (let mi = 0; mi < 12; mi++) {
+          for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+            if (!playedByYearMonth.has(yr + '-' + (mi+1) + '-' + d)) { allCovered = false; break outer; }
+          }
         }
+        if (allCovered) return true;
       }
-      return true;
+      return false;
     }
     case 'played_days_containing_digit': {
       const playedDays = new Set();
@@ -3322,7 +3332,7 @@ function renderStats() {
 
   html += '<div class="card"><div class="card-header"><span class="card-title">Days of the Year</span><span style="font-size:12px;font-weight:600;color:var(--green)">' + playedCalDays + ' / ' + totalCalDays + '</span></div><div class="cal-grid">' + calRows + '</div></div>';
 
-  document.getElementById('screen-stats').querySelector('.content').innerHTML = html;
+  document.getElementById('statsContent').innerHTML = html;
 }
 
 // ═══════════════════════════════════════

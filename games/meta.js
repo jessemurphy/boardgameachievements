@@ -93,10 +93,10 @@ window.META_DEFINITIONS = [
     check: { type: 'cross_same_day', games: ['nextstationlondon','nextstationparis','nextstationtokyo'] } },
 
   { id: 'm_cal_month',   icon: '📅', tier: 'silver', pts: 40,  category: 'active',
-    name: 'Perfect Month',      desc: 'Play a game on every day of a calendar month',
+    name: 'Perfect Month',      desc: 'Play a game on every single day of a calendar month in the same year',
     check: { type: 'played_every_day_of_month' } },
   { id: 'm_cal_year',    icon: '🗓️', tier: 'gold',   pts: 150, category: 'active',
-    name: 'Year-Round Gamer',   desc: 'Play a game on every day of the year (Jan 1 – Dec 31)',
+    name: 'Year-Round Gamer',   desc: 'Play a game on every single day of a calendar year',
     check: { type: 'played_every_day_of_year' } },
   { id: 'm_cal_twos',    icon: '2️⃣', tier: 'gold',   pts: 60,  category: 'active',
     name: 'The Twos',           desc: 'Play a game on every day of the year that contains a 2 (2nd, 12th, 20th–29th)',
