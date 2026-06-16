@@ -98,9 +98,9 @@ window.META_DEFINITIONS = [
   { id: 'm_cal_year',    icon: '🗓️', tier: 'gold',   pts: 150, category: 'active',
     name: 'Year-Round Gamer',   desc: 'Play a game on every single day of a calendar year',
     check: { type: 'played_every_day_of_year' } },
-  { id: 'm_cal_twos',    icon: '2️⃣', tier: 'gold',   pts: 60,  category: 'active',
-    name: 'The Twos',           desc: 'Play a game on every day of the year that contains a 2 (2nd, 12th, 20th–29th)',
-    check: { type: 'played_days_containing_digit', digit: 2 } },
+  { id: 'm_cal_sevens',  icon: '7️⃣', tier: 'silver', pts: 30,  category: 'active',
+    name: 'Lucky Sevens',       desc: 'Play a game on the 7th, 17th, and 27th of every month',
+    check: { type: 'played_days_containing_digit', digit: 7 } },
 
   // ── Completionist achievements ─────────────────────────────
   { id: 'mc_all_played',  icon: '📚', tier: 'silver', pts: 50,  category: 'completionist',
