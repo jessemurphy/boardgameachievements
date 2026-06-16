@@ -1,3 +1,5 @@
+// BGStats comment tags: [decksize=N] [relics=N]
+// Use [key=?] if you tracked it but didn't record the value
 // ── sts ──
 window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 window.GAME_DEFINITIONS.push(

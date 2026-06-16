@@ -1682,6 +1682,7 @@ function isPlayIncomplete(g, p) {
     const val = p[fid];
     const def = defaults[fid];
     if (val === undefined || val === null) return true;
+    if (val === -1) return false; // intentionally unknown sentinel — counts as complete
     if (UNSET.includes(String(val))) return true;
     if (typeof def === 'number') return (Number(val) || 0) === def;
     return String(val) === String(def);
@@ -2322,13 +2323,19 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
 
   const board = parseBoard(play.board);
   // Parse [key=value] tags from BGStats comments field
+  // Use [key=?] to mark a field as intentionally unknown (imports as -1)
   const commentTags = {};
   try {
     const comments = play.comments || '';
-    for (const m of comments.matchAll(/\[(\w+)=([^\]]+)\]/g)) {
+    for (const m of comments.matchAll(/\[(\w+)=([^\]]*)\]/g)) {
       commentTags[m[1].toLowerCase()] = m[2].trim();
     }
   } catch(e) {}
+  // Helper: parse a comment tag value, returning -1 for '?', 0 if absent
+  function tagNum(key) {
+    if (!(key in commentTags)) return 0;
+    return commentTags[key] === '?' ? -1 : (parseInt(commentTags[key]) || 0);
+  }
   const base = { date: playDate, ts, win, score };
 
   switch (gameId) {
@@ -2560,8 +2567,8 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         actsCleared, ascension: board.ascension,
         boss,
         playerCount: (play.playerScores||[]).length || 1,
-        deckSize:    commentTags.decksize   ? parseInt(commentTags.decksize)   : 0,
-        relicCount:  commentTags.relics     ? parseInt(commentTags.relics)     : 0,
+        deckSize:    tagNum('decksize'),
+        relicCount:  tagNum('relics'),
         hpFull: false, noRares: false,
         noRelics: false, dailyClimb: false, bossT1: false,
         hitStrength: false, hitPoison: false, hitBlock: false,

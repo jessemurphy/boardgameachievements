@@ -1,3 +1,5 @@
+// BGStats comment tags: [fort=N] (fort number if not in board field)
+// Use [key=?] if you tracked it but didn't record the value
 // ── hadrians ──
 window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 window.GAME_DEFINITIONS.push(
