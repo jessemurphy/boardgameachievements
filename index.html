@@ -298,6 +298,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 <script src="games/welcometo.js"></script>
 <script src="games/welcometothemoon.js"></script>
 <script src="games/nextstationlondon.js"></script>
+<script src="games/nextstationtokyo.js"></script>
 <script src="games/skyteam.js"></script>
 <script src="games/jawsoflion.js"></script>
 <script src="games/vantage.js"></script>
@@ -2197,6 +2198,7 @@ const BGG_TO_TRACKER = {
   373106: 'skyteam',        // Sky Team
   295374: 'circlewagons',   // Circle the Wagons
   420033: 'vantage',        // Vantage
+  380165: 'nextstationtokyo', // Next Station: Tokyo
 };
 
 // Spirit name normalization (BGStats uses Title Case)
@@ -2456,6 +2458,35 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
         touristSites: 0, crossings2: 0, crossings3: 0, crossings4: 0,
       };
     }
+    case 'nextstationtokyo': {
+      function ssPtsNst(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet || '{}');
+          for (const group of parsed.groups || []) {
+            for (const row of group.rows || []) {
+              if (row.templateId === key) {
+                const v = row.scores?.[playerUuid];
+                if (v !== undefined && v !== '') return parseInt(v) || 0;
+              }
+            }
+          }
+        } catch(e) {}
+        return 0;
+      }
+      return { ...base,
+        score:        parseFloat(ps.score) || 0,
+        line1:        ssPtsNst('line1'),
+        line2:        ssPtsNst('line2'),
+        line3:        ssPtsNst('line3'),
+        line4:        ssPtsNst('line4'),
+        touristSites: ssPtsNst('touristsites'),
+        greenLoop:    ssPtsNst('greenloop'),
+        crossings3:   ssPtsNst('3lines'),
+        crossings4:   ssPtsNst('4lines'),
+        crossings5:   ssPtsNst('5lines'),
+      };
+    }
+
     case 'nextstationlondon': {
       function ssPtsNsl(key) {
         try {
