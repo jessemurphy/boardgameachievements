@@ -1020,6 +1020,22 @@ function renderScoreTitles(g) {
   </div>`;
 }
 
+function renderTopScoresWithTag(g) {
+  if (!g.topScoresTagField) return '';
+  const plays = (appState[g.id]?.plays||[]).filter(p=>p.win && p.score);
+  const top = [...plays].sort((a,b)=>b.score-a.score).slice(0,10);
+  if (!top.length) return '';
+  const rows = top.map(p => {
+    const date = p.ts ? new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    const tag = p[g.topScoresTagField] || '';
+    return `<div class="pb-row"><span class="pb-label">${tag}<span style="font-size:10px;color:var(--text-3);font-weight:400;margin-left:6px">${date}</span></span><span class="pb-val">${p.score} pts</span></div>`;
+  }).join('');
+  return `<div class="card">
+    <div class="card-header"><span class="card-title">${g.topScoresTitle || 'Top Scores'}</span></div>
+    <div class="pb-table">${rows}</div>
+  </div>`;
+}
+
 function renderPersonalBests(g) {
   const bests = getPersonalBests(g);
   if (!bests || !Object.keys(bests).length) return '';
@@ -1037,6 +1053,22 @@ function renderPersonalBests(g) {
   const title = g.personalBestTitle || `Best Score by ${label}`;
   return `<div class="card">
     <div class="card-header"><span class="card-title">${title}</span></div>
+    <div class="pb-table">${rows}</div>
+  </div>`;
+}
+
+function renderTopScores(g) {
+  if (!g.topScoresLabelField) return '';
+  const wins = (appState[g.id]?.plays||[]).filter(p=>p.win && p.score);
+  const top = [...wins].sort((a,b)=>b.score-a.score).slice(0,10);
+  if (!top.length) return '';
+  const rows = top.map(p => {
+    const date = p.ts ? new Date(p.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    const label = p[g.topScoresLabelField] || '';
+    return `<div class="pb-row"><span class="pb-label">${label}<span style="font-size:10px;color:var(--text-3);font-weight:400;margin-left:6px">${date}</span></span><span class="pb-val">${p.score} pts</span></div>`;
+  }).join('');
+  return `<div class="card">
+    <div class="card-header"><span class="card-title">${g.topScoresTitle || 'Top Scores'}</span></div>
     <div class="pb-table">${rows}</div>
   </div>`;
 }
@@ -1997,6 +2029,7 @@ function renderGameDetail(g) {
     </div>
     ${renderScoreTitles(g)}
     ${renderPersonalBests(g)}
+    ${renderTopScoresWithTag(g)}
     ${renderCustomStats(g, plays)}
     ${renderCampaignTrail(g)}
     ${g.credit ? `<div style="padding:8px 4px;font-size:11px;color:var(--text-3);text-align:center">

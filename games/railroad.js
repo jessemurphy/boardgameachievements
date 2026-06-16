@@ -14,6 +14,9 @@ window.GAME_DEFINITIONS.push(
       { id: 'centre',      label: 'Centre Squares',     type: 'number', min: 0, max: 4, default: 2 },
       { id: 'errors',      label: 'Errors',             type: 'number', min: 0, max: 10, default: 0 },
     ],
+    topScoresTagField: 'edition',
+    topScoresTitle: 'Top 10 Scores',
+
     customStatsTitle: 'Edition Breakdown',
     customStats: [
       { label: 'Deep Blue',      type: 'ratio', field: 'edition', value: 'Deep Blue' },
