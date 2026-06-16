@@ -552,9 +552,24 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       return (allState[g2]?.plays||[]).some(p=>p.win&&dates1.has(p.date));
     }
     case 'n_different_games_in_week': {
-      const now=Date.now(), week=7*24*60*60*1000;
-      const n = GAME_DEFINITIONS.filter(g=>(allState[g.id]?.plays||[]).some(p=>now-p.ts<week)).length;
-      return n >= check.count;
+      // Find any rolling 7-day window in history where N+ different games were played
+      const week = 7*24*60*60*1000;
+      // Collect all plays with game id
+      const allPlays = [];
+      GAME_DEFINITIONS.forEach(g => {
+        (allState[g.id]?.plays||[]).forEach(p => allPlays.push({ gid: g.id, ts: p.ts||0 }));
+      });
+      allPlays.sort((a,b) => a.ts-b.ts);
+      // Sliding window: for each play, count distinct games in next 7 days
+      for (let i = 0; i < allPlays.length; i++) {
+        const windowEnd = allPlays[i].ts + week;
+        const games = new Set();
+        for (let j = i; j < allPlays.length && allPlays[j].ts <= windowEnd; j++) {
+          games.add(allPlays[j].gid);
+        }
+        if (games.size >= check.count) return true;
+      }
+      return false;
     }
     case 'all_games_in_week': {
       const now=Date.now(), week=7*24*60*60*1000;
