@@ -3225,7 +3225,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
 
       return { ...base, score: parseFloat(ps.score) || 0,
         planet, corporation, asymmetric: isAsymmetric,
-        targetScore, metObj: false, noMeteorites: false,
+        targetScore, noMeteorites: commentTags.meteorites === '0',
         planetScore, resourceScore, lifepodScore,
         meteoriteScore, civScore, objectiveScore,
       };
