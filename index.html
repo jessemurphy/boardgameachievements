@@ -3301,7 +3301,7 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
           }
         } catch(e) {} return 0;
       }
-      const editionMap = {245654:'Deep Blue',245655:'Lush Green',245656:'Blazing Red',263918:'Shining Yellow'};
+      const editionMap = {245654:'Deep Blue',245655:'Lush Green',251678:'Blazing Red',263918:'Shining Yellow'};
       const edition = editionMap[play.bggId] || 'Deep Blue';
       return { ...base,
         exits:   ssRI('networks'),
