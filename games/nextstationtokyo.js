@@ -25,7 +25,7 @@ window.GAME_DEFINITIONS.push(
   ],
 
   personalBestField: 'score',
-  personalBestTitle: 'Best Score',
+  personalBestTitle: 'Best Winning Scores',
 
   completenessFields: ['line1'],
 

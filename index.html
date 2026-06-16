@@ -768,6 +768,7 @@ function renderPersonalBests(g) {
   const label = g.logFields?.find(f=>f.id===field)?.label || field;
   const rows = Object.entries(bests)
     .sort((a,b) => b[1].score-a[1].score)
+    .slice(0, 10)
     .map(([k,v]) => {
       const date = v.ts ? new Date(v.ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
       const label = k === String(v.score) ? (date || k) : k;
