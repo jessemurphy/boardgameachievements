@@ -1,77 +1,99 @@
 # BGStats Formatting Guide
 
 Reference for how to enter plays in BGStats so they import cleanly into the
-achievement tracker. Two fields matter most: **Board** (often used for
-scenario/difficulty/dungeon) and **Role** (often used for character/spirit/ship).
-A few games also read `[key=value]` tags out of the **Comments** field.
+achievement tracker. Two fields matter most: the **Board/Scenario** field
+(often used for scenario/difficulty/dungeon/scoring cards) and the **Role**
+field (often used for character/spirit/ship). A few games also read
+`[key=value]` tags out of the **Comments** field.
 
 General rule for comment tags: `[key=value]` records a value, `[key=?]` means
-"I tracked this but don't know the value" (counts as complete without a number),
-and omitting the tag entirely means "not tracked."
+"I tracked this but don't know the value" (counts as complete without a
+number), and omitting the tag entirely means "not tracked."
 
 ---
 
-## Hadrian's Wall
-- **Board:** `Easy`, `Medium`, `Hard` — optionally append `／Fort N: Name`
-  e.g. `Medium／Fort 3: Condercum`
-- **Comment tags:** `[fort=N]` if not already in the board field
+## Games A–Z
 
-## Slay the Spire: The Board Game
-- **Board:** `Act I`, `Act II: Hexaghost`, etc. — act reached, optionally with boss name
-- **Role:** Character name — `Ironclad`, `Silent`, `Defect`, `Watcher`
-- **Comment tags:** `[decksize=N]` `[relics=N]` `[hpfull=1]` (all players at full HP on boss kill) `[norares=1]` (no uncommons/rares in deck) `[norelics=1]` (no relics/boss relics) `[daily=1]` (Daily Climb run)
+### Hadrian's Wall
+- **Board/Scenario field:** difficulty, optionally with the fort — `Easy`, `Medium`, or `Hard`, optionally followed by `／Fort N: Name`, e.g. `Medium／Fort 3: Condercum`
+- If you don't include the fort in the board field, use the `[fort=N]` comment tag instead
 
-## Spirit Island
-- **Role:** Spirit name, e.g. `River Surges in Sunlight`. Two spirits: separate with `/` or `,`
-- **Board:** Adversary name, or omit/`Blight Card` for no adversary
+### Jaws of the Lion
+- **Board/Scenario field:** `Scenario N`, where N is 1–25, e.g. `Scenario 7`
+- **Role field:** the character(s) played that session, separated by `／` or `/`, e.g. `Hatchet／Red Guard`
 
-## Sky Team
-- **Board:** Airport code with color, e.g. `YUL (Green)`
-- **Role:** `Pilot`, `Copilot`, or `Solo`
+### Next Station: London / Paris / Tokyo
+- No special board/role formatting needed — just fill in the BGStats scoresheet during play (Line 1–4, Tourist Stamps/Sites, interchange crossings, and for Tokyo, Green Loop) and all the score breakdown panels populate automatically
 
-## Warp's Edge
-- **Board:** Mothership/boss name — `The Dread`, `The Hydra`, `The Duo`, `The Array`, `The Revenant`
-- **Role:** Starfighter — `Hermes`, `Achilles`, `Titan`, `Artemis`
+### One Deck Dungeon
+- **Board/Scenario field:** the dungeon name, e.g. `Dragon's Cave`, `Hydra's Reef`, `Yeti's Peak`, `Dragonshard Mines`
+- **Role field:** the character(s) played — for a two-character run, separate names with `/`, e.g. `Archer/Mage`
 
-## Jaws of the Lion
-- **Board:** `Scenario N` (1–25)
-- **Role:** Character(s), separated by `／` or `/` — e.g. `Hatchet／Red Guard`
+### Planet Unknown
+- **Role field:** `Corporation／Planet` or `Planet／Corporation` — order doesn't matter, both get parsed out
+- In 2-player games, the "target/opponent score" panel is filled in automatically from the other player's score — no extra tag needed
+- Use `[meteorites=0]` if you want to flag a no-meteorites game
 
-## Vantage
-- **Board:** Mission number/name
-- **Role:** Character name
+### Railroad Ink (any edition)
+- No special board/role formatting needed — fill in the BGStats scoresheet (Networks, Longest Highway, Longest Railway, Central Spaces, Errors) and the edition is inferred automatically from which BGG game entry you logged the play against
+- Deep Blue, Lush Green, Shining Yellow, and Blazing Red are separate BGG entries that all roll up into one tracker game — make sure you pick the correct edition's entry in BGStats when logging so the edition tag comes through right
 
-## Planet Unknown
-- **Role:** `Corporation／Planet` or `Planet／Corporation` (order doesn't matter)
-- **Comment tags:** `[meteorites=0]` to flag a no-meteorites game
-- In 2-player games, "target/opponent score" is taken from the other player's score automatically (no extra tag needed)
+### Railroad Ink Challenge: Solo Board
+- Tracked as its own separate game in the tracker (different scoring and special structures from the base editions above)
+- Currently win/score only in the tracker — no scoresheet import yet, so just enter your final score directly
 
-## One Deck Dungeon
-- **Board:** Dungeon name — `Dragon's Cave`, `Hydra's Reef`, etc.
-- **Role:** Character(s) — separate two-character runs with `/`
+### Search for Planet X
+- **Board/Scenario field:** the difficulty mode — `Standard` or `Expert`
 
-## Welcome to the Moon
-- **Board:** Scenario, e.g. `#8: The Battle` (extra spaces and "Campaign" prefix/suffix are handled)
-- **Role:** Automata name if playing against one
+### Sky Team
+- **Board/Scenario field:** the airport code with its difficulty color, e.g. `YUL (Green)`, `KEF (Black)`
+- **Role field:** `Pilot`, `Copilot`, or `Solo`
 
-## Next Station London / Paris / Tokyo
-- Score components come entirely from the BGStats scoresheet — no special board/role formatting needed if you fill in the scoresheet during play
+### Slay the Spire: The Board Game
+- **Board/Scenario field:** the act reached, optionally with the boss fought, e.g. `Act I`, `Act II: Hexaghost`, `Act III: The Awakened One`
+- **Role field:** the character played — `Ironclad`, `Silent`, `Defect`, or `Watcher`
+- Player count is pulled automatically from how many players are listed on the play
+- Comment tags let you record things the scoresheet doesn't capture — see the table below
 
-## Railroad Ink (any edition)
-- Score components come from the BGStats scoresheet (Networks, Longest Highway, Longest Railway, Central Spaces, Errors)
-- Edition is inferred from the BGG game entry you log against
-- Deep Blue, Lush Green, Shining Yellow, and Blazing Red are different BGG entries that all roll up into one tracker game — make sure you're logging against the correct edition's entry in BGStats so the edition tag comes through right
+### Spirit Island
+- **Role field:** the spirit name, e.g. `River Surges in Sunlight` — for a two-spirit game, separate with `/` or `,`
+- **Board/Scenario field:** the adversary name if one was used, or leave blank/use `Blight Card` for a game with no adversary
 
-## Railroad Ink Challenge: Solo Board
-- Tracked as its own separate game (different scoring/structures from the base editions above)
-- Currently win/score only — no scoresheet import yet
+### Sprawlopolis
+- **Board/Scenario field:** the three scoring cards drawn, separated by `／`, each one prefixed with its card number, e.g. `13 Park Hopping／14 Looping Lanes／16 Morning Commute`
+- This is the same field used for "scenario" in other games — just enter the three card numbers and names here and the tracker reads each one out individually for the per-card win-rate panel
 
-## Sprawlopolis
-- **Board:** the three scoring cards drawn, separated by `／`, each prefixed with its card number, e.g. `13 Park Hopping／14 Looping Lanes／16 Morning Commute`
-- The card numbers and names are read directly from this field — no special formatting needed beyond entering the scoring cards as the board/scenario
+### Vantage
+- **Board/Scenario field:** the mission number or name
+- **Role field:** the character played
 
-## Search for Planet X
-- **Board:** `Standard` or `Expert`
+### Warp's Edge
+- **Board/Scenario field:** the mothership/boss name — `The Dread`, `The Hydra`, `The Duo`, `The Array`, or `The Revenant`
+- **Role field:** the starfighter played — `Hermes`, `Achilles`, `Titan`, or `Artemis`
+
+### Welcome to the Moon
+- **Board/Scenario field:** the scenario, e.g. `#8: The Battle` — extra spaces and a "Campaign" prefix/suffix in the name are both handled automatically
+- **Role field:** the automata's name, if you played against one
+
+---
+
+## Comment Tag Reference
+
+All comment tags go in the **Comments** field on the play, in `[key=value]`
+format. Multiple tags can be combined in one comment, e.g.
+`[decksize=12][relics=7]`. Use `[key=?]` instead of a number if you tracked
+the stat but don't remember the value — it still counts as "recorded."
+
+| Game | Tag | Meaning |
+|---|---|---|
+| Hadrian's Wall | `[fort=N]` | Fort number, if not already included in the board field |
+| Planet Unknown | `[meteorites=0]` | Flags a no-meteorites game |
+| Slay the Spire | `[decksize=N]` | Final deck size |
+| Slay the Spire | `[relics=N]` | Number of relics held |
+| Slay the Spire | `[hpfull=1]` | All players were at full HP when the boss was defeated |
+| Slay the Spire | `[norares=1]` | No uncommons or rares ended up in the deck |
+| Slay the Spire | `[norelics=1]` | No relics or boss relics were collected |
+| Slay the Spire | `[daily=1]` | This was a Daily Climb run |
 
 ---
 
