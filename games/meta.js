@@ -92,13 +92,13 @@ window.META_DEFINITIONS = [
     name: 'Network Builder',    desc: 'Win Next Station London, Paris, and Tokyo on the same day',
     check: { type: 'cross_same_day', games: ['nextstationlondon','nextstationparis','nextstationtokyo'] } },
 
-  { id: 'm_cal_month',   icon: '📅', tier: 'silver', pts: 40,  category: 'active',
+  { id: 'm_cal_month',   icon: '📅', tier: 'silver', pts: 40,  category: 'seasonal',
     name: 'Perfect Month',      desc: 'Play a game on every single day of a calendar month in the same year',
     check: { type: 'played_every_day_of_month' } },
-  { id: 'm_cal_year',    icon: '🗓️', tier: 'gold',   pts: 150, category: 'active',
+  { id: 'm_cal_year',    icon: '🗓️', tier: 'gold',   pts: 150, category: 'seasonal',
     name: 'Year-Round Gamer',   desc: 'Play a game on every single day of a calendar year',
     check: { type: 'played_every_day_of_year' } },
-  { id: 'm_cal_sevens',  icon: '7️⃣', tier: 'silver', pts: 30,  category: 'active',
+  { id: 'm_cal_sevens',  icon: '7️⃣', tier: 'silver', pts: 30,  category: 'seasonal',
     name: 'Lucky Sevens',       desc: 'Play a game on the 7th, 17th, and 27th of every month',
     check: { type: 'played_days_containing_digit', digit: 7 } },
 
