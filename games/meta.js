@@ -92,6 +92,16 @@ window.META_DEFINITIONS = [
     name: 'Network Builder',    desc: 'Win Next Station London, Paris, and Tokyo on the same day',
     check: { type: 'cross_same_day', games: ['nextstationlondon','nextstationparis','nextstationtokyo'] } },
 
+  { id: 'm_cal_month',   icon: '📅', tier: 'silver', pts: 40,  category: 'active',
+    name: 'Perfect Month',      desc: 'Play a game on every day of a calendar month',
+    check: { type: 'played_every_day_of_month' } },
+  { id: 'm_cal_year',    icon: '🗓️', tier: 'gold',   pts: 150, category: 'active',
+    name: 'Year-Round Gamer',   desc: 'Play a game on every day of the year (Jan 1 – Dec 31)',
+    check: { type: 'played_every_day_of_year' } },
+  { id: 'm_cal_twos',    icon: '2️⃣', tier: 'gold',   pts: 60,  category: 'active',
+    name: 'The Twos',           desc: 'Play a game on every day of the year that contains a 2 (2nd, 12th, 20th–29th)',
+    check: { type: 'played_days_containing_digit', digit: 2 } },
+
   // ── Completionist achievements ─────────────────────────────
   { id: 'mc_all_played',  icon: '📚', tier: 'silver', pts: 50,  category: 'completionist',
     name: 'Full Library',       desc: 'Log at least one play of every game in your library',

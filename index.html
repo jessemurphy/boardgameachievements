@@ -74,6 +74,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .hist-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
 .hist-date{font-size:11px;color:var(--text-3)}
 .hist-incomplete{font-size:10px;font-weight:700;color:#ff9500;background:#fff8ee;border:1px solid #ffd080;border-radius:4px;padding:1px 5px}
+.cal-grid{padding:4px 0}
+.cal-month-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.cal-month-label{font-size:10px;font-weight:700;color:var(--text-3);width:26px;flex-shrink:0}
+.cal-dots{display:flex;flex-wrap:nowrap;gap:2px;overflow:hidden}
+.cal-dot{width:9px;height:9px;border-radius:2px;background:#e8e8f0;flex-shrink:0;font-size:0}
+.cal-dot.played{background:var(--green)}
 .trail-ends{display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:#bbb;margin-bottom:6px;padding:0 2px}
 .trail-wrap{position:relative;padding:8px 0 4px}
 .trail-line{position:absolute;top:20px;left:10px;right:10px;height:4px;background:#e0e0e8;border-radius:2px;z-index:0}
@@ -577,6 +583,55 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
     }
 
     // n_different_games_won_same_day: won N+ different games on the same calendar date
+    case 'played_every_day_of_month': {
+      // Check if any calendar month has all days covered
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const playedDays = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+      }));
+      for (let mi = 0; mi < 12; mi++) {
+        let allCovered = true;
+        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+          if (!playedDays.has((mi+1)+'-'+d)) { allCovered = false; break; }
+        }
+        if (allCovered) return true;
+      }
+      return false;
+    }
+    case 'played_every_day_of_year': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const playedDays = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+      }));
+      for (let mi = 0; mi < 12; mi++) {
+        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+          if (!playedDays.has((mi+1)+'-'+d)) return false;
+        }
+      }
+      return true;
+    }
+    case 'played_days_containing_digit': {
+      const playedDays = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+      }));
+      const digit = String(check.digit);
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      for (let mi = 0; mi < 12; mi++) {
+        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+          if (String(d).includes(digit) && !playedDays.has((mi+1)+'-'+d)) return false;
+        }
+      }
+      return true;
+    }
     case 'n_different_games_won_same_day': {
       const dateGames = {};
       GAME_DEFINITIONS.forEach(g => {
@@ -3243,6 +3298,31 @@ function renderStats() {
         ${gameRows || '<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">No plays logged yet</div>'}
       </div>
     </div>`;
+
+  // ── Calendar heatmap ──
+  const playedDays = new Set();
+  allPlays.forEach(p => {
+    if (!p.ts) return;
+    const d = new Date(p.ts);
+    playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+  });
+  const CAL_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const CAL_DAYS   = [31,28,31,30,31,30,31,31,30,31,30,31];
+  const totalCalDays = CAL_DAYS.reduce((a,b)=>a+b,0);
+  const playedCalDays = playedDays.size;
+  let calRows = '';
+  CAL_MONTHS.forEach((mon, mi) => {
+    let dots = '';
+    for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+      const played = playedDays.has((mi+1)+'-'+d);
+      dots += '<div class="cal-dot ' + (played?'played':'') + '" title="' + mon + ' ' + d + '"></div>';
+    }
+    calRows += '<div class="cal-month-row"><div class="cal-month-label">' + mon + '</div><div class="cal-dots">' + dots + '</div></div>';
+  });
+
+  html += '<div class="card"><div class="card-header"><span class="card-title">Days of the Year</span><span style="font-size:12px;font-weight:600;color:var(--green)">' + playedCalDays + ' / ' + totalCalDays + '</span></div><div class="cal-grid">' + calRows + '</div></div>';
+
+  document.getElementById('screen-stats').querySelector('.content').innerHTML = html;
 }
 
 // ═══════════════════════════════════════
