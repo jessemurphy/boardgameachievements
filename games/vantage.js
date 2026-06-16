@@ -1,4 +1,7 @@
 // ── vantage ──
+// Achievement concepts based on Travis Merkle's community achievement sheet:
+// https://boardgamegeek.com/thread/3564651/page/1
+// Used with gratitude — thanks Travis!
 window.GAME_DEFINITIONS = window.GAME_DEFINITIONS || [];
 window.GAME_DEFINITIONS.push(
 // ── Vantage ───────────────────────────────────────────────────
@@ -7,6 +10,7 @@ window.GAME_DEFINITIONS.push(
     name:     'Vantage',
     icon:     '🔭',
     genre:    'Cooperative · Sci-Fi · Card Game',
+    credit:   { text: 'Achievements inspired by Travis Merkle', url: 'https://boardgamegeek.com/thread/3564651/page/1' },
     color:    '#2a5faa',
     bgColor:  '#f0f4fc',
     dimColor: '#8aaad8',

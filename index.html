@@ -1622,6 +1622,9 @@ function renderGameDetail(g) {
     ${renderPersonalBests(g)}
     ${renderCustomStats(g, plays)}
     ${renderCampaignTrail(g)}
+    ${g.credit ? `<div style="padding:8px 4px;font-size:11px;color:var(--text-3);text-align:center">
+      Achievements inspired by <a href="${g.credit.url}" target="_blank" style="color:var(--text-3)">${g.credit.text}</a>
+    </div>` : ''}
     <div class="card">
       <div class="card-header">
         <span class="card-title">Achievements${g.official ? ' <span class=\"official-badge\">Official</span>' : ''}</span>
