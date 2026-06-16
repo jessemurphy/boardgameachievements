@@ -781,6 +781,28 @@ function getProgressPct(check, gameState, allState) {
       plays.forEach(p => check.fields.forEach(f => { if(p[f]===true) everTrue.add(f); }));
       return Math.min(1, everTrue.size / check.count);
     }
+    case 'all_games_played': {
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).length>0).length;
+      return total ? played/total : 0;
+    }
+    case 'all_games_won': {
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const won = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).some(p=>p.win)).length;
+      return total ? won/total : 0;
+    }
+    case 'all_games_won_subset': {
+      const have = check.games.filter(gid=>(allState[gid]?.plays||[]).some(p=>p.win)).length;
+      return have/check.games.length;
+    }
+    case 'all_plat_achievements': {
+      const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
+      return platIds.length ? platIds.filter(id=>unlocked[id]).length/platIds.length : 0;
+    }
+    case 'plat_count_gte': {
+      const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
+      return Math.min(1, platIds.filter(id=>unlocked[id]).length/check.count);
+    }
     case 'played_every_day_of_month': {
       const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
       const playedByYearMonth = new Set();
@@ -1136,6 +1158,30 @@ function getProgress(check, gameState, allState) {
     case 'win_two_fields_gte': {
       const best1 = plays.reduce((m,p)=>Math.max(m,Number(p[check.field1])||0),0);
       return `Best ${check.field1}: ${best1} / ${check.value1}`;
+    }
+    case 'all_games_played': {
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).length>0).length;
+      return `${played} / ${total} games`;
+    }
+    case 'all_games_won': {
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const won = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).some(p=>p.win)).length;
+      return `${won} / ${total} games`;
+    }
+    case 'all_games_won_subset': {
+      const have = check.games.filter(gid=>(allState[gid]?.plays||[]).some(p=>p.win)).length;
+      return `${have} / ${check.games.length} games`;
+    }
+    case 'all_plat_achievements': {
+      const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
+      const have = platIds.filter(id=>unlocked[id]).length;
+      return `${have} / ${platIds.length} platinums`;
+    }
+    case 'plat_count_gte': {
+      const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
+      const have = platIds.filter(id=>unlocked[id]).length;
+      return `${have} / ${check.count} platinums`;
     }
     case 'played_every_day_of_month': {
       const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
