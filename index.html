@@ -3003,7 +3003,19 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       // score string may be '36+50+30-5-24' - evaluate it
       let parsedScore = 0;
       try { parsedScore = eval((ps.score||'0').replace(/--/g,'+')) || 0; } catch(e) {}
-      return { ...base, difficulty: diff, score: parsedScore, lifeLeft: 0 };
+      function ssFri(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet||'{}');
+          for (const g of parsed.groups||[]) for (const r of g.rows||[]) {
+            if (r.templateId===key) { const v=r.scores?.[playerUuid]; if(v!==undefined&&v!=='') return parseInt(v)||0; }
+          }
+        } catch(e) {} return 0;
+      }
+      return { ...base, difficulty: diff, score: parsedScore,
+        fightingCards: ssFri('fightingcards'), lifePoints: ssFri('lifepoints'),
+        pirate1: ssFri('pirate1'), pirate2: ssFri('pirate2'),
+        unbeatenHazards: ssFri('unbeatenhazards'), agingCards: ssFri('agingcards'),
+        lifeLeft: 0 };
     }
     case 'planetx': {
       const modeMap = {'standard':'Standard','expert':'Expert'};

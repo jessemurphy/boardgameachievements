@@ -20,6 +20,26 @@ window.GAME_DEFINITIONS.push(
       { label: 'Level 4', type: 'ratio', field: 'difficulty', value: 'Level 4' },
     ],
 
+    personalBestField: 'score',
+    personalBestContext: 'difficulty',
+    personalBestTitle: 'Best Score by Difficulty',
+
+    customStatsTitle: 'Difficulty Breakdown',
+    customStats: [
+      { label: 'Level 1', type: 'ratio', field: 'difficulty', value: 'Level 1' },
+      { label: 'Level 2', type: 'ratio', field: 'difficulty', value: 'Level 2' },
+      { label: 'Level 3', type: 'ratio', field: 'difficulty', value: 'Level 3' },
+      { label: 'Level 4', type: 'ratio', field: 'difficulty', value: 'Level 4' },
+    ],
+
+    customStats2Title: 'Best Score Components',
+    customStats2: [
+      { label: 'Fighting Cards',   type: 'best_win', field: 'fightingCards' },
+      { label: 'Life Points',      type: 'best_win', field: 'lifePoints' },
+      { label: 'Pirate 1',         type: 'best_win', field: 'pirate1' },
+      { label: 'Pirate 2',         type: 'best_win', field: 'pirate2' },
+    ],
+
     achievements: [
       { id: 'fri_first',  icon: '🌟', tier: 'bronze', pts: 10, name: 'Survived',
         desc: 'Win your first game',
