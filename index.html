@@ -781,6 +781,69 @@ function getProgressPct(check, gameState, allState) {
       plays.forEach(p => check.fields.forEach(f => { if(p[f]===true) everTrue.add(f); }));
       return Math.min(1, everTrue.size / check.count);
     }
+    case 'played_every_day_of_month': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const playedByYearMonth = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedByYearMonth.add(d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate());
+      }));
+      const years = [...new Set([...playedByYearMonth].map(s=>parseInt(s)))];
+      let best = 0;
+      for (const yr of years) {
+        for (let mi = 0; mi < 12; mi++) {
+          let count = 0;
+          for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+            if (playedByYearMonth.has(yr+'-'+(mi+1)+'-'+d)) count++;
+          }
+          best = Math.max(best, count / CAL_DAYS[mi]);
+        }
+      }
+      return Math.min(1, best);
+    }
+    case 'played_every_day_of_year': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const total = CAL_DAYS.reduce((a,b)=>a+b,0);
+      const playedByYearMonth = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedByYearMonth.add(d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate());
+      }));
+      const years = [...new Set([...playedByYearMonth].map(s=>parseInt(s)))];
+      let best = 0;
+      for (const yr of years) {
+        let count = 0;
+        for (let mi = 0; mi < 12; mi++) {
+          for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+            if (playedByYearMonth.has(yr+'-'+(mi+1)+'-'+d)) count++;
+          }
+        }
+        best = Math.max(best, count / total);
+      }
+      return Math.min(1, best);
+    }
+    case 'played_days_containing_digit': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const digit = String(check.digit);
+      const playedDays = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedDays.add((d.getMonth()+1)+'-'+d.getDate());
+      }));
+      let qual = 0, covered = 0;
+      for (let mi = 0; mi < 12; mi++) {
+        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+          if (String(d).includes(digit)) {
+            qual++;
+            if (playedDays.has((mi+1)+'-'+d)) covered++;
+          }
+        }
+      }
+      return qual ? Math.min(1, covered/qual) : 0;
+    }
     default: return 0;
   }
 }
@@ -1073,6 +1136,72 @@ function getProgress(check, gameState, allState) {
     case 'win_two_fields_gte': {
       const best1 = plays.reduce((m,p)=>Math.max(m,Number(p[check.field1])||0),0);
       return `Best ${check.field1}: ${best1} / ${check.value1}`;
+    }
+    case 'played_every_day_of_month': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const playedByYearMonth = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedByYearMonth.add(d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate());
+      }));
+      const years = [...new Set([...playedByYearMonth].map(s => parseInt(s)))];
+      let bestCount = 0, bestLabel = '';
+      for (const yr of years) {
+        for (let mi = 0; mi < 12; mi++) {
+          let count = 0;
+          for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+            if (playedByYearMonth.has(yr + '-' + (mi+1) + '-' + d)) count++;
+          }
+          if (count > bestCount) { bestCount = count; bestLabel = MONTH_NAMES[mi] + ' ' + yr; }
+        }
+      }
+      return bestCount > 0 ? `Best: ${bestLabel} — ${bestCount} / ${CAL_DAYS.find((_,i) => MONTH_NAMES[i] === bestLabel.split(' ')[0]) || 31} days` : null;
+    }
+    case 'played_every_day_of_year': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const total = CAL_DAYS.reduce((a,b)=>a+b,0);
+      const playedByYearMonth = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedByYearMonth.add(d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate());
+      }));
+      const years = [...new Set([...playedByYearMonth].map(s => parseInt(s)))];
+      let bestCount = 0, bestYear = 0;
+      for (const yr of years) {
+        let count = 0;
+        for (let mi = 0; mi < 12; mi++) {
+          for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+            if (playedByYearMonth.has(yr + '-' + (mi+1) + '-' + d)) count++;
+          }
+        }
+        if (count > bestCount) { bestCount = count; bestYear = yr; }
+      }
+      return bestCount > 0 ? `Best: ${bestYear} — ${bestCount} / ${total} days` : null;
+    }
+    case 'played_days_containing_digit': {
+      const CAL_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      const digit = String(check.digit);
+      const playedDays = new Set();
+      Object.values(allState).forEach(gs => (gs?.plays||[]).forEach(p => {
+        if (!p.ts) return;
+        const d = new Date(p.ts);
+        playedDays.add((d.getMonth()+1) + '-' + d.getDate());
+      }));
+      // Count distinct day-of-month numbers containing digit that are covered in any month they appear
+      const qualDays = new Set();
+      const coveredDays = new Set();
+      for (let mi = 0; mi < 12; mi++) {
+        for (let d = 1; d <= CAL_DAYS[mi]; d++) {
+          if (String(d).includes(digit)) {
+            qualDays.add((mi+1) + '-' + d);
+            if (playedDays.has((mi+1) + '-' + d)) coveredDays.add((mi+1) + '-' + d);
+          }
+        }
+      }
+      return `${coveredDays.size} / ${qualDays.size} days`;
     }
     default: return null;
   }
