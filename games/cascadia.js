@@ -46,6 +46,8 @@ window.GAME_DEFINITIONS.push(
       { id: 'keystonesCompleted', label: 'Keystone Habitats Completed', type: 'number', min: 0, max: 5, default: 1 },
     ],
 
+    completenessFields: ['scoreBears'],
+
     achievements: [
       // ── Official scoring titles (any play, no win required) ──
       { id: 'ca_65',   icon: '🥾', tier: 'bronze', pts: 5,  name: 'Naturalist',

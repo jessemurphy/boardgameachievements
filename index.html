@@ -2784,10 +2784,30 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       return { ...base, city, hardSky: false, roundsLeft: 0, shipsDestroyed: 0 };
     }
     case 'cascadia': {
-      return { ...base, natureTokens: 0, maxWildlifeCount: 0, wildlifeTypes: 5,
-        scoreBears:0, scoreElk:0, scoreSalmon:0, scoreHawks:0, scoreFoxes:0,
-        bestHabitatScore:0, habitatsOver5:0, habitatMajorities:0, keystonesCompleted:0,
-        hadBears:true, hadElk:true, hadSalmon:true, hadHawks:true, hadFoxes:true };
+      function ssCas(key) {
+        try {
+          const parsed = JSON.parse(play.scoresheet || '{}');
+          for (const g of parsed.groups || []) for (const r of g.rows || []) {
+            if (r.templateId === key) { const v = r.scores?.[playerUuid]; if (v !== undefined && v !== '') return parseInt(v) || 0; }
+          }
+        } catch(e) {} return 0;
+      }
+      const scoreBears  = ssCas('bears'),  scoreElk   = ssCas('elk'),
+            scoreSalmon = ssCas('salmon'), scoreHawks = ssCas('hawks'), scoreFoxes = ssCas('foxes');
+      const habitatScores = [ssCas('mountains'), ssCas('forests'), ssCas('prairies'), ssCas('wetlands'), ssCas('rivers')];
+      const majorityScores = [ssCas('mountainmajority'), ssCas('forestmajority'), ssCas('prairiemajority'), ssCas('wetlandsmajority'), ssCas('rivermajority')];
+      const wildlifeScores = [scoreBears, scoreElk, scoreSalmon, scoreHawks, scoreFoxes];
+      return { ...base,
+        natureTokens: ssCas('tokens'), maxWildlifeCount: 0,
+        wildlifeTypes: wildlifeScores.filter(s=>s>0).length || 5,
+        scoreBears, scoreElk, scoreSalmon, scoreHawks, scoreFoxes,
+        bestHabitatScore: Math.max(0, ...habitatScores),
+        habitatsOver5: habitatScores.filter(s=>s>=5).length,
+        habitatMajorities: majorityScores.filter(s=>s>0).length,
+        keystonesCompleted: 0,
+        hadBears: scoreBears>0, hadElk: scoreElk>0, hadSalmon: scoreSalmon>0, hadHawks: scoreHawks>0, hadFoxes: scoreFoxes>0,
+        natureSpent: 0,
+      };
     }
     case 'dragonsdown': {
       return { ...base, avidReader: false };
