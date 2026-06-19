@@ -1523,6 +1523,8 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
       if (dates.length < (check.ids||[]).length) return null;
       return dates.sort().pop(); // latest date string
     }
+    case 'win_multifield_value_and_field_eq':
+      return ts2date(wins.find(p => check.fields.some(f=>p[f]===check.value) && p[check.condField]===check.condValue)?.ts);
     default:
       return new Date().toISOString().split('T')[0];
   }
