@@ -3038,7 +3038,11 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       };
     }
     case 'sts': {
-      const chars = role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
+      // Pull every player's character from their own role field (yours first, then others)
+      const otherRoles = (play.playerScores||[]).filter(p => p !== ps).map(p => (p.role||'').trim()).filter(Boolean);
+      const chars = (play.playerScores||[]).length > 1
+        ? [role, ...otherRoles].filter(Boolean)
+        : role.split(/[\/,]/).map(s=>s.trim()).filter(Boolean);
       const actStr = board.actsCleared;
       const actsMap = {1:'Act 1', 2:'Act 2', 3:'Act 3', 4:'Act 4'};
       const actsCleared = actsMap[actStr] || '';
