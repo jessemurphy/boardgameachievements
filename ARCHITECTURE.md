@@ -169,7 +169,11 @@ Every game file pushes one config object to `window.GAME_DEFINITIONS`:
   customStats4: StatDef[],
 
   // Optional completeness flagging
-  completenessFields: string[],  // play flagged incomplete if ALL these fields are at default/unset
+  completenessFields: string[],
+
+  // Optional: exclude from "all games" meta conditions
+  // (all_games_played, all_games_won, all_games_in_week, all_games_in_month)
+  excludeFromAllGames: true,  // play flagged incomplete if ALL these fields are at default/unset
 
   // Optional campaign trail panel
   campaignTrail: {
@@ -331,7 +335,7 @@ A play field is considered "unset/incomplete" if its value is any of:
 3. ~~**Legend (5000pts) timing**~~ — FIXED (July 2026): `checkAll` now loops to a fixed point, so cascade unlocks (`total_pts_gte`, `all_achievements`, `plat_count_gte`) resolve in one scan.
 4. **`findTriggerDate`** — meta types added; remaining unrecognized types still fall back to today's date. `total_pts_gte` dating is an approximation (walks unlock dates chronologically until the sum crosses the threshold).
 5. **Backup round-trip** — FIXED (July 2026): `campaigns` was missing from export/import; campaign progress was silently lost on restore. Old backups (without campaigns) import cleanly but restore empty campaigns.
-6. **Hardcoded `dorfromantik` exclusion** — `all_games_played`/`all_games_won`/`all_games_in_week` exclude dorfromantik via literal string checks in evalCondition (lines ~554, 555, 598), while docs say "every visible game" and other conditions use `hiddenGames`. Deliberate behavior kept as-is for now; consider centralizing into a config flag (e.g. `excludeFromAllGames: true` on the game config).
+6. ~~**Hardcoded `dorfromantik` exclusion**~~ — FIXED (July 2026): replaced with `excludeFromAllGames: true` config flag (set on dorfromantik). evalCondition, getProgress, and getProgressPct all respect it; `all_games_in_month` evalCondition previously counted excluded games in its denominator and now doesn't.
 
 ---
 

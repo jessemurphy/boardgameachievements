@@ -196,6 +196,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 /* Toast */
 .toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a1a;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:transform .25s,opacity .25s;pointer-events:none;z-index:300;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.has-action{pointer-events:auto}
+.toast-action{margin-left:12px;background:none;border:none;color:#7db8ff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:0;cursor:pointer}
 
 .btn-danger{width:100%;padding:13px;border-radius:var(--radius);background:none;border:1.5px solid #ffb3ae;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--red);cursor:pointer}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);font-size:15px}
@@ -551,8 +553,8 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       );
 
     case 'all_achievements':  return check.ids.every(id => unlockedMap[id]);
-    case 'all_games_played':  return GAME_DEFINITIONS.filter(g=>g.id!=='dorfromantik').every(g => (allState[g.id]?.plays||[]).length >= 1);
-    case 'all_games_won':     return GAME_DEFINITIONS.filter(g=>g.id!=='dorfromantik').every(g => (allState[g.id]?.plays||[]).some(p=>p.win));
+    case 'all_games_played':  return GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames).every(g => (allState[g.id]?.plays||[]).length >= 1);
+    case 'all_games_won':     return GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames).every(g => (allState[g.id]?.plays||[]).some(p=>p.win));
     case 'total_wins_gte': {
       const n = GAME_DEFINITIONS.reduce((s,g)=>s+(allState[g.id]?.plays||[]).filter(p=>p.win).length,0);
       return n >= check.count;
@@ -598,7 +600,7 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
     }
     case 'all_games_in_week': {
       const now=Date.now(), week=7*24*60*60*1000;
-      return GAME_DEFINITIONS.filter(g=>g.id!=='dorfromantik').every(g=>(allState[g.id]?.plays||[]).some(p=>now-p.ts<week));
+      return GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames).every(g=>(allState[g.id]?.plays||[]).some(p=>now-p.ts<week));
     }
 
     // n_different_games_won_same_day: won N+ different games on the same calendar date
@@ -717,8 +719,9 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
 
     // all_games_in_month: all games played at least once in any calendar month
     case 'all_games_in_month': {
+      const eligible = GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames);
       const byMonth = {};
-      GAME_DEFINITIONS.forEach(g => {
+      eligible.forEach(g => {
         (allState[g.id]?.plays||[]).forEach(p => {
           const month = p.date?.slice(0,7);
           if (!month) return;
@@ -726,7 +729,7 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
           byMonth[month].add(g.id);
         });
       });
-      const total = GAME_DEFINITIONS.length;
+      const total = eligible.length;
       return Object.values(byMonth).some(s => s.size >= total);
     }
 
@@ -811,7 +814,7 @@ function getProgressPct(check, gameState, allState) {
           monthCounts[key].add(g.id);
         });
       });
-      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames).length;
       let best = 0, bestKey = '';
       Object.entries(monthCounts).forEach(([k,s]) => { if(s.size > best){best=s.size;bestKey=k;} });
       if (!bestKey) return null;
@@ -831,13 +834,13 @@ function getProgressPct(check, gameState, allState) {
       return best > 0 ? `Best day: ${best} / ${check.count} games` : null;
     }
     case 'all_games_played': {
-      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
-      const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).length>0).length;
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames).length;
+      const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames&&(allState[g.id]?.plays||[]).length>0).length;
       return total ? played/total : 0;
     }
     case 'all_games_won': {
-      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
-      const won = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).some(p=>p.win)).length;
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames).length;
+      const won = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames&&(allState[g.id]?.plays||[]).some(p=>p.win)).length;
       return total ? won/total : 0;
     }
     case 'all_games_won_subset': {
@@ -859,7 +862,7 @@ function getProgressPct(check, gameState, allState) {
       return Math.min(1, best/check.count);
     }
     case 'all_games_in_month': {
-      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames).length;
       const monthCounts = {};
       GAME_DEFINITIONS.forEach(g => {
         (allState[g.id]?.plays||[]).forEach(p => {
@@ -1309,13 +1312,13 @@ function getProgress(check, gameState, allState) {
       return `Best ${check.field1}: ${best1} / ${check.value1}`;
     }
     case 'all_games_played': {
-      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
-      const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).length>0).length;
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames).length;
+      const played = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames&&(allState[g.id]?.plays||[]).length>0).length;
       return `${played} / ${total} games`;
     }
     case 'all_games_won': {
-      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)).length;
-      const won = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&(allState[g.id]?.plays||[]).some(p=>p.win)).length;
+      const total = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames).length;
+      const won = GAME_DEFINITIONS.filter(g=>!hiddenGames.has(g.id)&&!g.excludeFromAllGames&&(allState[g.id]?.plays||[]).some(p=>p.win)).length;
       return `${won} / ${total} games`;
     }
     case 'all_games_won_subset': {
@@ -2502,16 +2505,30 @@ function deletePlay() {
   }
 }
 
+let lastDeletedPlay = null;
 function deletePlayAt(gid, idx) {
   if (!appState[gid]?.plays) return;
-  appState[gid].plays.splice(idx,1);
+  const removed = appState[gid].plays.splice(idx,1)[0];
+  lastDeletedPlay = { gid, idx, play: removed };
   // Recheck achievements — some may need to be revoked
   // Simple approach: just re-render (don't revoke already unlocked)
   saveState();
   const g = GAME_DEFINITIONS.find(x=>x.id===gid);
   if (currentGameId===gid) renderGameDetail(g);
   renderAll();
-  showToast('Play deleted');
+  showToast('Play deleted', 'Undo', undoDeletePlay);
+}
+function undoDeletePlay() {
+  if (!lastDeletedPlay) return;
+  const { gid, idx, play } = lastDeletedPlay;
+  lastDeletedPlay = null;
+  if (!appState[gid]) appState[gid] = { plays: [] };
+  appState[gid].plays.splice(Math.min(idx, appState[gid].plays.length), 0, play);
+  saveState();
+  checkAll();
+  if (currentGameId===gid) renderGameDetail(GAME_DEFINITIONS.find(x=>x.id===gid));
+  renderAll();
+  showToast('Play restored');
 }
 
 function toggleField(id,tl,fl){
@@ -2595,10 +2612,23 @@ function showUnlockBanner(a){
 function dismissBanner(){
   document.getElementById('unlockBanner').style.display='none';
 }
-function showToast(msg){
+function showToast(msg, actionLabel, actionFn){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2400);
+  t.classList.remove('has-action');
+  if (actionLabel && actionFn) {
+    t.textContent = msg;
+    const b = document.createElement('button');
+    b.className = 'toast-action';
+    b.textContent = actionLabel;
+    b.onclick = () => { t.classList.remove('show','has-action'); actionFn(); };
+    t.appendChild(b);
+    t.classList.add('has-action');
+  } else {
+    t.textContent = msg;
+  }
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove('show','has-action'), actionLabel ? 5000 : 2400);
 }
 
 // ═══════════════════════════════════════
@@ -3785,6 +3815,40 @@ function renderStats() {
   });
 
   html += '<div class="card"><div class="card-header"><span class="card-title">Days of the Year</span><span style="font-size:12px;font-weight:600;color:var(--green)">' + playedCalDays + ' / ' + totalCalDays + '</span></div><div class="cal-grid">' + calRows + '</div></div>';
+
+  // ── Achievement timeline ──
+  const achById = {};
+  GAME_DEFINITIONS.forEach(g => g.achievements?.forEach(a => achById[a.id] = {...a, srcName: g.name, srcIcon: g.icon, color: g.color}));
+  META_DEFINITIONS.forEach(a => achById[a.id] = {...a, srcName: 'Meta', srcIcon: '⭐', color: 'var(--text-2)'});
+  const timeline = Object.keys(unlockedDates)
+    .filter(id => unlocked[id] && achById[id])
+    .map(id => ({ ...achById[id], date: unlockedDates[id] }))
+    .sort((a,b) => b.date.localeCompare(a.date));
+  const TIMELINE_SHOWN = 15;
+  const timelineRow = a =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:18px;flex-shrink:0">${a.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.name}</div>
+        <div style="font-size:11px;color:var(--text-3)">${a.srcIcon} ${a.srcName} · ${a.date}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:12px;font-weight:700;color:${a.color}">${a.pts} pts</div>
+        <div class="ach-tier tier-${a.tier}" style="margin-top:2px">${a.tier}</div>
+      </div>
+    </div>`;
+  if (timeline.length) {
+    const shown = timeline.slice(0, TIMELINE_SHOWN).map(timelineRow).join('');
+    const hidden = timeline.slice(TIMELINE_SHOWN).map(timelineRow).join('');
+    html += `<div class="card" style="margin-top:12px">
+      <div class="card-header"><span class="card-title">Unlock Timeline</span><span style="font-size:12px;font-weight:600;color:var(--text-3)">${timeline.length} unlocked</span></div>
+      <div style="padding:0 14px">
+        ${shown}
+        ${hidden ? `<div id="timelineMore" style="display:none">${hidden}</div>
+        <button onclick="const m=document.getElementById('timelineMore');const b=this;const open=m.style.display!=='none';m.style.display=open?'none':'block';b.textContent=open?'Show all ${timeline.length}':'Show fewer';" style="width:100%;padding:12px;background:none;border:none;color:var(--blue);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Show all ${timeline.length}</button>` : ''}
+      </div>
+    </div>`;
+  }
 
   document.getElementById('statsContent').innerHTML = html;
 }

@@ -7,6 +7,7 @@ window.GAME_DEFINITIONS.push(
     name:     'Dorfromantik',
     icon:     '🏡',
     genre:    'Tile Laying · Campaign',
+    excludeFromAllGames: true,  // excluded from all_games_played/won/in_week/in_month meta conditions
     color:    '#5b8a3c',
     bgColor:  '#f2f9ee',
     dimColor: '#9dc87a',
