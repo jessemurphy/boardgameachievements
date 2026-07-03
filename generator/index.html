@@ -278,6 +278,41 @@ const CONDITION_TYPES = [
   { group: 'Compound',           value: 'win_with_toggle_and_field_eq', label: 'Win: toggle ON AND field = value',             params: ['field','field2','value2'] },
   { group: 'Compound',           value: 'win_two_fields',               label: 'Win: field ≥ value AND field2 ≥ value2',        params: ['field','value','field2','value2'] },
   { group: 'Meta',               value: 'all_achievements',             label: 'All listed achievements unlocked',             params: ['ids'] },
+  // ── Streaks ──
+  { group: 'Streak',             value: 'win_streak',                   label: 'Best win streak ≥ N (across all games)',       params: ['count'] },
+  { group: 'Streak',             value: 'win_streak_game',              label: 'Best win streak ≥ N (this game only)',         params: ['count'] },
+  // ── Field / compound (win only) ──
+  { group: 'Field (win only)',   value: 'win_field_beats_by',           label: 'Win: field beats compareField by margin',       params: ['field','compareField','margin'] },
+  { group: 'Field (win only)',   value: 'win_two_fields_gte',           label: 'Win: field1 ≥ value1 AND field2 ≥ value2',      params: ['field1','value1','field2','value2'] },
+  { group: 'Field (win only)',   value: 'win_with_any_field',           label: 'Win: any of fields = value',                    params: ['fields','value'] },
+  { group: 'Field (win only)',   value: 'count_wins_with_field_values', label: 'Win: field in values list, ≥ N times',          params: ['field','values','count'] },
+  // ── Multi-field values ──
+  { group: 'Multi-field',        value: 'win_all_values_multifield',    label: 'Win: cover every value across fields',          params: ['fields','values'] },
+  { group: 'Multi-field',        value: 'unique_win_values_multifield', label: 'Win: N distinct values across fields',          params: ['fields','count'] },
+  { group: 'Multi-field',        value: 'unique_values',                label: 'Any play: N distinct values in field',          params: ['field','count'] },
+  { group: 'Multi-field',        value: 'win_multifield_value_and_field_eq', label: 'Win: any of fields = value AND condField = condValue', params: ['fields','value','condField','condValue'] },
+  { group: 'Multi-field',        value: 'unique_field_pair_combos',     label: 'Win: all combos of two fields (needs gameId)',  params: ['gameId','field1','field2'] },
+  // ── Toggle ──
+  { group: 'Toggle',             value: 'any_toggle_count_gte',         label: 'Any of toggles ON, ≥ N times total',            params: ['fields','count'] },
+  // ── Cross-game totals ──
+  { group: 'Cross-game',         value: 'total_plays_gte',              label: 'Total plays across all games ≥ N',              params: ['count'] },
+  { group: 'Cross-game',         value: 'total_wins_gte',               label: 'Total wins across all games ≥ N',               params: ['count'] },
+  { group: 'Cross-game',         value: 'total_pts_gte',                label: 'Total achievement points ≥ N',                  params: ['count'] },
+  { group: 'Cross-game',         value: 'games_played_gte',             label: 'Distinct games played ≥ N',                     params: ['count'] },
+  { group: 'Cross-game',         value: 'plat_count_gte',               label: 'Platinum achievements unlocked ≥ N',            params: ['count'] },
+  { group: 'Cross-game',         value: 'all_plat_achievements',        label: 'All platinum achievements unlocked',            params: [] },
+  { group: 'Cross-game',         value: 'all_games_played',             label: 'Every game played at least once',               params: [] },
+  { group: 'Cross-game',         value: 'all_games_won',                label: 'Every game won at least once',                  params: [] },
+  { group: 'Cross-game',         value: 'all_games_won_subset',         label: 'Win a specific list of games',                  params: ['games'] },
+  { group: 'Cross-game',         value: 'cross_same_day',               label: 'Win a list of games on the same day',           params: ['games'] },
+  { group: 'Cross-game',         value: 'n_different_games_won_same_day', label: 'Win N different games on the same day',        params: ['count'] },
+  { group: 'Cross-game',         value: 'n_different_games_in_week',    label: 'Play N different games within any 7 days',      params: ['count'] },
+  { group: 'Cross-game',         value: 'campaign_complete',            label: 'Complete a campaign (needs gameId)',            params: ['gameId'] },
+  // ── Calendar ──
+  { group: 'Calendar',           value: 'all_games_in_month',           label: 'Play every game within one calendar month',     params: [] },
+  { group: 'Calendar',           value: 'played_every_day_of_month',    label: 'Play on every day of a calendar month',         params: [] },
+  { group: 'Calendar',           value: 'played_every_day_of_year',     label: 'Play on all 365 days of a year',                params: [] },
+  { group: 'Calendar',           value: 'played_days_containing_digit', label: 'Play on every date containing a digit',         params: ['digit'] },
 ];
 
 // ── Save / Load ──────────────────────────────────────────────
@@ -491,7 +526,7 @@ function renderScoreTitles() {
 // ── Achievements ──────────────────────────────────────────
 function addAchievement() {
   achievements.push({ _id: `ach_${achIdCounter++}`, id: '', icon: '🏆', tier: 'bronze', name: '', desc: '', pts: 10, official: false,
-    condType: 'min_wins', p_count: '1', p_field: '', p_value: '', p_fields: '', p_values: '', p_field2: '', p_value2: '', p_ids: '' });
+    condType: 'min_wins', p_count: '1', p_field: '', p_value: '', p_fields: '', p_values: '', p_field2: '', p_value2: '', p_ids: '', p_field1: '', p_value1: '', p_compareField: '', p_margin: '', p_condField: '', p_condValue: '', p_digit: '', p_gameId: '', p_games: '' });
   renderAchievements(); generate();
 }
 function duplicateAchievement(id, e) {
@@ -545,6 +580,15 @@ function renderAchievements() {
     if (params.includes('fields')) ph += `<div class="fg3"><label>Fields (comma separated)</label><input type="text" value="${a.p_fields}" placeholder="fieldA, fieldB" oninput="updateAchievement('${a._id}','p_fields',this.value)"></div>`;
     if (params.includes('values')) ph += `<div class="fg3"><label>Values (comma separated)</label><input type="text" value="${a.p_values}" placeholder="London, Paris" oninput="updateAchievement('${a._id}','p_values',this.value)"></div>`;
     if (params.includes('ids')) ph += `<div class="fg3"><label>Achievement IDs (comma separated)</label><input type="text" value="${a.p_ids}" placeholder="myg_first_win, myg_score50" oninput="updateAchievement('${a._id}','p_ids',this.value)"></div>`;
+    if (params.includes('field1')) ph += `<div class="fg1"><label>Field 1</label><select onchange="updateAchievement('${a._id}','p_field1',this.value)"><option value="">—</option>${fids.map(id=>`<option value="${id}" ${id===a.p_field1?'selected':''}>${id}</option>`).join('')}</select></div>`;
+    if (params.includes('value1')) ph += `<div class="fg1"><label>Value 1</label><input type="text" value="${a.p_value1}" placeholder="0" oninput="updateAchievement('${a._id}','p_value1',this.value)"></div>`;
+    if (params.includes('compareField')) ph += `<div class="fg1"><label>Compare Field</label><select onchange="updateAchievement('${a._id}','p_compareField',this.value)"><option value="">—</option>${fids.map(id=>`<option value="${id}" ${id===a.p_compareField?'selected':''}>${id}</option>`).join('')}</select></div>`;
+    if (params.includes('margin')) ph += `<div class="fg1"><label>Margin</label><input type="number" value="${a.p_margin}" placeholder="10" oninput="updateAchievement('${a._id}','p_margin',this.value)"></div>`;
+    if (params.includes('condField')) ph += `<div class="fg1"><label>Condition Field</label><select onchange="updateAchievement('${a._id}','p_condField',this.value)"><option value="">—</option>${fids.map(id=>`<option value="${id}" ${id===a.p_condField?'selected':''}>${id}</option>`).join('')}</select></div>`;
+    if (params.includes('condValue')) ph += `<div class="fg1"><label>Condition Value</label><input type="text" value="${a.p_condValue}" placeholder="Act 3" oninput="updateAchievement('${a._id}','p_condValue',this.value)"></div>`;
+    if (params.includes('digit')) ph += `<div class="fg1"><label>Digit (0–9)</label><input type="number" value="${a.p_digit}" min="0" max="9" placeholder="7" oninput="updateAchievement('${a._id}','p_digit',this.value)"></div>`;
+    if (params.includes('gameId')) ph += `<div class="fg1"><label>Game ID</label><input type="text" value="${a.p_gameId}" placeholder="planetunknown" oninput="updateAchievement('${a._id}','p_gameId',this.value)"></div>`;
+    if (params.includes('games')) ph += `<div class="fg3"><label>Game IDs (comma separated)</label><input type="text" value="${a.p_games}" placeholder="spiritisland, onedeck, frosthaven" oninput="updateAchievement('${a._id}','p_games',this.value)"></div>`;
     return `<div class="repeater-item ${col?'collapsed':''}" id="${iid}">
       <div class="repeater-header" onclick="toggleItem('${iid}')">
         <div class="repeater-header-left">
@@ -675,6 +719,15 @@ function buildCheck(a) {
   if (params.includes('fields') && a.p_fields) parts.push(`fields: [${a.p_fields.split(',').map(s=>`'${s.trim()}'`).join(', ')}]`);
   if (params.includes('values') && a.p_values) parts.push(`values: [${a.p_values.split(',').map(s=>`'${s.trim()}'`).join(', ')}]`);
   if (params.includes('ids') && a.p_ids) parts.push(`ids: [${a.p_ids.split(',').map(s=>`'${s.trim()}'`).join(', ')}]`);
+  if (params.includes('field1') && a.p_field1) parts.push(`field1: '${a.p_field1}'`);
+  if (params.includes('value1') && a.p_value1 !== '') parts.push(`value1: ${isNaN(a.p_value1)?`'${a.p_value1}'`:a.p_value1}`);
+  if (params.includes('compareField') && a.p_compareField) parts.push(`compareField: '${a.p_compareField}'`);
+  if (params.includes('margin') && a.p_margin !== '') parts.push(`margin: ${isNaN(a.p_margin)?`'${a.p_margin}'`:a.p_margin}`);
+  if (params.includes('condField') && a.p_condField) parts.push(`condField: '${a.p_condField}'`);
+  if (params.includes('condValue') && a.p_condValue !== '') parts.push(`condValue: ${isNaN(a.p_condValue)?`'${a.p_condValue}'`:a.p_condValue}`);
+  if (params.includes('digit') && a.p_digit !== '') parts.push(`digit: ${a.p_digit}`);
+  if (params.includes('gameId') && a.p_gameId) parts.push(`gameId: '${a.p_gameId}'`);
+  if (params.includes('games') && a.p_games) parts.push(`games: [${a.p_games.split(',').map(s=>`'${s.trim()}'`).join(', ')}]`);
   return `{ ${parts.join(', ')} }`;
 }
 
