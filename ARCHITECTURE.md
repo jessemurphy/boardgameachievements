@@ -326,10 +326,12 @@ A play field is considered "unset/incomplete" if its value is any of:
 
 ## Known Bugs / Pending Fixes
 
-1. **`win_streak` evalCondition** — checks current streak, not best ever. `getProgress` correctly uses best ever. Achievement won't unlock even with a historical streak of 17.
-2. **Meta achievement unlock dates** — rebuilt from scratch during audit, so existing unlocks show today instead of historical dates.
-3. **Legend (5000pts) timing** — `total_pts_gte` uses `calcTotalPts()` which only counts already-unlocked achievements. May miss by one scan cycle.
-4. **`findTriggerDate`** — not all condition types are handled; unrecognized types fall back to today's date.
+1. ~~**`win_streak` evalCondition**~~ — FIXED (July 2026): now uses best-ever streak, matching `getProgress`.
+2. **Meta achievement unlock dates** — partially fixed: `checkAll` now calls `findTriggerDate` for meta achievements, and meta types (`total_plays_gte`, `total_wins_gte`, `games_played_gte`, `win_streak`, `total_pts_gte`) are handled. Existing wrong dates need the one-time console repair (delete meta entries from `unlockedDates`, run `checkAll()` twice, `saveState()`).
+3. ~~**Legend (5000pts) timing**~~ — FIXED (July 2026): `checkAll` now loops to a fixed point, so cascade unlocks (`total_pts_gte`, `all_achievements`, `plat_count_gte`) resolve in one scan.
+4. **`findTriggerDate`** — meta types added; remaining unrecognized types still fall back to today's date. `total_pts_gte` dating is an approximation (walks unlock dates chronologically until the sum crosses the threshold).
+5. **Backup round-trip** — FIXED (July 2026): `campaigns` was missing from export/import; campaign progress was silently lost on restore. Old backups (without campaigns) import cleanly but restore empty campaigns.
+6. **Hardcoded `dorfromantik` exclusion** — `all_games_played`/`all_games_won`/`all_games_in_week` exclude dorfromantik via literal string checks in evalCondition (lines ~554, 555, 598), while docs say "every visible game" and other conditions use `hiddenGames`. Deliberate behavior kept as-is for now; consider centralizing into a config flag (e.g. `excludeFromAllGames: true` on the game config).
 
 ---
 

@@ -567,8 +567,9 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
     }
     case 'total_pts_gte':     return calcPts() >= check.count;
     case 'win_streak': {
-      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({win:p.win,ts:p.ts}))).sort((a,b)=>b.ts-a.ts);
-      let streak=0; for(const p of all){if(p.win)streak++;else break;} return streak >= check.count;
+      // Best-ever streak across all games (matches getProgress/getProgressPct)
+      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({win:p.win,ts:p.ts}))).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      let best=0, cur=0; for(const p of all){if(p.win){cur++;best=Math.max(best,cur);}else cur=0;} return best >= check.count;
     }
     case 'cross_same_day': {
       const [g1,g2] = check.games;
@@ -1421,7 +1422,12 @@ function loadState() {
       // First ever load — hide all games (no plays yet)
       hiddenGames=new Set(GAME_DEFINITIONS.map(g=>g.id));
     }
-  } catch(e){}
+  } catch(e){
+    // Don't let the next saveState() destroy possibly-recoverable data
+    console.error('Failed to load saved state:', e);
+    try { localStorage.setItem('solo_tracker_pub_v4_corrupt', localStorage.getItem('solo_tracker_pub_v4')); } catch(_){}
+    setTimeout(()=>showToast('⚠ Saved data could not be read — copy kept'), 500);
+  }
 }
 function saveState() {
   localStorage.setItem('solo_tracker_pub_v4', JSON.stringify({state:appState,unlocked,unlockedDates,hiddenGames:[...hiddenGames],campaigns}));
@@ -1525,6 +1531,40 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
     }
     case 'win_multifield_value_and_field_eq':
       return ts2date(wins.find(p => check.fields.some(f=>p[f]===check.value) && p[check.condField]===check.condValue)?.ts);
+    // ── Meta / cross-game types ──
+    case 'total_plays_gte': {
+      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[])).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      return ts2date(all[check.count-1]?.ts);
+    }
+    case 'total_wins_gte': {
+      const allW = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[])).filter(p=>p.win).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      return ts2date(allW[check.count-1]?.ts);
+    }
+    case 'games_played_gte': {
+      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({gid:g.id,ts:p.ts||0}))).sort((a,b)=>a.ts-b.ts);
+      const seen = new Set();
+      for (const p of all) { seen.add(p.gid); if (seen.size >= check.count) return ts2date(p.ts); }
+      return null;
+    }
+    case 'win_streak': {
+      const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({win:p.win,ts:p.ts||0}))).sort((a,b)=>a.ts-b.ts);
+      let cur=0;
+      for (const p of all) { if (p.win) { cur++; if (cur >= check.count) return ts2date(p.ts); } else cur=0; }
+      return null;
+    }
+    case 'total_pts_gte': {
+      // Approximate: walk unlock dates chronologically until the point sum crosses the threshold
+      const ptsById = {};
+      GAME_DEFINITIONS.forEach(g=>g.achievements?.forEach(a=>ptsById[a.id]=a.pts));
+      META_DEFINITIONS.forEach(a=>ptsById[a.id]=a.pts);
+      const entries = Object.keys(unlockedDates)
+        .filter(id=>unlocked[id] && ptsById[id])
+        .map(id=>({date:unlockedDates[id], pts:ptsById[id]}))
+        .sort((a,b)=>a.date.localeCompare(b.date));
+      let sum=0;
+      for (const e of entries) { sum+=e.pts; if (sum>=check.count) return e.date; }
+      return null;
+    }
     default:
       return new Date().toISOString().split('T')[0];
   }
@@ -1532,24 +1572,30 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
 
 function checkAll() {
   const newUnlocks=[];
-  GAME_DEFINITIONS.forEach(g=>{
-    if (!g.achievements) return;
-    const gs=appState[g.id]||{plays:[]};
-    g.achievements.forEach(a=>{
-      if(!unlocked[a.id] && evalCondition(a.check,gs,appState,unlocked,calcTotalPts)){
-        unlocked[a.id]=true; newlyUnlocked.add(a.id);
-        unlockedDates[a.id] = findTriggerDate(a.check, gs, appState, unlockedDates) || new Date().toISOString().split('T')[0];
-        newUnlocks.push({...a,source:g.name});
+  // Loop until no new unlocks: conditions like total_pts_gte, all_achievements,
+  // and plat_count_gte depend on unlocks made earlier in the same scan.
+  let changed=true;
+  while(changed){
+    changed=false;
+    GAME_DEFINITIONS.forEach(g=>{
+      if (!g.achievements) return;
+      const gs=appState[g.id]||{plays:[]};
+      g.achievements.forEach(a=>{
+        if(!unlocked[a.id] && evalCondition(a.check,gs,appState,unlocked,calcTotalPts)){
+          unlocked[a.id]=true; newlyUnlocked.add(a.id); changed=true;
+          unlockedDates[a.id] = findTriggerDate(a.check, gs, appState, unlockedDates) || new Date().toISOString().split('T')[0];
+          newUnlocks.push({...a,source:g.name});
+        }
+      });
+    });
+    META_DEFINITIONS.forEach(a=>{
+      if(!unlocked[a.id] && evalCondition(a.check,null,appState,unlocked,calcTotalPts)){
+        unlocked[a.id]=true; newlyUnlocked.add(a.id); changed=true;
+        unlockedDates[a.id] = findTriggerDate(a.check, null, appState, unlockedDates) || new Date().toISOString().split('T')[0];
+        newUnlocks.push({...a,source:'Meta'});
       }
     });
-  });
-  META_DEFINITIONS.forEach(a=>{
-    if(!unlocked[a.id] && evalCondition(a.check,null,appState,unlocked,calcTotalPts)){
-      unlocked[a.id]=true; newlyUnlocked.add(a.id);
-      unlockedDates[a.id] = new Date().toISOString().split('T')[0];
-      newUnlocks.push({...a,source:'Meta'});
-    }
-  });
+  }
   return newUnlocks;
 }
 
@@ -3754,6 +3800,7 @@ function exportData() {
     unlocked,
     unlockedDates,
     hiddenGames: [...hiddenGames],
+    campaigns,
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -3775,6 +3822,7 @@ function importData(e) {
       unlocked = data.unlocked || {};
       unlockedDates = data.unlockedDates || {};
       hiddenGames = new Set(data.hiddenGames || []);
+      campaigns = data.campaigns || {};
       saveState();
       checkAll();
       renderAll();
