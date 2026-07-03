@@ -199,6 +199,22 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .toast.has-action{pointer-events:auto}
 .toast-action{margin-left:12px;background:none;border:none;color:#7db8ff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:0;cursor:pointer}
 
+/* ── Solo Wrapped ── */
+.wrapped-overlay{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.wrapped-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:16px;font-weight:700;cursor:pointer;z-index:2}
+.wrapped-progress{position:absolute;top:calc(env(safe-area-inset-top,0px) + 20px);left:16px;right:64px;display:flex;gap:4px}
+.wrapped-progress div{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3)}
+.wrapped-progress div.done{background:#fff}
+.wrapped-slide{text-align:center;color:#fff;max-width:340px;animation:wrappedIn .5s ease}
+.wrapped-slide .wr-big{font-size:64px;font-weight:800;line-height:1;margin:8px 0}
+.wrapped-slide .wr-huge{font-size:80px;line-height:1;margin:8px 0}
+.wrapped-slide .wr-title{font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.85}
+.wrapped-slide .wr-sub{font-size:16px;font-weight:500;opacity:.9;line-height:1.5;margin-top:10px}
+.wrapped-slide .wr-list{margin-top:18px;text-align:left;font-size:15px;font-weight:600;line-height:2}
+.wrapped-slide .wr-list span{opacity:.7;font-weight:500}
+.wrapped-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);color:rgba(255,255,255,.6);font-size:12px;font-weight:600;letter-spacing:1px}
+@keyframes wrappedIn{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+
 .btn-danger{width:100%;padding:13px;border-radius:var(--radius);background:none;border:1.5px solid #ffb3ae;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--red);cursor:pointer}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);font-size:15px}
 .settings-row:last-child{border-bottom:none}
@@ -453,6 +469,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
   <div class="ub-dismiss">Tap to dismiss</div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="wrapped-overlay" id="wrapped" style="display:none" onclick="wrappedNext()">
+  <button class="wrapped-close" onclick="event.stopPropagation();closeWrapped()">✕</button>
+  <div class="wrapped-progress" id="wrappedProgress"></div>
+  <div class="wrapped-slide" id="wrappedSlide"></div>
+  <div class="wrapped-hint">TAP TO CONTINUE</div>
+</div>
 
 <script>
 // ═══════════════════════════════════════
@@ -3932,6 +3954,7 @@ function renderStats() {
   ).join('');
 
   let html = `
+    <button onclick="openWrapped()" style="width:100%;margin-bottom:12px;padding:16px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,#1a1a2e,#4a1a6e);color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;letter-spacing:.5px;cursor:pointer">🎁 Solo Wrapped</button>
     <div class="card" style="margin-bottom:12px">
       <div class="card-header"><span class="card-title">Overview</span></div>
       <div style="padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px">
@@ -4021,6 +4044,101 @@ function renderStats() {
 // ═══════════════════════════════════════
 // EXPORT / IMPORT
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// SOLO WRAPPED
+// ═══════════════════════════════════════
+let wrappedSlides = [], wrappedIdx = 0;
+
+function openWrapped() {
+  const allP = GAME_DEFINITIONS.flatMap(g => (appState[g.id]?.plays||[]).map(p=>({...p, g})));
+  const years = [...new Set(allP.map(p=>p.date?.slice(0,4)).filter(Boolean))].sort();
+  if (!years.length) { showToast('No plays logged yet'); return; }
+  const year = years[years.length-1];
+  const plays = allP.filter(p=>p.date?.startsWith(year)).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  const wins = plays.filter(p=>p.win);
+  const days = new Set(plays.map(p=>p.date)).size;
+
+  // Top games
+  const counts = {};
+  plays.forEach(p=>{ counts[p.g.id]=(counts[p.g.id]||0)+1; });
+  const top = Object.keys(counts).map(id=>({g:GAME_DEFINITIONS.find(x=>x.id===id), n:counts[id]})).sort((a,b)=>b.n-a.n);
+
+  // New games discovered this year (first-ever play falls in this year)
+  const newGames = GAME_DEFINITIONS.filter(g=>{
+    const ps = appState[g.id]?.plays||[];
+    if (!ps.length) return false;
+    return ps.reduce((m,p)=>p.date&&p.date<m?p.date:m, '9999').startsWith(year);
+  }).length;
+
+  // Best streak within the year
+  let streak=0, cur=0;
+  plays.forEach(p=>{ if(p.win){cur++;streak=Math.max(streak,cur);}else cur=0; });
+
+  // Achievements unlocked this year
+  const achById = {};
+  GAME_DEFINITIONS.forEach(g=>g.achievements?.forEach(a=>achById[a.id]={...a, srcIcon:g.icon}));
+  META_DEFINITIONS.forEach(a=>achById[a.id]={...a, srcIcon:'⭐'});
+  const yearAch = Object.keys(unlockedDates).filter(id=>unlocked[id]&&achById[id]&&unlockedDates[id].startsWith(year)).map(id=>achById[id]);
+  const yearPts = yearAch.reduce((s,a)=>s+a.pts,0);
+  const bigAch = [...yearAch].sort((a,b)=>b.pts-a.pts)[0];
+
+  // Busiest day & month
+  const byDay = {};
+  plays.forEach(p=>{ byDay[p.date]=(byDay[p.date]||0)+1; });
+  const busiestDay = Object.keys(byDay).sort((a,b)=>byDay[b]-byDay[a])[0];
+  const byMonth = {};
+  plays.forEach(p=>{ const m=p.date.slice(5,7); byMonth[m]=(byMonth[m]||0)+1; });
+  const busiestMonth = Object.keys(byMonth).sort((a,b)=>byMonth[b]-byMonth[a])[0];
+  const monthName = new Date(year, Number(busiestMonth)-1, 1).toLocaleString('default',{month:'long'});
+  const winRate = plays.length ? Math.round(wins.length/plays.length*100) : 0;
+
+  wrappedSlides = [
+    { bg:'linear-gradient(160deg,#1a1a2e,#4a1a6e)', html:
+      `<div class="wr-title">Solo Wrapped</div><div class="wr-big">${year}</div><div class="wr-sub">Your year in solo gaming.<br>Let's see how it went.</div>` },
+    { bg:'linear-gradient(160deg,#0f3460,#16537e)', html:
+      `<div class="wr-title">You showed up</div><div class="wr-big">${plays.length}</div><div class="wr-sub">plays across <b>${days} days</b>${newGames?`<br>and discovered <b>${newGames} new game${newGames===1?'':'s'}</b>`:''}</div>` },
+    { bg:`linear-gradient(160deg,#2d1b4e,${top[0]?.g.color||'#6a3093'})`, html:
+      `<div class="wr-title">Your most played</div><div class="wr-huge">${top[0]?.g.icon||'🎲'}</div><div class="wr-sub" style="font-size:22px;font-weight:800">${top[0]?.g.name||''}</div><div class="wr-sub"><b>${top[0]?.n||0} plays</b></div>
+       <div class="wr-list">${top.slice(1,5).map((x,i)=>`${i+2}. ${x.g.icon} ${x.g.name} <span>· ${x.n}</span>`).join('<br>')}</div>` },
+    { bg:'linear-gradient(160deg,#134e5e,#2e8b57)', html:
+      `<div class="wr-title">The scoreboard</div><div class="wr-big">${wins.length}</div><div class="wr-sub">wins at a <b>${winRate}%</b> win rate${streak>1?`<br>with a best streak of <b>${streak}</b> in a row`:''}</div>` },
+    { bg:'linear-gradient(160deg,#7a4a00,#b8860b)', html:
+      `<div class="wr-title">Trophy cabinet</div><div class="wr-big">${yearAch.length}</div><div class="wr-sub">achievements unlocked<br>worth <b>${yearPts} points</b>${bigAch?`<br><br>Biggest: ${bigAch.icon} <b>${bigAch.name}</b> (${bigAch.pts} pts)`:''}</div>` },
+    { bg:'linear-gradient(160deg,#4a1a3e,#8e2d56)', html:
+      `<div class="wr-title">Peak gaming</div><div class="wr-huge">📅</div><div class="wr-sub"><b>${monthName}</b> was your busiest month<br>with <b>${byMonth[busiestMonth]} plays</b>${busiestDay?`<br><br>Biggest single day: <b>${busiestDay}</b><br>(${byDay[busiestDay]} plays)`:''}</div>` },
+    { bg:'linear-gradient(160deg,#1a1a2e,#4a1a6e)', html:
+      `<div class="wr-title">Solo Wrapped ${year}</div><div class="wr-huge">🏆</div>
+       <div class="wr-list" style="text-align:center">${plays.length} plays <span>·</span> ${wins.length} wins<br>${yearAch.length} achievements <span>·</span> ${yearPts} pts<br>Top game: ${top[0]?.g.icon||''} ${top[0]?.g.name||''}</div>
+       <div class="wr-sub" style="margin-top:16px;opacity:.7">See you at the table 🎲</div>` },
+  ];
+  wrappedIdx = 0;
+  document.getElementById('wrapped').style.display = 'flex';
+  showWrappedSlide();
+}
+
+function showWrappedSlide() {
+  const s = wrappedSlides[wrappedIdx];
+  const overlay = document.getElementById('wrapped');
+  overlay.style.background = s.bg;
+  document.getElementById('wrappedProgress').innerHTML =
+    wrappedSlides.map((_,i)=>`<div class="${i<=wrappedIdx?'done':''}"></div>`).join('');
+  const slide = document.getElementById('wrappedSlide');
+  slide.style.animation = 'none';
+  slide.offsetHeight; // restart animation
+  slide.style.animation = '';
+  slide.innerHTML = s.html;
+}
+
+function wrappedNext() {
+  wrappedIdx++;
+  if (wrappedIdx >= wrappedSlides.length) { closeWrapped(); return; }
+  showWrappedSlide();
+}
+
+function closeWrapped() {
+  document.getElementById('wrapped').style.display = 'none';
+}
+
 function recomputeUnlockDates() {
   let changedCount = 0;
   const recompute = (a, gs) => {
