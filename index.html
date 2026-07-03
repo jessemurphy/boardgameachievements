@@ -379,6 +379,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
         <div style="font-size:13px;color:var(--text-2);line-height:1.5">Play history and achievements are stored locally in this browser. Export regularly to keep a backup.</div>
         <button class="btn-log" style="background:var(--green)" onclick="exportData()">⬆ Export My Data</button>
         <button class="btn-log" style="background:var(--blue)" onclick="document.getElementById('importDataFile').click()">⬇ Import Data</button>
+        <button class="btn-log" style="background:var(--text-2)" onclick="recomputeUnlockDates()">🕰 Recompute Unlock Dates</button>
         <input type="file" id="importDataFile" accept=".json" style="display:none" onchange="importData(event)">
         <div style="font-size:12px;color:var(--text-3)">Solo Achievement Tracker — <a href="https://github.com/jessemurphy/boardgameachievements" style="color:var(--text-3)">GitHub</a></div>
         <a href="https://ko-fi.com/jessemurphy" target="_blank" style="display:block;text-align:center;padding:10px;background:#FF5E5B;color:white;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none">☕ Buy me a coffee</a>
@@ -1534,6 +1535,170 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
     }
     case 'win_multifield_value_and_field_eq':
       return ts2date(wins.find(p => check.fields.some(f=>p[f]===check.value) && p[check.condField]===check.condValue)?.ts);
+    case 'win_field_beats_by':
+      return ts2date(wins.find(p => (Number(p[check.field])||0) - (Number(p[check.compareField])||0) >= check.margin)?.ts);
+    case 'win_two_fields_gte':
+      return ts2date(wins.find(p => Number(p[check.field1]) >= check.value1 && Number(p[check.field2]) >= check.value2)?.ts);
+    case 'win_with_any_field':
+      return ts2date(wins.find(p => (check.fields||[]).some(f => p[f] === check.value))?.ts);
+    case 'win_streak_game': {
+      let cur = 0;
+      for (const p of plays) { if (p.win) { cur++; if (cur >= check.count) return ts2date(p.ts); } else cur = 0; }
+      return null;
+    }
+    case 'count_wins_with_field_values': {
+      let n = 0;
+      for (const p of wins) { if ((check.values||[]).includes(p[check.field])) { n++; if (n >= check.count) return ts2date(p.ts); } }
+      return null;
+    }
+    case 'win_all_values_multifield': {
+      const need = new Set(check.values);
+      for (const p of wins) {
+        (check.fields||[]).forEach(f => need.delete(p[f]));
+        if (need.size === 0) return ts2date(p.ts);
+      }
+      return null;
+    }
+    case 'unique_win_values_multifield': {
+      const vals = new Set();
+      for (const p of wins) {
+        (check.fields||[]).forEach(f => { if (p[f] && p[f] !== 'None') vals.add(p[f]); });
+        if (vals.size >= check.count) return ts2date(p.ts);
+      }
+      return null;
+    }
+    case 'any_toggle_count_gte': {
+      let n = 0;
+      for (const p of plays) { n += (check.fields||[]).filter(f => p[f] === true).length; if (n >= check.count) return ts2date(p.ts); }
+      return null;
+    }
+    case 'unique_field_pair_combos': {
+      const lf = GAME_DEFINITIONS.find(g=>g.id===check.gameId)?.logFields||[];
+      const f1opts = lf.find(f=>f.id===check.field1)?.options?.filter(o=>o!=='Unknown') || [];
+      const f2opts = lf.find(f=>f.id===check.field2)?.options?.filter(o=>o!=='Unknown') || [];
+      const totalCombos = f1opts.length * f2opts.length;
+      if (!totalCombos) return null;
+      const cWins = ((allState[check.gameId]?.plays)||[]).filter(p=>p.win);
+      const seen = new Set();
+      for (const p of cWins) {
+        if (f1opts.includes(p[check.field1]) && f2opts.includes(p[check.field2])) seen.add(p[check.field1]+'|'+p[check.field2]);
+        if (seen.size >= totalCombos) return ts2date(p.ts);
+      }
+      return null;
+    }
+    case 'all_games_played': {
+      const firsts = GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames)
+        .map(g => (allState[g.id]?.plays||[]).reduce((m,p)=>Math.min(m,p.ts||Infinity),Infinity));
+      if (firsts.some(t=>!isFinite(t))) return null;
+      return ts2date(Math.max(...firsts));
+    }
+    case 'all_games_won': {
+      const firsts = GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames)
+        .map(g => (allState[g.id]?.plays||[]).filter(p=>p.win).reduce((m,p)=>Math.min(m,p.ts||Infinity),Infinity));
+      if (firsts.some(t=>!isFinite(t))) return null;
+      return ts2date(Math.max(...firsts));
+    }
+    case 'all_games_won_subset': {
+      const firsts = (check.games||[])
+        .map(gid => (allState[gid]?.plays||[]).filter(p=>p.win).reduce((m,p)=>Math.min(m,p.ts||Infinity),Infinity));
+      if (firsts.some(t=>!isFinite(t))) return null;
+      return ts2date(Math.max(...firsts));
+    }
+    case 'n_different_games_won_same_day': {
+      const byDate = {};
+      GAME_DEFINITIONS.forEach(g => (allState[g.id]?.plays||[]).forEach(p => {
+        if (!p.win || !p.date) return;
+        if (!byDate[p.date]) byDate[p.date] = new Set();
+        byDate[p.date].add(g.id);
+      }));
+      const dates = Object.keys(byDate).filter(d => byDate[d].size >= check.count).sort();
+      return dates[0] || null;
+    }
+    case 'cross_same_day': {
+      const winDateSets = (check.games||[]).map(gid => new Set((allState[gid]?.plays||[]).filter(p=>p.win).map(p=>p.date)));
+      if (!winDateSets.length) return null;
+      const shared = [...winDateSets[0]].filter(d => winDateSets.every(s=>s.has(d))).sort();
+      return shared[0] || null;
+    }
+    case 'n_different_games_in_week': {
+      const week = 7*24*60*60*1000;
+      const allP = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).map(p=>({gid:g.id,ts:p.ts||0}))).sort((a,b)=>a.ts-b.ts);
+      let earliest = null;
+      for (let i = 0; i < allP.length; i++) {
+        const seen = new Set();
+        for (let j = i; j < allP.length && allP[j].ts <= allP[i].ts + week; j++) {
+          seen.add(allP[j].gid);
+          if (seen.size >= check.count) { if (earliest===null || allP[j].ts < earliest) earliest = allP[j].ts; break; }
+        }
+      }
+      return ts2date(earliest);
+    }
+    case 'all_games_in_month': {
+      const eligible = GAME_DEFINITIONS.filter(g=>!g.excludeFromAllGames);
+      const byMonth = {};
+      eligible.forEach(g => (allState[g.id]?.plays||[]).forEach(p => {
+        const m = p.date?.slice(0,7);
+        if (!m) return;
+        if (!byMonth[m]) byMonth[m] = {};
+        // first date each game appeared in this month
+        if (!byMonth[m][g.id] || p.date < byMonth[m][g.id]) byMonth[m][g.id] = p.date;
+      }));
+      const completions = Object.values(byMonth)
+        .filter(gmap => Object.keys(gmap).length >= eligible.length)
+        .map(gmap => Object.values(gmap).sort().pop());  // date the last game joined
+      return completions.sort()[0] || null;
+    }
+    case 'played_every_day_of_month': {
+      const byMonth = {};
+      GAME_DEFINITIONS.forEach(g => (allState[g.id]?.plays||[]).forEach(p => {
+        const m = p.date?.slice(0,7);
+        if (!m) return;
+        if (!byMonth[m]) byMonth[m] = new Set();
+        byMonth[m].add(p.date);
+      }));
+      const full = Object.keys(byMonth).filter(m => {
+        const [y, mo] = m.split('-').map(Number);
+        return byMonth[m].size >= new Date(y, mo, 0).getDate();
+      }).sort();
+      if (!full.length) return null;
+      const [y, mo] = full[0].split('-').map(Number);
+      return full[0] + '-' + String(new Date(y, mo, 0).getDate()).padStart(2,'0');
+    }
+    case 'played_every_day_of_year': {
+      const byYear = {};
+      GAME_DEFINITIONS.forEach(g => (allState[g.id]?.plays||[]).forEach(p => {
+        const y = p.date?.slice(0,4);
+        if (!y) return;
+        if (!byYear[y]) byYear[y] = new Set();
+        byYear[y].add(p.date.slice(5));
+      }));
+      const full = Object.keys(byYear).filter(y => byYear[y].size >= 365).sort();
+      return full.length ? full[0] + '-12-31' : null;
+    }
+    case 'played_days_containing_digit': {
+      const target = new Set();
+      const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+      DAYS.forEach((n,mi) => { for (let d=1; d<=n; d++) if (String(d).includes(String(check.digit))) target.add((mi+1)+'-'+d); });
+      const allP = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[]).filter(p=>p.date)).sort((a,b)=>a.date.localeCompare(b.date));
+      const seen = new Set();
+      for (const p of allP) {
+        const [y,m,d] = p.date.split('-').map(Number);
+        const key = m+'-'+d;
+        if (target.has(key)) seen.add(key);
+        if (seen.size >= target.size) return p.date;
+      }
+      return null;
+    }
+    case 'all_plat_achievements': {
+      const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
+      const dates = platIds.map(id => unlockedDates[id]).filter(Boolean);
+      return dates.length === platIds.length ? dates.sort().pop() : null;
+    }
+    case 'plat_count_gte': {
+      const platIds = GAME_DEFINITIONS.flatMap(g=>(g.achievements||[]).filter(a=>a.tier==='plat').map(a=>a.id));
+      const dates = platIds.map(id => unlockedDates[id]).filter(Boolean).sort();
+      return dates.length >= check.count ? dates[check.count-1] : null;
+    }
     // ── Meta / cross-game types ──
     case 'total_plays_gte': {
       const all = GAME_DEFINITIONS.flatMap(g=>(allState[g.id]?.plays||[])).sort((a,b)=>(a.ts||0)-(b.ts||0));
@@ -1569,7 +1734,7 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
       return null;
     }
     default:
-      return new Date().toISOString().split('T')[0];
+      return null;  // caller (checkAll) falls back to today for genuinely new unlocks
   }
 }
 
@@ -3856,6 +4021,23 @@ function renderStats() {
 // ═══════════════════════════════════════
 // EXPORT / IMPORT
 // ═══════════════════════════════════════
+function recomputeUnlockDates() {
+  let changedCount = 0;
+  const recompute = (a, gs) => {
+    const d = findTriggerDate(a.check, gs, appState, unlockedDates);
+    if (d && unlockedDates[a.id] !== d) { unlockedDates[a.id] = d; changedCount++; }
+  };
+  // Game achievements first so meta conditions (total_pts_gte, plat_count_gte) see corrected dates
+  GAME_DEFINITIONS.forEach(g => g.achievements?.forEach(a => { if (unlocked[a.id]) recompute(a, appState[g.id]||{plays:[]}); }));
+  // Two passes over meta so point tiers see other metas' recomputed dates
+  for (let pass = 0; pass < 2; pass++) {
+    META_DEFINITIONS.forEach(a => { if (unlocked[a.id]) recompute(a, null); });
+  }
+  saveState();
+  renderAll();
+  showToast(changedCount ? `✓ Recomputed ${changedCount} unlock date${changedCount===1?'':'s'}` : 'No dates changed');
+}
+
 function exportData() {
   const data = {
     version: 'solo_tracker_pub_v4',
