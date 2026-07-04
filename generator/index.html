@@ -613,6 +613,7 @@ function renderAchievements() {
             <option value="silver" ${a.tier==='silver'?'selected':''}>Silver</option>
             <option value="gold" ${a.tier==='gold'?'selected':''}>Gold</option>
             <option value="plat" ${a.tier==='plat'?'selected':''}>Platinum</option>
+            <option value="diamond" ${a.tier==='diamond'?'selected':''}>Diamond (prestige)</option>
           </select></div>
           <div class="fg1"><label>Points</label><input type="number" value="${a.pts}" min="1" oninput="updateAchievement('${a._id}','pts',this.value)"></div>
         </div>

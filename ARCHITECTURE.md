@@ -328,6 +328,17 @@ A play field is considered "unset/incomplete" if its value is any of:
 
 ---
 
+## Achievement Tiers
+
+Tiers, low to high: `bronze`, `silver`, `gold`, `plat`, and `diamond` (prestige).
+
+**Diamond** is a prestige tier that sits *outside* the completion economy — for extremely hard, optional feats (e.g. winning every Sprawlopolis scoring-card combination). Design rules:
+- Excluded from all completion measures: per-game % and points (`calcGamePts` skips `tier==='diamond'`), the game-card X/Y achievement count, the game's platinum requirement (never listed in a `_plat` achievement's `all_achievements` ids), and the `all_plat_achievements` / `plat_count_gte` metas (those filter `tier==='plat'`).
+- **Points still count** toward the global total (`calcTotalPts` includes diamond) and therefore toward point metas (Legend/Immortal). Set `pts: 0` for a pure-prestige, cosmetic-only diamond.
+- A game shows 💠 on its card when a diamond is earned (distinct from the platinum 💎).
+- Generator offers Diamond in the tier picker.
+- Not yet built: condition types for combo-coverage feats like "every Sprawlopolis scoring-card combination" — needs per-play card-ID logging plus a new condition type.
+
 ## Known Bugs / Pending Fixes
 
 1. ~~**`win_streak` evalCondition**~~ — FIXED (July 2026): now uses best-ever streak, matching `getProgress`.

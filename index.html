@@ -150,6 +150,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .tier-silver{background:#f0f2f4;color:var(--silver)}
 .tier-gold{background:#fff8e0;color:var(--gold)}
 .tier-plat{background:#f0f8ff;color:#4488cc}
+.tier-diamond{background:linear-gradient(135deg,#e6f3ff,#f3e9ff);color:#7a5cff;box-shadow:inset 0 0 0 1px #cbbcff}
+[data-theme="dark"] .tier-bronze{background:#3a2e26;color:var(--bronze)}
+[data-theme="dark"] .tier-silver{background:#2a2e33;color:var(--silver)}
+[data-theme="dark"] .tier-gold{background:#3a3320;color:var(--gold)}
+[data-theme="dark"] .tier-plat{background:#1e2c3a;color:#7ab8ee}
+[data-theme="dark"] .tier-diamond{background:linear-gradient(135deg,#2a2440,#1e2c3a);color:#bda6ff;box-shadow:inset 0 0 0 1px #6a5aaa}
 .new-badge{font-size:9px;font-weight:700;background:#ff3b30;color:#fff;border-radius:4px;padding:1px 5px;text-transform:uppercase;letter-spacing:.4px}
 
 /* Play history */
@@ -1484,7 +1490,7 @@ function calcGamePts(gid) {
   const g=GAME_DEFINITIONS.find(x=>x.id===gid);
   if (!g.achievements) return {earned:0,total:0};
   let earned=0, total=0;
-  g.achievements.forEach(a=>{ total+=a.pts; if(unlocked[a.id]) earned+=a.pts; });
+  g.achievements.forEach(a=>{ if(a.tier==='diamond')return; total+=a.pts; if(unlocked[a.id]) earned+=a.pts; });
   return {earned,total};
 }
 
@@ -2075,8 +2081,9 @@ function renderHome() {
     const plays = appState[g.id]?.plays||[];
     const wins  = plays.filter(p=>p.win).length;
     const {earned,total} = calcGamePts(g.id);
-    const achN  = g.achievements?.filter(a=>unlocked[a.id]).length||0;
-    const achT  = g.achievements?.length||0;
+    const achN  = g.achievements?.filter(a=>a.tier!=='diamond'&&unlocked[a.id]).length||0;
+    const achT  = g.achievements?.filter(a=>a.tier!=='diamond').length||0;
+    const hasDiamond = (g.achievements||[]).some(a=>a.tier==='diamond'&&unlocked[a.id]);
     const pct   = total>0?Math.round(earned/total*100):0;
     const platted = (g.achievements||[]).some(a=>a.id.endsWith('_plat')&&unlocked[a.id]);
     const lastTs = plays.length ? Math.max(...plays.map(p=>p.ts||0)) : 0;
@@ -2084,7 +2091,7 @@ function renderHome() {
     return `<div class="game-card ${platted?'platted':''}" style="border-left-color:${g.color}" onclick="openGame('${g.id}')">
       <div class="game-card-icon" style="background:${g.bgColor}">${g.icon}</div>
       <div class="game-card-info">
-        <div class="game-card-name">${g.name}${platted?' 💎':''}</div>
+        <div class="game-card-name">${g.name}${platted?' 💎':''}${hasDiamond?' 💠':''}</div>
         <div class="game-card-sub">${plays.length} plays · ${wins} wins · ${achN}/${achT} achievements</div>
         <div class="game-card-sub" style="color:var(--text-3);font-size:11px;margin-top:2px">Last played: ${lastStr}</div>
       </div>
