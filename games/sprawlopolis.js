@@ -109,7 +109,7 @@ window.GAME_DEFINITIONS.push(
         check: { type: 'min_plays', count: 15 } },
       { id: 'sp_plat',     icon: '💎', tier: 'plat',   pts: 100, name: 'Master Planner',
         desc: 'Unlock all other Sprawlopolis achievements',
-        check: { type: 'all_achievements', ids: ['sp_first','sp_score30','sp_score50','sp_score65','sp_margin5','sp_margin10','sp_margin15','sp_hightarget','sp_5wins','sp_10wins','sp_15plays'] } },
+        check: { type: 'all_achievements', ids: ['sp_first','sp_score30','sp_score50','sp_score65','sp_margin5','sp_margin10','sp_margin15','sp_hightarget','sp_5wins','sp_10wins','sp_15plays','sp_cleanroads','sp_bigscoring'] } },
     ]
   }
 );
