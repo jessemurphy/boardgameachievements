@@ -178,6 +178,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .modal-overlay.open{display:flex}
 .modal{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 40px;width:100%;max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:14px;max-height:88vh;overflow-y:auto;box-shadow:0 -4px 32px rgba(0,0,0,.15)}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto -4px}
+.card-count{font-size:12px;font-weight:700;color:var(--text-3)}
+.card-count.full{color:var(--green)}
+.card-picker{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.card-chip{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 11px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text-2);cursor:pointer;transition:all .12s}
+.card-chip.sel{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:700}
+.card-chip.dim{opacity:.4}
 .modal-title{font-size:17px;font-weight:700;text-align:center}
 .modal-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3)}
 .modal-field{display:flex;flex-direction:column;gap:6px}
@@ -2594,7 +2600,7 @@ function buildSummary(g, p) {
   }
   // Then show up to 1 more interesting field (skip win, score, toggles that are false)
   const otherFields = g.logFields
-    .filter(f => f.id !== 'win' && f.id !== 'score' && f.type !== 'toggle')
+    .filter(f => f.id !== 'win' && f.id !== 'score' && f.type !== 'toggle' && f.type !== 'cards')
     .slice(0, 1);
   for (const f of otherFields) {
     const v = p[f.id];
@@ -2608,12 +2614,12 @@ function buildSummary(g, p) {
 // ═══════════════════════════════════════
 // MODAL — LOG & EDIT
 // ═══════════════════════════════════════
-let logGameId=null, modalToggles={}, editPlayIndex=-1;
+let logGameId=null, modalToggles={}, editPlayIndex=-1, modalCards=[];
 
 function openModal(gid, playIdx=-1) {
   logGameId=gid; editPlayIndex=playIdx;
   const g=GAME_DEFINITIONS.find(x=>x.id===gid);
-  modalToggles={};
+  modalToggles={}; modalCards=[];
   const isEdit = playIdx >= 0;
   const existingPlay = isEdit ? (appState[gid]?.plays||[])[playIdx] : null;
 
@@ -2660,6 +2666,19 @@ function openModal(gid, playIdx=-1) {
         <select class="modal-select" id="fld_${f.id}" ${onchange}>
           ${optLabels.join('')}
         </select>
+      </div>`;
+    } else if(f.type==='cards'){
+      // Pre-select existing cards (edit) by matching stored names back to numbered options
+      if(isEdit){
+        modalCards = (f.targets||[]).map(t=>existingPlay?.[t]).filter(Boolean)
+          .map(name => f.options.find(o=>o.replace(/^\d+\s*/,'')===name)).filter(Boolean);
+      }
+      const full = modalCards.length===f.count;
+      html+=`<div class="modal-field" id="wrap_${f.id}">
+        <label class="modal-label">${f.label} <span class="card-count ${full?'full':''}" id="cardCount_${f.id}">${modalCards.length} / ${f.count}</span></label>
+        <div class="card-picker" id="cardpick_${f.id}">
+          ${f.options.map((o,i)=>`<button type="button" class="card-chip ${modalCards.includes(o)?'sel':''} ${!modalCards.includes(o)&&full?'dim':''}" onclick="toggleCard('${f.id}',${i},${f.count})">${o}</button>`).join('')}
+        </div>
       </div>`;
     } else if(f.type==='number'){
       const val = isEdit&&existing!==undefined ? existing : f.default;
@@ -2776,17 +2795,45 @@ function toggleField(id,tl,fl){
   document.getElementById('togLbl_'+id).textContent=modalToggles[id]?tl:fl;
   updateShowIf(id, modalToggles[id]);
 }
+function toggleCard(fieldId, idx, count){
+  const g=GAME_DEFINITIONS.find(x=>x.id===logGameId);
+  const f=g.logFields.find(x=>x.id===fieldId);
+  const opt=f.options[idx];
+  const at=modalCards.indexOf(opt);
+  if(at>=0) modalCards.splice(at,1);
+  else { if(modalCards.length>=count){ showToast(`Pick ${count} — deselect one first`); return; } modalCards.push(opt); }
+  const full=modalCards.length===count;
+  const wrap=document.getElementById('cardpick_'+fieldId);
+  [...wrap.children].forEach((btn,bi)=>{
+    const sel=modalCards.includes(f.options[bi]);
+    btn.classList.toggle('sel',sel);
+    btn.classList.toggle('dim',!sel&&full);
+  });
+  const cnt=document.getElementById('cardCount_'+fieldId);
+  cnt.textContent=`${modalCards.length} / ${count}`;
+  cnt.classList.toggle('full',full);
+}
 function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
 
 function submitPlay(){
   const g=GAME_DEFINITIONS.find(x=>x.id===logGameId);
+  // Validate cards fields: must be empty or exactly `count`
+  for(const f of g.logFields){
+    if(f.type==='cards' && modalCards.length!==0 && modalCards.length!==f.count){
+      showToast(`Pick exactly ${f.count} ${f.noun||'cards'} (or none)`); return;
+    }
+  }
   const dateEl=document.getElementById('modal_date');
   const playDate=dateEl?.value||new Date().toISOString().split('T')[0];
   const play={ts:new Date(playDate+'T12:00:00').getTime(),date:playDate};
   g.logFields.forEach(f=>{
     if(f.type==='toggle')      play[f.id]=!!modalToggles[f.id];
     else if(f.type==='number') play[f.id]=parseFloat(document.getElementById('fld_'+f.id).value)||0;
+    else if(f.type==='cards'){
+      const names=modalCards.map(o=>o.replace(/^\d+\s*/,''));
+      (f.targets||[]).forEach((t,i)=> play[t]=names[i]||'');
+    }
     else                       play[f.id]=document.getElementById('fld_'+f.id).value;
   });
   const notes = document.getElementById('modal_notes')?.value?.trim();

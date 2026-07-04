@@ -328,6 +328,10 @@ A play field is considered "unset/incomplete" if its value is any of:
 
 ---
 
+### Log field types (`logFields`)
+
+`toggle`, `number`, `select`, and `cards`. The **`cards`** type renders a tap-to-select chip picker for choosing exactly `count` options from a list with no duplicates (used by Sprawlopolis to pick 3 of 18 scoring cards). It does not store under its own `id`; instead it writes the stripped names (number prefix removed, matching the importer) to the fields named in `targets` (e.g. `['card1','card2','card3']`), so manually-logged and imported plays produce identical fields. Config keys: `count`, `targets`, `options` (numbered strings like `'01 The Outskirts'`), optional `noun` for the validation toast. Validation: a play must have 0 or exactly `count` selected. One `cards` field per game (shared `modalCards` state).
+
 ## Achievement Tiers
 
 Tiers, low to high: `bronze`, `silver`, `gold`, `plat`, and `diamond` (prestige).
