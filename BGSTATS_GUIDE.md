@@ -77,8 +77,27 @@ number), and omitting the tag entirely means "not tracked."
 - **Board/Scenario field:** the adversary name if one was used, or leave blank/use `Blight Card` for a game with no adversary
 
 ### Sprawlopolis
-- **Board/Scenario field:** the three scoring cards drawn, separated by `／`, each one prefixed with its card number, e.g. `13 Park Hopping／14 Looping Lanes／16 Morning Commute`
-- This is the same field used for "scenario" in other games — just enter the three card numbers and names here and the tracker reads each one out individually for the per-card win-rate panel
+- **Board/Scenario field:** the three scoring cards drawn, separated by `／`, each prefixed with its card number, e.g. `13 Park Hopping／14 Looping Lanes／16 Morning Commute`
+- This is the same field used for "scenario" in other games — the tracker reads each card out individually for the per-card win-rate panel.
+- **⚠ The separator is the fullwidth slash `／` (U+FF0F), NOT a regular `/`.** A normal slash will not split and the play's cards won't register. Easiest to copy the `／` character. (On iOS, it's under the `/` key on some keyboards, or paste it.)
+- **⚠ Card names must be spelled exactly as below (case-sensitive).** The number prefix is stripped to get the name (and summed for the target score), so `13 Park Hopping` and `13 park hopping` differ — only the first matches. A misspelling silently drops that card (and, for *The Whole Sprawl* diamond, that combination) from your totals.
+- The number prefix is required for the target-score achievements (target = sum of the three card numbers); the combination/card achievements only need the exact names.
+
+**Canonical scoring cards (base game):**
+
+| # | Name | # | Name |
+|---|------|---|------|
+| 01 | The Outskirts | 10 | The Strip |
+| 02 | Bloom Boom | 11 | Mini Marts |
+| 03 | Go Green | 12 | The Superhighway |
+| 04 | Block Party | 13 | Park Hopping |
+| 05 | Stacks and Scrapers | 14 | Looping Lanes |
+| 06 | Master Planned | 15 | Skid Row |
+| 07 | Central Perks | 16 | Morning Commute |
+| 08 | The 'Burbs | 17 | Tourist Traps |
+| 09 | Concrete Jungle | 18 | Sprawlopolis |
+
+Note `The 'Burbs` uses a straight apostrophe `'`. *The Whole Sprawl* (💠 diamond) tracks distinct winning three-card combinations toward all C(18,3) = 816.
 
 ### Vantage
 - **Board/Scenario field:** the mission number or name
