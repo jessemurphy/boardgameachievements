@@ -1171,7 +1171,8 @@ function renderCustomStats(g, plays) {
         return s.labelMap ? (s.labelMap[best] || best) : best;
       }
       case 'avg': {
-        const pool = s.winsOnly ? wins : plays;
+        let pool = s.winsOnly ? wins : plays;
+        if (s.presentOnly) pool = pool.filter(p => p[s.field] !== undefined && p[s.field] !== null && p[s.field] !== '');
         if (!pool.length) return '—';
         const sum = pool.reduce((t, p) => t + (Number(p[s.field]) || 0), 0);
         return (sum / pool.length).toFixed(s.decimals ?? 1);
@@ -3099,6 +3100,30 @@ function parseBoard(board) {
 }
 
 // Parse a single BGStats play object into our format
+// Extract the point breakdown from a BGStats scoresheet (Sprawlopolis / Agropolis
+// share the same structure). Returns fields keyed sheet_<templateId>, plus
+// sheet_scoring = sum of the "Scoring cards" rows. Card identities are NOT in the
+// scoresheet (rows are slots 1/2/3), so this is aggregate breakdown only.
+function parseScoresheetBreakdown(play) {
+  const out = {};
+  try {
+    const ss = JSON.parse(play.scoresheet || '{}');
+    for (const g of ss.groups || []) {
+      const isScoringCards = (g.label === 'Scoring cards');
+      let scoringSum = 0, sawScoring = false;
+      for (const r of g.rows || []) {
+        const raw = Object.values(r.scores || {})[0];
+        if (raw === undefined || raw === '') continue;
+        const num = parseInt(raw) || 0;
+        if (isScoringCards) { scoringSum += num; sawScoring = true; }
+        else if (r.templateId) out['sheet_' + r.templateId] = num;
+      }
+      if (isScoringCards && sawScoring) out.sheet_scoring = scoringSum;
+    }
+  } catch (e) {}
+  return out;
+}
+
 function parseSinglePlay(play, gameId, playerUuid, games) {
   // Always identify as player id:1 (account owner)
   const myScore = play.playerScores?.find(ps => {
@@ -3670,7 +3695,8 @@ function parseSinglePlay(play, gameId, playerUuid, games) {
       let parsedScore = 0;
       try { parsedScore = eval((ps.score||'0').replace(/--/g,'+')) || 0; } catch(e) {}
       return { ...base, score: parsedScore, targetScore: targetScore || 9,
-        card1: cardNames[0]||'', card2: cardNames[1]||'', card3: cardNames[2]||'' };
+        card1: cardNames[0]||'', card2: cardNames[1]||'', card3: cardNames[2]||'',
+        ...parseScoresheetBreakdown(play) };
     }
     case 'orchard': {
       return { ...base, score: parseFloat(ps.score)||0, perfect: false };

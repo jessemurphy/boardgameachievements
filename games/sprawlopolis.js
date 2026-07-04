@@ -34,6 +34,16 @@ window.GAME_DEFINITIONS.push(
       { label: '18 Sprawlopolis',     type: 'ratio_any_field', fields: ['card1','card2','card3'], value: 'Sprawlopolis' },
     ],
 
+    customStats2Title: 'Score Breakdown (avg per game)',
+    customStats2: [
+      { label: 'Scoring conditions', type: 'avg', field: 'sheet_scoring', presentOnly: true },
+      { label: 'Residential',        type: 'avg', field: 'sheet_residential', presentOnly: true },
+      { label: 'Commercial',         type: 'avg', field: 'sheet_commercial', presentOnly: true },
+      { label: 'Industrial',         type: 'avg', field: 'sheet_industrial', presentOnly: true },
+      { label: 'Park',               type: 'avg', field: 'sheet_park', presentOnly: true },
+      { label: 'Road tax (lost)',    type: 'avg', field: 'sheet_roadtax', presentOnly: true },
+    ],
+
     achievements: [
       { id: 'sp_allcards', icon: '🗂️', tier: 'plat', pts: 60, name: 'City Planner Supreme',
         desc: 'Win at least once with every scoring card',
