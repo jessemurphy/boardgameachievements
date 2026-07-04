@@ -79,7 +79,7 @@ number), and omitting the tag entirely means "not tracked."
 ### Sprawlopolis
 - **Board/Scenario field:** the three scoring cards drawn, separated by `／`, each prefixed with its card number, e.g. `13 Park Hopping／14 Looping Lanes／16 Morning Commute`
 - This is the same field used for "scenario" in other games — the tracker reads each card out individually for the per-card win-rate panel.
-- **⚠ The separator is the fullwidth slash `／` (U+FF0F), NOT a regular `/`.** A normal slash will not split and the play's cards won't register. Easiest to copy the `／` character. (On iOS, it's under the `/` key on some keyboards, or paste it.)
+- **The `／` separator comes from BGStats automatically.** When a play has multiple scenario/board values, BGStats joins them with the fullwidth slash `／` (U+FF0F) in its export — you don't type it. Just enter each of the three scoring cards as its own scenario value in BGStats and the export handles the joining. (This is why the parser splits on `／`.)
 - **⚠ Card names must be spelled exactly as below (case-sensitive).** The number prefix is stripped to get the name (and summed for the target score), so `13 Park Hopping` and `13 park hopping` differ — only the first matches. A misspelling silently drops that card (and, for *The Whole Sprawl* diamond, that combination) from your totals.
 - The number prefix is required for the target-score achievements (target = sum of the three card numbers); the combination/card achievements only need the exact names.
 
