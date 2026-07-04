@@ -8,13 +8,12 @@ window.GAME_DEFINITIONS.push(
     logFields: [
       { id: 'win',        label: 'Win?',          type: 'toggle', trueLabel: 'Yes ✓', falseLabel: 'No ✗' },
       { id: 'scoringCards', label: 'Scoring Cards (pick 3)', type: 'cards', count: 3, noun: 'scoring cards',
-        targets: ['card1','card2','card3'], options: [
+        targets: ['card1','card2','card3'], sumTo: 'targetScore', sumDefault: 9, options: [
           '01 The Outskirts','02 Bloom Boom','03 Go Green','04 Block Party','05 Stacks and Scrapers','06 Master Planned',
           '07 Central Perks','08 The \'Burbs','09 Concrete Jungle','10 The Strip','11 Mini Marts','12 The Superhighway',
           '13 Park Hopping','14 Looping Lanes','15 Skid Row','16 Morning Commute','17 Tourist Traps','18 Sprawlopolis'
         ] },
       { id: 'score',      label: 'Final Score',   type: 'number', min: -30, max: 40, default: 0 },
-      { id: 'targetScore',label: 'Target Score',  type: 'number', min: 5, max: 25, default: 9 },
     ],
     completenessFields: ['card1'],
 

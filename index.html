@@ -184,6 +184,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .card-chip{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 11px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text-2);cursor:pointer;transition:all .12s}
 .card-chip.sel{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:700}
 .card-chip.dim{opacity:.4}
+.sum-readout{margin-top:9px;font-size:13px;font-weight:600;color:var(--text-2)}
+.sum-readout span{font-weight:700;color:var(--text)}
 .modal-title{font-size:17px;font-weight:700;text-align:center}
 .modal-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3)}
 .modal-field{display:flex;flex-direction:column;gap:6px}
@@ -2614,12 +2616,12 @@ function buildSummary(g, p) {
 // ═══════════════════════════════════════
 // MODAL — LOG & EDIT
 // ═══════════════════════════════════════
-let logGameId=null, modalToggles={}, editPlayIndex=-1, modalCards=[];
+let logGameId=null, modalToggles={}, editPlayIndex=-1, modalCards=[], modalSumFallback=null;
 
 function openModal(gid, playIdx=-1) {
   logGameId=gid; editPlayIndex=playIdx;
   const g=GAME_DEFINITIONS.find(x=>x.id===gid);
-  modalToggles={}; modalCards=[];
+  modalToggles={}; modalCards=[]; modalSumFallback=null;
   const isEdit = playIdx >= 0;
   const existingPlay = isEdit ? (appState[gid]?.plays||[])[playIdx] : null;
 
@@ -2674,11 +2676,15 @@ function openModal(gid, playIdx=-1) {
           .map(name => f.options.find(o=>o.replace(/^\d+\s*/,'')===name)).filter(Boolean);
       }
       const full = modalCards.length===f.count;
+      const sumNow = () => modalCards.reduce((s,o)=>s+(parseInt(o)||0),0);
+      modalSumFallback = (isEdit && existingPlay?.[f.sumTo]!==undefined) ? existingPlay[f.sumTo] : null;
+      const readout = full ? sumNow() : (modalSumFallback!==null ? modalSumFallback : '—');
       html+=`<div class="modal-field" id="wrap_${f.id}">
         <label class="modal-label">${f.label} <span class="card-count ${full?'full':''}" id="cardCount_${f.id}">${modalCards.length} / ${f.count}</span></label>
         <div class="card-picker" id="cardpick_${f.id}">
           ${f.options.map((o,i)=>`<button type="button" class="card-chip ${modalCards.includes(o)?'sel':''} ${!modalCards.includes(o)&&full?'dim':''}" onclick="toggleCard('${f.id}',${i},${f.count})">${o}</button>`).join('')}
         </div>
+        ${f.sumTo?`<div class="sum-readout">Target Score <span id="sumOut_${f.id}">${readout}</span></div>`:''}
       </div>`;
     } else if(f.type==='number'){
       const val = isEdit&&existing!==undefined ? existing : f.default;
@@ -2812,6 +2818,10 @@ function toggleCard(fieldId, idx, count){
   const cnt=document.getElementById('cardCount_'+fieldId);
   cnt.textContent=`${modalCards.length} / ${count}`;
   cnt.classList.toggle('full',full);
+  if(f.sumTo){
+    const out=document.getElementById('sumOut_'+fieldId);
+    if(out) out.textContent = full ? modalCards.reduce((s,o)=>s+(parseInt(o)||0),0) : (modalSumFallback!==null ? modalSumFallback : '—');
+  }
 }
 function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
@@ -2826,6 +2836,7 @@ function submitPlay(){
   }
   const dateEl=document.getElementById('modal_date');
   const playDate=dateEl?.value||new Date().toISOString().split('T')[0];
+  const existingPlay = editPlayIndex>=0 ? (appState[logGameId]?.plays||[])[editPlayIndex] : null;
   const play={ts:new Date(playDate+'T12:00:00').getTime(),date:playDate};
   g.logFields.forEach(f=>{
     if(f.type==='toggle')      play[f.id]=!!modalToggles[f.id];
@@ -2833,6 +2844,19 @@ function submitPlay(){
     else if(f.type==='cards'){
       const names=modalCards.map(o=>o.replace(/^\d+\s*/,''));
       (f.targets||[]).forEach((t,i)=> play[t]=names[i]||'');
+      // Derive a summed field (e.g. targetScore = sum of card numbers), gracefully:
+      // - exactly `count` cards picked -> compute the sum
+      // - no cards but editing a play that already has a value -> preserve it
+      // - otherwise fall back to sumDefault (mirrors importer's `|| 9`)
+      if(f.sumTo){
+        if(modalCards.length===f.count){
+          play[f.sumTo]=modalCards.reduce((s,o)=>s+(parseInt(o)||0),0);
+        } else if(existingPlay && existingPlay[f.sumTo]!==undefined){
+          play[f.sumTo]=existingPlay[f.sumTo];
+        } else if(f.sumDefault!==undefined){
+          play[f.sumTo]=f.sumDefault;
+        }
+      }
     }
     else                       play[f.id]=document.getElementById('fld_'+f.id).value;
   });
