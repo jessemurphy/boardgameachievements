@@ -414,7 +414,7 @@ function getAchievementIds() { return achievements.map(a => a.id).filter(Boolean
 
 // ── Fields ────────────────────────────────────────────────
 function addField() {
-  fields.push({ _id: `field_${fieldIdCounter++}`, id: '', label: '', type: 'number', options: '', trueLabel: '', falseLabel: '', min: '', max: '', default: '' });
+  fields.push({ _id: `field_${fieldIdCounter++}`, id: '', label: '', type: 'number', options: '', trueLabel: '', falseLabel: '', min: '', max: '', default: '', count: '1', required: false, targets: '', noun: '', sumTo: '', sumDefault: '' });
   renderFields(); generate();
 }
 function duplicateField(id, e) {
@@ -467,6 +467,7 @@ function renderFields() {
             <option value="toggle" ${f.type==='toggle'?'selected':''}>toggle</option>
             <option value="select" ${f.type==='select'?'selected':''}>select</option>
             <option value="text" ${f.type==='text'?'selected':''}>text</option>
+            <option value="cards" ${f.type==='cards'?'selected':''}>cards (scenario/card picker)</option>
           </select></div>
         </div>
         ${f.type==='number'?`<div class="field-row">
@@ -480,6 +481,22 @@ function renderFields() {
         </div>`:''}
         ${f.type==='select'?`<div class="field-row">
           <div class="fg3"><label>Options (comma separated)</label><input type="text" value="${f.options}" placeholder="Easy, Normal, Hard" oninput="updateField('${f._id}','options',this.value)"></div>
+        </div>`:''}
+        ${f.type==='cards'?`<div class="field-row">
+          <div class="fg3"><label>Options (comma separated)</label><input type="text" value="${f.options}" placeholder="01 The Outskirts, 02 Bloom Boom, …" oninput="updateField('${f._id}','options',this.value)"></div>
+        </div>
+        <div class="field-row">
+          <div class="fg1"><label>How many to pick</label><input type="number" min="1" value="${f.count}" placeholder="3" oninput="updateField('${f._id}','count',this.value)"></div>
+          <div class="fg1"><label>Selection</label><select onchange="updateField('${f._id}','required',this.value==='true')">
+            <option value="false" ${!f.required?'selected':''}>Optional (X)</option>
+            <option value="true" ${f.required?'selected':''}>Mandatory (O)</option>
+          </select></div>
+          <div class="fg2"><label>Writes to fields (comma sep)</label><input type="text" value="${f.targets}" placeholder="card1, card2, card3" oninput="updateField('${f._id}','targets',this.value)"></div>
+        </div>
+        <div class="field-row">
+          <div class="fg1"><label>Noun (for prompts)</label><input type="text" value="${f.noun}" placeholder="scoring cards" oninput="updateField('${f._id}','noun',this.value)"></div>
+          <div class="fg1"><label>Sum numbers → field <span style="opacity:.6">(optional)</span></label><input type="text" value="${f.sumTo}" placeholder="targetScore" oninput="updateField('${f._id}','sumTo',this.value)"></div>
+          <div class="fg1"><label>Sum default</label><input type="number" value="${f.sumDefault}" placeholder="9" oninput="updateField('${f._id}','sumDefault',this.value)"></div>
         </div>`:''}
       </div>
     </div>`;
@@ -757,7 +774,18 @@ function generateGameJs() {
     let line = `    { id: '${f.id}', label: '${f.label}', type: '${f.type}'`;
     if (f.type==='number') { if (f.min!=='') line+=`, min: ${f.min}`; if (f.max!=='') line+=`, max: ${f.max}`; if (f.default!=='') line+=`, default: ${f.default}`; }
     if (f.type==='toggle') { if (f.trueLabel) line+=`, trueLabel: '${f.trueLabel}'`; if (f.falseLabel) line+=`, falseLabel: '${f.falseLabel}'`; }
-    if (f.type==='select' && f.options) line+=`, options: [${f.options.split(',').map(o=>`'${o.trim()}'`).join(', ')}]`;
+    if (f.type==='select' && f.options) line+=`, options: [${f.options.split(',').map(o=>`'${o.trim().replace(/'/g,"\\'")}'`).join(', ')}]`;
+    if (f.type==='cards') {
+      const cnt = f.count || '1';
+      line += `, count: ${cnt}`;
+      const targets = f.targets ? f.targets.split(',').map(t=>t.trim()).filter(Boolean) : (cnt==='1'&&f.id ? [f.id] : []);
+      if (targets.length) line += `, targets: [${targets.map(t=>`'${t}'`).join(', ')}]`;
+      if (f.required) line += `, required: true`;
+      if (f.noun) line += `, noun: '${f.noun.replace(/'/g,"\\'")}'`;
+      if (f.sumTo) line += `, sumTo: '${f.sumTo}'`;
+      if (f.sumDefault!=='' && f.sumDefault!=null) line += `, sumDefault: ${f.sumDefault}`;
+      if (f.options) line += `, options: [${f.options.split(',').map(o=>`'${o.trim().replace(/'/g,"\\'")}'`).join(', ')}]`;
+    }
     out += line + ` },\n`;
   }
   out += `  ],\n  achievements: [\n`;
