@@ -47,7 +47,7 @@ window.GAME_DEFINITIONS.push(
       { label: 'Commercial',         type: 'avg', field: 'sheet_commercial', presentOnly: true },
       { label: 'Industrial',         type: 'avg', field: 'sheet_industrial', presentOnly: true },
       { label: 'Park',               type: 'avg', field: 'sheet_park', presentOnly: true },
-      { label: 'Road tax (lost)',    type: 'avg', field: 'sheet_roadtax', presentOnly: true },
+      { label: 'Road tax (lost)',    type: 'avg', field: 'sheet_roadtax', presentOnly: true, negative: true },
     ],
 
     achievements: [
@@ -65,6 +65,12 @@ window.GAME_DEFINITIONS.push(
           'Central Perks','The \'Burbs','Concrete Jungle','The Strip','Mini Marts','The Superhighway',
           'Park Hopping','Looping Lanes','Skid Row','Morning Commute','Tourist Traps','Sprawlopolis'
         ] } },
+      { id: 'sp_cleanroads', icon: '🛣️', tier: 'silver', pts: 20, name: 'Clean Streets',
+        desc: 'Win with 2 or fewer road-tax points lost',
+        check: { type: 'win_field_lte', field: 'sheet_roadtax', value: 2 } },
+      { id: 'sp_bigscoring', icon: '🎴', tier: 'silver', pts: 20, name: 'Optimal Draw',
+        desc: 'Win a game where your scoring cards total 40+ points',
+        check: { type: 'win_field_gte', field: 'sheet_scoring', value: 40 } },
       { id: 'sp_card18', icon: '🃏', tier: 'gold', pts: 25, name: 'The Eighteenth Card',
         desc: 'Win a game that includes the "Sprawlopolis" scoring card',
         check: { type: 'win_with_any_field', fields: ['card1','card2','card3'], value: 'Sprawlopolis' } },

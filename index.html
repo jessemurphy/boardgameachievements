@@ -276,6 +276,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .pb-row:last-child{border-bottom:none}
 .pb-label{color:var(--text-2)}
 .pb-val{font-family:'DM Mono',monospace;font-weight:600;color:var(--text)}
+.pb-val.neg{color:var(--red)}
 
 /* Sort/filter bar */
 .list-controls{display:flex;gap:8px;align-items:center;margin-bottom:4px}
@@ -1201,10 +1202,14 @@ function renderCustomStats(g, plays) {
     }
   }
 
-  const rows = g.customStats.map(s => {
-    const val = evalStat(s);
-    return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
-  }).join('');
+  const statRow = s => {
+    let val = evalStat(s);
+    const neg = s.negative && val !== '—';
+    const disp = neg ? `(${val})` : val;
+    return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val${neg?' neg':''}">${disp}</span></div>`;
+  };
+
+  const rows = g.customStats.map(statRow).join('');
 
   let html = `<div class="card">
     <div class="card-header"><span class="card-title">${g.customStatsTitle || 'Game Stats'}</span></div>
@@ -1212,10 +1217,7 @@ function renderCustomStats(g, plays) {
   </div>`;
 
   if (g.customStats2 && g.customStats2.length) {
-    const rows2 = g.customStats2.map(s => {
-      const val = evalStat(s);
-      return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
-    }).join('');
+    const rows2 = g.customStats2.map(statRow).join('');
     html += `<div class="card">
       <div class="card-header"><span class="card-title">${g.customStats2Title || 'More Stats'}</span></div>
       <div class="pb-table">${rows2}</div>
@@ -1223,10 +1225,7 @@ function renderCustomStats(g, plays) {
   }
 
   if (g.customStats3 && g.customStats3.length) {
-    const rows3 = g.customStats3.map(s => {
-      const val = evalStat(s);
-      return `<div class="pb-row"><span class="pb-label">${s.label}</span><span class="pb-val">${val}</span></div>`;
-    }).join('');
+    const rows3 = g.customStats3.map(statRow).join('');
     html += `<div class="card">
       <div class="card-header"><span class="card-title">${g.customStats3Title || 'More Stats'}</span></div>
       <div class="pb-table">${rows3}</div>
