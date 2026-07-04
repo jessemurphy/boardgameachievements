@@ -510,6 +510,17 @@ const META_DEFINITIONS = window.META_DEFINITIONS || [];
 // ═══════════════════════════════════════
 // CONDITION ENGINE
 // ═══════════════════════════════════════
+function nCk(n, k) { if (k < 0 || k > n) return 0; let r = 1; for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1); return Math.round(r); }
+// Count distinct winning combinations of `fields` drawn from the valid `values` pool
+function wonCombos(wins, fields, values) {
+  const valid = new Set(values), k = fields.length, set = new Set();
+  for (const p of wins) {
+    const cs = [...new Set(fields.map(f => p[f]).filter(v => valid.has(v)))];
+    if (cs.length === k) set.add(cs.sort().join('|'));
+  }
+  return set.size;
+}
+
 function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
   const plays = gameState?.plays || [];
   const wins  = plays.filter(p => p.win);
@@ -549,6 +560,8 @@ function evalCondition(check, gameState, allState, unlockedMap, calcPts) {
       return check.values.every(v => wins.some(p => p[check.field] === v));
     case 'win_all_values_multifield':
       return check.values.every(v => wins.some(p => check.fields.some(f => p[f] === v)));
+    case 'win_all_combos_multifield':
+      return wonCombos(wins, check.fields, check.values) >= nCk(check.values.length, check.fields.length);
     case 'unique_field_pair_combos': {
       // Tracks unique combinations of two fields across wins; expandable since it compares
       // against the live count of possible combos rather than a hardcoded number.
@@ -812,6 +825,10 @@ function getProgressPct(check, gameState, allState) {
     case 'win_all_values_multifield': {
       const have = check.values.filter(v=>wins.some(p=>check.fields.some(f=>p[f]===v))).length;
       return have / check.values.length;
+    }
+    case 'win_all_combos_multifield': {
+      const total = nCk(check.values.length, check.fields.length);
+      return total ? wonCombos(wins, check.fields, check.values) / total : 0;
     }
     case 'unique_win_values': {
       const vals = new Set(wins.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='None'));
@@ -1288,6 +1305,9 @@ function getProgress(check, gameState, allState) {
       const have = check.values.filter(v => wins.some(p=>check.fields.some(f=>p[f]===v))).length;
       return `${have} / ${check.values.length}`;
     }
+    case 'win_all_combos_multifield': {
+      return `${wonCombos(wins, check.fields, check.values)} / ${nCk(check.values.length, check.fields.length)}`;
+    }
     case 'unique_win_values': {
       const vals = new Set(wins.map(p=>p[check.field]).filter(v=>v&&v!=='Unknown'&&v!=='None'));
       return `${vals.size} / ${check.count}`;
@@ -1599,6 +1619,16 @@ function findTriggerDate(check, gs, allState, unlockedDates) {
       for (const p of wins) {
         (check.fields||[]).forEach(f => need.delete(p[f]));
         if (need.size === 0) return ts2date(p.ts);
+      }
+      return null;
+    }
+    case 'win_all_combos_multifield': {
+      const valid = new Set(check.values), k = check.fields.length;
+      const total = nCk(check.values.length, k), seen = new Set();
+      const sorted = [...wins].sort((a,b)=>(a.ts||0)-(b.ts||0));
+      for (const p of sorted) {
+        const cs = [...new Set(check.fields.map(f=>p[f]).filter(v=>valid.has(v)))];
+        if (cs.length === k) { seen.add(cs.sort().join('|')); if (seen.size >= total) return ts2date(p.ts); }
       }
       return null;
     }

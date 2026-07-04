@@ -37,6 +37,13 @@ window.GAME_DEFINITIONS.push(
           'Central Perks','The \'Burbs','Concrete Jungle','The Strip','Mini Marts','The Superhighway',
           'Park Hopping','Looping Lanes','Skid Row','Morning Commute','Tourist Traps','Sprawlopolis'
         ] } },
+      { id: 'sp_allcombos', icon: '💠', tier: 'diamond', pts: 150, name: 'The Whole Sprawl',
+        desc: 'Win with every possible 3-card scoring combination (816 in all)',
+        check: { type: 'win_all_combos_multifield', fields: ['card1','card2','card3'], values: [
+          'The Outskirts','Bloom Boom','Go Green','Block Party','Stacks and Scrapers','Master Planned',
+          'Central Perks','The \'Burbs','Concrete Jungle','The Strip','Mini Marts','The Superhighway',
+          'Park Hopping','Looping Lanes','Skid Row','Morning Commute','Tourist Traps','Sprawlopolis'
+        ] } },
       { id: 'sp_card18', icon: '🃏', tier: 'gold', pts: 25, name: 'The Eighteenth Card',
         desc: 'Win a game that includes the "Sprawlopolis" scoring card',
         check: { type: 'win_with_any_field', fields: ['card1','card2','card3'], value: 'Sprawlopolis' } },

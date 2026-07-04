@@ -337,7 +337,7 @@ Tiers, low to high: `bronze`, `silver`, `gold`, `plat`, and `diamond` (prestige)
 - **Points still count** toward the global total (`calcTotalPts` includes diamond) and therefore toward point metas (Legend/Immortal). Set `pts: 0` for a pure-prestige, cosmetic-only diamond.
 - A game shows 💠 on its card when a diamond is earned (distinct from the platinum 💎).
 - Generator offers Diamond in the tier picker.
-- Not yet built: condition types for combo-coverage feats like "every Sprawlopolis scoring-card combination" — needs per-play card-ID logging plus a new condition type.
+- Combo-coverage condition type `win_all_combos_multifield` exists (added July 2026): tracks distinct winning combinations of N fields drawn from a `values` pool; denominator is C(pool, fieldCount) via `nCk`. First user: Sprawlopolis `sp_allcombos` ('The Whole Sprawl', diamond) — win all C(18,3)=816 three-card scoring combinations. Progress bar shows 'X / 816'. Cards come from BGStats comment tags (`card1/2/3`), not logFields.
 
 ## Known Bugs / Pending Fixes
 

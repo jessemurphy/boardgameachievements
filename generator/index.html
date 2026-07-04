@@ -288,6 +288,7 @@ const CONDITION_TYPES = [
   { group: 'Field (win only)',   value: 'count_wins_with_field_values', label: 'Win: field in values list, ≥ N times',          params: ['field','values','count'] },
   // ── Multi-field values ──
   { group: 'Multi-field',        value: 'win_all_values_multifield',    label: 'Win: cover every value across fields',          params: ['fields','values'] },
+  { group: 'Multi-field',        value: 'win_all_combos_multifield',    label: 'Win: every combination of fields (diamond-tier)', params: ['fields','values'] },
   { group: 'Multi-field',        value: 'unique_win_values_multifield', label: 'Win: N distinct values across fields',          params: ['fields','count'] },
   { group: 'Multi-field',        value: 'unique_values',                label: 'Any play: N distinct values in field',          params: ['field','count'] },
   { group: 'Multi-field',        value: 'win_multifield_value_and_field_eq', label: 'Win: any of fields = value AND condField = condValue', params: ['fields','value','condField','condValue'] },
