@@ -13,7 +13,13 @@ window.GAME_DEFINITIONS.push(
           '07 Central Perks','08 The \'Burbs','09 Concrete Jungle','10 The Strip','11 Mini Marts','12 The Superhighway',
           '13 Park Hopping','14 Looping Lanes','15 Skid Row','16 Morning Commute','17 Tourist Traps','18 Sprawlopolis'
         ] },
-      { id: 'score',      label: 'Final Score',   type: 'number', min: -30, max: 40, default: 0 },
+      { id: 'cardPoints', label: 'Points per scoring card', type: 'cardpoints', targets: ['cpts1','cpts2','cpts3'], sumTo: 'sheet_scoring' },
+      { id: 'sheet_residential', label: 'Residential (largest)', type: 'number', min: 0, max: 60, default: '', scorePart: 'add' },
+      { id: 'sheet_commercial',  label: 'Commercial (largest)',  type: 'number', min: 0, max: 60, default: '', scorePart: 'add' },
+      { id: 'sheet_industrial',  label: 'Industrial (largest)',  type: 'number', min: 0, max: 60, default: '', scorePart: 'add' },
+      { id: 'sheet_park',        label: 'Park (largest)',        type: 'number', min: 0, max: 60, default: '', scorePart: 'add' },
+      { id: 'sheet_roadtax',     label: 'Road tax (unfinished roads)', type: 'number', min: 0, max: 60, default: '', scorePart: 'sub' },
+      { id: 'score',      label: 'Final Score',   type: 'number', min: -60, max: 120, default: 0, derived: true },
     ],
     completenessFields: ['card1'],
 

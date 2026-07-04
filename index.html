@@ -186,6 +186,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:v
 .card-chip.dim{opacity:.4}
 .sum-readout{margin-top:9px;font-size:13px;font-weight:600;color:var(--text-2)}
 .sum-readout span{font-weight:700;color:var(--text)}
+.fld-optional{font-weight:500;color:var(--text-3);font-size:12px}
+.cardpts-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.cardpts-name{flex:1;font-size:14px;font-weight:500;color:var(--text-2)}
+.cardpts-input{width:80px;flex-shrink:0}
+.cardpts-empty{font-size:13px;color:var(--text-3);margin-top:4px}
 .modal-title{font-size:17px;font-weight:700;text-align:center}
 .modal-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3)}
 .modal-field{display:flex;flex-direction:column;gap:6px}
@@ -2617,12 +2622,12 @@ function buildSummary(g, p) {
 // ═══════════════════════════════════════
 // MODAL — LOG & EDIT
 // ═══════════════════════════════════════
-let logGameId=null, modalToggles={}, editPlayIndex=-1, modalCards=[], modalSumFallback=null;
+let logGameId=null, modalToggles={}, editPlayIndex=-1, modalCards=[], modalSumFallback=null, modalCardPts={};
 
 function openModal(gid, playIdx=-1) {
   logGameId=gid; editPlayIndex=playIdx;
   const g=GAME_DEFINITIONS.find(x=>x.id===gid);
-  modalToggles={}; modalCards=[]; modalSumFallback=null;
+  modalToggles={}; modalCards=[]; modalSumFallback=null; modalCardPts={};
   const isEdit = playIdx >= 0;
   const existingPlay = isEdit ? (appState[gid]?.plays||[])[playIdx] : null;
 
@@ -2687,13 +2692,21 @@ function openModal(gid, playIdx=-1) {
         </div>
         ${f.sumTo?`<div class="sum-readout">Target Score <span id="sumOut_${f.id}">${readout}</span></div>`:''}
       </div>`;
+    } else if(f.type==='cardpoints'){
+      if(isEdit && existingPlay){
+        (f.targets||[]).forEach((t,i)=>{ const v=existingPlay[t]; if(v!==undefined && v!=='' && modalCards[i]!==undefined) modalCardPts[modalCards[i]]=v; });
+      }
+      html+=`<div class="modal-field" id="wrap_${f.id}">
+        <label class="modal-label">${f.label} <span class="fld-optional">optional</span></label>
+        <div id="cardpts_${f.id}">${renderCardPoints(f)}</div>
+      </div>`;
     } else if(f.type==='number'){
       const val = isEdit&&existing!==undefined ? existing : f.default;
       const showIfAttr = f.showIf ? ` data-showif-field="${f.showIf.field}" data-showif-value="${f.showIf.value}"` : '';
       const showIfHide = f.showIf ? ` style="display:none"` : '';
       html+=`<div class="modal-field"${showIfAttr}${showIfHide} id="wrap_${f.id}">
-        <label class="modal-label">${f.label}</label>
-        <input class="modal-input" type="number" id="fld_${f.id}" min="${f.min}" max="${f.max}" value="${val}">
+        <label class="modal-label">${f.label}${f.scorePart?` <span class="fld-optional">optional</span>`:''}</label>
+        <input class="modal-input" type="number" id="fld_${f.id}" min="${f.min}" max="${f.max}" value="${val}"${f.scorePart?` oninput="recomputeDerivedScore()"`:''}>
       </div>`;
     }
   });
@@ -2825,6 +2838,48 @@ function toggleCard(fieldId, idx, count){
     const out=document.getElementById('sumOut_'+fieldId);
     if(out) out.textContent = full ? modalCards.reduce((s,o)=>s+(parseInt(o)||0),0) : (modalSumFallback!==null ? modalSumFallback : '—');
   }
+  // Refresh any linked per-card points inputs (labels track the selection)
+  const cp=g.logFields.find(x=>x.type==='cardpoints');
+  if(cp){
+    const box=document.getElementById('cardpts_'+cp.id);
+    if(box) box.innerHTML=renderCardPoints(cp);
+    recomputeDerivedScore();
+  }
+}
+// Render the per-card scoring inputs for a cardpoints field, labeled by the
+// currently-selected cards. Values are keyed by the card option string so they
+// survive re-selection/reordering.
+function renderCardPoints(f){
+  if(!modalCards.length) return `<div class="cardpts-empty">Pick scoring cards above to enter per-card points (optional).</div>`;
+  return modalCards.map((o,i)=>`<div class="cardpts-row">
+    <span class="cardpts-name">${o}</span>
+    <input class="modal-input cardpts-input" type="number" inputmode="numeric" value="${modalCardPts[o]??''}" oninput="onCardPtsInput(${i},this.value)">
+  </div>`).join('');
+}
+function onCardPtsInput(i, val){
+  const opt=modalCards[i];
+  if(val==='') delete modalCardPts[opt]; else modalCardPts[opt]=val;
+  recomputeDerivedScore();
+}
+// Auto-fill the derived score field from breakdown parts (card points + zone
+// fields tagged scorePart:'add' minus scorePart:'sub'). Runs only when a
+// breakdown field changes, so a quick score-only entry is never overwritten.
+function recomputeDerivedScore(){
+  const g=GAME_DEFINITIONS.find(x=>x.id===logGameId);
+  const scoreField=(g.logFields||[]).find(f=>f.derived);
+  if(!scoreField) return;
+  let total=0, any=false;
+  const cp=(g.logFields||[]).find(f=>f.type==='cardpoints');
+  if(cp) modalCards.forEach(o=>{ if(modalCardPts[o]!==undefined&&modalCardPts[o]!==''){ total+=parseFloat(modalCardPts[o])||0; any=true; } });
+  (g.logFields||[]).forEach(f=>{
+    if(!f.scorePart) return;
+    const raw=document.getElementById('fld_'+f.id)?.value;
+    if(raw===''||raw===undefined) return;
+    total += (f.scorePart==='sub'?-1:1)*(parseFloat(raw)||0); any=true;
+  });
+  if(!any) return;
+  const el=document.getElementById('fld_'+scoreField.id);
+  if(el) el.value=total;
 }
 function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
@@ -2847,7 +2902,18 @@ function submitPlay(){
   const play={ts:new Date(playDate+'T12:00:00').getTime(),date:playDate};
   g.logFields.forEach(f=>{
     if(f.type==='toggle')      play[f.id]=!!modalToggles[f.id];
-    else if(f.type==='number') play[f.id]=parseFloat(document.getElementById('fld_'+f.id).value)||0;
+    else if(f.type==='number'){
+      const raw=document.getElementById('fld_'+f.id).value;
+      if(f.scorePart && raw==='') return; // leave optional breakdown field unset so it doesn't dilute averages
+      play[f.id]=parseFloat(raw)||0;
+    }
+    else if(f.type==='cardpoints'){
+      const vals=modalCards.map(o=>modalCardPts[o]);
+      if(vals.some(v=>v!==undefined && v!=='')){
+        (f.targets||[]).forEach((t,i)=>{ if(vals[i]!==undefined && vals[i]!=='') play[t]=parseFloat(vals[i])||0; });
+        if(f.sumTo) play[f.sumTo]=vals.reduce((s,v)=>s+(parseFloat(v)||0),0);
+      }
+    }
     else if(f.type==='cards'){
       const names=modalCards.map(o=>o.replace(/^\d+\s*/,''));
       (f.targets||[]).forEach((t,i)=> play[t]=names[i]||'');
