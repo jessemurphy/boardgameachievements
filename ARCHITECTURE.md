@@ -4,6 +4,10 @@ Quick reference for future sessions. Reduces need to grep the codebase for
 common lookups. Line numbers are approximate — search for function names if
 they've drifted.
 
+## Editing conventions
+
+- When touching a game config's `achievements`, leave the array ordered by tier: bronze → silver → gold → plat → diamond. Not a standalone task — just tidy it as a cleanup step whenever editing that game. (The plat's `all_achievements` ids list is order-independent, so reordering is safe.)
+
 ---
 
 ## Stack
